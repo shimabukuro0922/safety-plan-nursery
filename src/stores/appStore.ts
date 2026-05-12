@@ -264,7 +264,7 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
       },
       resetToDefault: () => set({ items: DEFAULT_CHECKLIST_ITEMS }),
     }),
-    { name: 'checklist-items-store-v2' }
+    { name: 'checklist-items-store-v3' }
   )
 )
 
@@ -311,7 +311,7 @@ export const useAnnualPlanStore = create<AnnualPlanState>()(
       },
       resetToDefault: () => set({ plans: DEFAULT_ANNUAL_PLANS }),
     }),
-    { name: 'annual-plan-store-v2' }
+    { name: 'annual-plan-store-v3' }
   )
 )
 
@@ -369,6 +369,6 @@ export const useSeasonalItemsStore = create<SeasonalItemsState>()(
       },
       resetToDefault: () => set({ items: DEFAULT_SEASONAL_ITEMS }),
     }),
-    { name: 'seasonal-items-store-v2' }
+    { name: 'seasonal-items-store-v3' }
   )
 )
