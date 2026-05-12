@@ -1,10 +1,11 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { NavLink, useLocation } from 'react-router-dom'
 import {
   LayoutDashboard, ClipboardCheck, History,
   FileText, Settings, ChevronLeft,
-  ShieldCheck, CalendarDays, AlertCircle, Users, Bell,
+  ShieldCheck, CalendarDays, AlertCircle, Users, Bell, HelpCircle,
 } from 'lucide-react'
+import { GuideModal } from '@/components/GuideModal'
 
 interface NavItem {
   label: string
@@ -58,7 +59,9 @@ const PC_NAV_ITEMS = [
   },
 ]
 
-const Sidebar: React.FC = () => (
+const Sidebar: React.FC = () => {
+  const [guideOpen, setGuideOpen] = useState(false)
+  return (
   <aside className="hidden md:flex flex-col fixed left-0 top-0 bottom-0 w-60 bg-white border-r border-gray-200 z-40 overflow-y-auto">
     <div className="px-5 py-5 border-b border-gray-100">
       <div className="flex items-center gap-2">
@@ -98,11 +101,19 @@ const Sidebar: React.FC = () => (
       ))}
     </nav>
 
-    <div className="px-5 py-4 border-t border-gray-100">
-      <p className="text-xs text-gray-400">さくら保育園</p>
+    <div className="px-5 py-4 border-t border-gray-100 space-y-2">
+      <button
+        onClick={() => setGuideOpen(true)}
+        className="flex items-center gap-2 text-xs text-gray-500 hover:text-blue-600 transition-colors w-full"
+      >
+        <HelpCircle size={14} />
+        操作ガイドを見る
+      </button>
     </div>
+    <GuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
   </aside>
-)
+  )
+}
 
 const BottomNav: React.FC = () => (
   <nav
@@ -130,31 +141,41 @@ const BottomNav: React.FC = () => (
 const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
   const location = useLocation()
   const isTop = location.pathname === '/dashboard'
+  const [guideOpen, setGuideOpen] = useState(false)
 
   return (
-    <header
-      className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-200"
-      style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
-    >
-      <div className="h-14 flex items-center px-4 gap-2">
-        {!isTop && (
+    <>
+      <header
+        className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-200"
+        style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
+      >
+        <div className="h-14 flex items-center px-4 gap-2">
+          {!isTop && (
+            <button
+              onClick={() => window.history.back()}
+              className="p-2 -ml-2 text-gray-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
+            >
+              <ChevronLeft size={20} />
+            </button>
+          )}
+          {isTop && (
+            <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
+              <ShieldCheck size={15} className="text-white" />
+            </div>
+          )}
+          <h1 className="text-base font-bold text-gray-900 break-anywhere truncate flex-1">
+            {title}
+          </h1>
           <button
-            onClick={() => window.history.back()}
-            className="p-2 -ml-2 text-gray-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
+            onClick={() => setGuideOpen(true)}
+            className="p-2 text-gray-400 hover:text-blue-600 transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
-            <ChevronLeft size={20} />
+            <HelpCircle size={20} />
           </button>
-        )}
-        {isTop && (
-          <div className="w-7 h-7 bg-blue-600 rounded-lg flex items-center justify-center">
-            <ShieldCheck size={15} className="text-white" />
-          </div>
-        )}
-        <h1 className="text-base font-bold text-gray-900 break-anywhere truncate flex-1">
-          {title}
-        </h1>
-      </div>
-    </header>
+        </div>
+      </header>
+      <GuideModal open={guideOpen} onClose={() => setGuideOpen(false)} />
+    </>
   )
 }
 

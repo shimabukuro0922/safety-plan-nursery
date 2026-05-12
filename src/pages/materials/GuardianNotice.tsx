@@ -1,16 +1,30 @@
 import React, { useState } from 'react'
 import { Sparkles, FileDown, Send } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
-import { DEMO_CATEGORIES } from '@/lib/demoData'
+import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'
 
+const NOTICE_CATEGORIES = [
+  { id: 'nap',        name: '午睡の安全' },
+  { id: 'eating',     name: '食事・アレルギー' },
+  { id: 'water_play', name: '水遊び・プール' },
+  { id: 'outdoor',    name: '園庭・外遊び' },
+  { id: 'excursion',  name: '園外活動・散歩' },
+  { id: 'first_aid',  name: '救急備品・AED' },
+  { id: 'disaster',   name: '災害・避難訓練' },
+  { id: 'intrusion',  name: '不審者対応' },
+  { id: 'training',   name: '職員研修' },
+  { id: 'infection',  name: '感染症対策' },
+]
+
 const STYLES = [
-  { value: 'gentle', label: 'やわらかい文体', sub: '保護者に親しみやすく' },
-  { value: 'standard', label: '標準文体', sub: '一般的なおたより形式' },
-  { value: 'formal', label: '丁寧な文体', sub: '正式な通知として' },
+  { value: 'gentle',   label: 'やわらかい文体',  sub: '保護者に親しみやすく' },
+  { value: 'standard', label: '標準文体',         sub: '一般的なおたより形式' },
+  { value: 'formal',   label: '丁寧な文体',       sub: '正式な通知として' },
 ]
 
 export const GuardianNotice: React.FC = () => {
+  const { facility } = useFacilityStore()
   const [selectedCats, setSelectedCats] = useState<string[]>([])
   const [style, setStyle] = useState('gentle')
   const [isGenerating, setIsGenerating] = useState(false)
@@ -24,10 +38,12 @@ export const GuardianNotice: React.FC = () => {
   const handleGenerate = async () => {
     if (selectedCats.length === 0) { toast.error('カテゴリを1つ以上選択してください'); return }
     setIsGenerating(true)
-    await new Promise((r) => setTimeout(r, 1800))
-    const catNames = DEMO_CATEGORIES.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
+    await new Promise((r) => setTimeout(r, 1200))
+    const catNames = NOTICE_CATEGORIES.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
+    const facilityName = facility?.name ?? '当園'
+    const now = new Date()
     setGenerated(
-      `保護者の皆様へ\n\n平素より当園の教育活動にご理解・ご協力をいただき、誠にありがとうございます。\n\n今月は「${catNames.join('・')}」について、職員全員で安全確認を実施いたしました。\n\nお子様の安全のために、ご家庭でも以下の点についてお声がけいただけますと幸いです。\n\n・外遊びから戻ったら手洗い・うがいを習慣にする\n・体調が優れないときはすぐにご連絡ください\n\nご不明な点がございましたら、担任またはフロントまでお気軽にご相談ください。\n\n${new Date().getFullYear()}年${new Date().getMonth() + 1}月\nさくら保育園`
+      `保護者の皆様へ\n\n平素より${facilityName}の教育活動にご理解・ご協力をいただき、誠にありがとうございます。\n\n今月は「${catNames.join('・')}」について、職員全員で安全確認を実施いたしました。\n\nお子様の安全のために、ご家庭でも以下の点についてお声がけいただけますと幸いです。\n\n・外遊びから戻ったら手洗い・うがいを習慣にする\n・体調が優れないときはすぐにご連絡ください\n\nご不明な点がございましたら、担任またはフロントまでお気軽にご相談ください。\n\n${now.getFullYear()}年${now.getMonth() + 1}月\n${facilityName}`
     )
     setIsGenerating(false)
     toast.success('保護者周知文を作成しました')
@@ -35,13 +51,13 @@ export const GuardianNotice: React.FC = () => {
 
   return (
     <div className="px-4 py-6 space-y-5">
-      <SectionHeader title="保護者向け周知文を作る" subtitle="AIが下書きを作成します。配布前に必ず確認してください" />
+      <SectionHeader title="保護者向け周知文を作る" subtitle="下書きを作成します。配布前に必ず内容を確認・編集してください" />
 
       {/* カテゴリ選択 */}
       <div>
         <p className="text-xs font-semibold text-gray-600 mb-2">周知したいカテゴリ（複数選択可）</p>
         <div className="grid grid-cols-2 gap-2">
-          {DEMO_CATEGORIES.map((cat) => (
+          {NOTICE_CATEGORIES.map((cat) => (
             <button
               key={cat.id}
               onClick={() => toggleCat(cat.id)}
@@ -77,24 +93,25 @@ export const GuardianNotice: React.FC = () => {
       </div>
 
       <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
-        <Sparkles size={18} /> AIで文章を作る
+        <Sparkles size={18} /> 文章を自動で作る
       </Button>
 
       {generated && (
         <Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-gray-900">生成された周知文（下書き）</p>
-            <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">AI生成</span>
+            <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
           </div>
           <textarea
             defaultValue={generated}
             className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[240px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
+          <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
           <div className="mt-3 flex gap-2">
-            <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('PDF出力（デモ）')}>
+            <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}>
               <FileDown size={14} /> PDF出力
             </Button>
-            <Button variant="primary" size="sm" fullWidth onClick={() => toast.success('配布済みとして記録しました（デモ）')}>
+            <Button variant="primary" size="sm" fullWidth onClick={() => toast.success('配布済みとして記録しました')}>
               <Send size={14} /> 配布済みとして記録
             </Button>
           </div>

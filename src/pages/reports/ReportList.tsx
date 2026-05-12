@@ -1,20 +1,30 @@
 import React from 'react'
 import { useNavigate } from 'react-router-dom'
-import { FileText, Plus, ChevronRight } from 'lucide-react'
+import { FileText, Plus, ChevronRight, Trash2 } from 'lucide-react'
 import { Card, Button, EmptyState, SectionHeader } from '@/components/ui'
-import { DEMO_REPORTS } from '@/lib/demoData'
+import { useReportStore } from '@/stores/appStore'
 import { REPORT_TYPE_LABELS, STATUS_CONFIG } from '@/types'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
+import toast from 'react-hot-toast'
 
 export const ReportList: React.FC = () => {
   const navigate = useNavigate()
+  const { reports, deleteReport } = useReportStore()
+
+  const handleDelete = (e: React.MouseEvent, id: string, title: string) => {
+    e.stopPropagation()
+    if (window.confirm(`「${title}」を削除しますか？`)) {
+      deleteReport(id)
+      toast.success('報告書を削除しました')
+    }
+  }
 
   return (
     <div className="px-4 py-6 space-y-5">
       <SectionHeader
         title="報告書"
-        subtitle="AI下書き・編集・承認を管理します"
+        subtitle="作成した報告書の一覧です"
         action={
           <Button variant="primary" size="sm" onClick={() => navigate('/reports/new')}>
             <Plus size={14} />
@@ -23,16 +33,16 @@ export const ReportList: React.FC = () => {
         }
       />
 
-      {DEMO_REPORTS.length === 0 ? (
+      {reports.length === 0 ? (
         <EmptyState
           icon={<FileText size={40} />}
           title="報告書がまだありません"
-          description="「報告書を作成する」から始めましょう"
+          description="「新規作成」から月次報告書や研修記録を作成できます"
           action={{ label: '報告書を作成する', onClick: () => navigate('/reports/new') }}
         />
       ) : (
         <div className="space-y-3">
-          {DEMO_REPORTS.map((r) => {
+          {reports.map((r) => {
             const { label, color } = STATUS_CONFIG[r.status]
             return (
               <Card
@@ -57,7 +67,15 @@ export const ReportList: React.FC = () => {
                       　v{r.current_version}
                     </p>
                   </div>
-                  <ChevronRight size={16} className="text-gray-400 shrink-0 mt-2" />
+                  <div className="flex items-center gap-1 shrink-0">
+                    <button
+                      onClick={(e) => handleDelete(e, r.id, r.title)}
+                      className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+                    >
+                      <Trash2 size={14} />
+                    </button>
+                    <ChevronRight size={16} className="text-gray-400" />
+                  </div>
                 </div>
               </Card>
             )

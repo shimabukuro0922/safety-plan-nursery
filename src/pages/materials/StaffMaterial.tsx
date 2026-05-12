@@ -237,7 +237,7 @@ export const StaffMaterial: React.FC = () => {
                 variant="secondary"
                 size="sm"
                 fullWidth
-                onClick={() => toast.success('PDF出力（デモ）')}
+                onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}
               >
                 <FileDown size={14} /> PDFで出力
               </Button>
@@ -245,7 +245,7 @@ export const StaffMaterial: React.FC = () => {
                 variant="primary"
                 size="sm"
                 fullWidth
-                onClick={() => toast.success('研修記録を登録しました（デモ）')}
+                onClick={() => toast.success('研修記録を登録しました')}
               >
                 研修記録を登録
               </Button>

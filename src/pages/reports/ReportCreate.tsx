@@ -4,6 +4,8 @@ import { Sparkles, ChevronRight } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { REPORT_TYPE_LABELS, REPORT_STYLE_LABELS } from '@/types'
 import type { ReportType, ReportStyle } from '@/types'
+import { useReportStore } from '@/stores/appStore'
+import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'
 
 const REPORT_TYPES: ReportType[] = [
@@ -14,6 +16,8 @@ const REPORT_STYLES: ReportStyle[] = ['internal', 'guardian', 'government', 'aud
 
 export const ReportCreate: React.FC = () => {
   const navigate = useNavigate()
+  const { addReport } = useReportStore()
+  const { facility } = useFacilityStore()
   const [step, setStep] = useState<1 | 2 | 3>(1)
   const [selectedType, setSelectedType] = useState<ReportType | null>(null)
   const [selectedStyle, setSelectedStyle] = useState<ReportStyle>('internal')
@@ -22,11 +26,18 @@ export const ReportCreate: React.FC = () => {
   const handleGenerate = async () => {
     if (!selectedType) return
     setIsGenerating(true)
-    // デモ: 2秒待ってエディタへ
-    await new Promise((r) => setTimeout(r, 2000))
+    await new Promise((r) => setTimeout(r, 1200))
+    const now = new Date()
+    const title = `${REPORT_TYPE_LABELS[selectedType]}（${now.getFullYear()}年${now.getMonth() + 1}月）`
+    const id = addReport({
+      title,
+      report_type: selectedType,
+      style: selectedStyle,
+      created_by: facility?.director_name ?? '管理者',
+    })
     setIsGenerating(false)
-    toast.success('AIが下書きを作成しました')
-    navigate('/reports/r1')
+    toast.success('報告書を作成しました')
+    navigate(`/reports/${id}`)
   }
 
   return (
@@ -49,7 +60,7 @@ export const ReportCreate: React.FC = () => {
       <div className="flex justify-between text-xs text-gray-500 -mt-2">
         <span>種別選択</span>
         <span className="ml-auto mr-8">文体選択</span>
-        <span>AI生成</span>
+        <span>作成</span>
       </div>
 
       {/* Step 1: 報告書種別 */}
@@ -120,10 +131,10 @@ export const ReportCreate: React.FC = () => {
         </>
       )}
 
-      {/* Step 3: 確認＆生成 */}
+      {/* Step 3: 確認＆作成 */}
       {step === 3 && (
         <>
-          <SectionHeader title="内容を確認してAIに下書きを作らせます" />
+          <SectionHeader title="内容を確認して報告書を作成します" />
           <Card className="p-4 space-y-3">
             <div>
               <p className="text-xs text-gray-500 mb-0.5">報告書種別</p>
@@ -137,20 +148,15 @@ export const ReportCreate: React.FC = () => {
                 {REPORT_STYLE_LABELS[selectedStyle]}
               </p>
             </div>
-            <div>
-              <p className="text-xs text-gray-500 mb-0.5">元データ</p>
-              <p className="text-sm text-gray-700">今月のチェック表・研修記録（2件）</p>
-            </div>
           </Card>
 
-          <div className="bg-violet-50 border border-violet-200 rounded-xl p-4">
+          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
-              <Sparkles size={16} className="text-violet-600 mt-0.5 shrink-0" />
+              <Sparkles size={16} className="text-blue-600 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-violet-800">AIによる下書き作成について</p>
-                <p className="text-xs text-violet-600 mt-1 leading-relaxed break-anywhere">
-                  AIは記録データをもとに下書きを作成します。
-                  内容は必ず人が確認・編集し、承認してから確定してください。
+                <p className="text-sm font-semibold text-blue-800">報告書の下書きを作成します</p>
+                <p className="text-xs text-blue-600 mt-1 leading-relaxed break-anywhere">
+                  空白のセクションが用意されます。内容を自由に入力・編集してください。
                 </p>
               </div>
             </div>
@@ -159,13 +165,13 @@ export const ReportCreate: React.FC = () => {
           <div className="flex gap-2">
             <Button variant="secondary" fullWidth onClick={() => setStep(2)}>戻る</Button>
             <Button
-              variant="ai"
+              variant="primary"
               fullWidth
               loading={isGenerating}
               onClick={handleGenerate}
             >
               <Sparkles size={16} />
-              AIで下書きを作る
+              報告書を作成する
             </Button>
           </div>
         </>
