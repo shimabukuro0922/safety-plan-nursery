@@ -5,10 +5,9 @@ import {
   AlertCircle, Users, Bell, Building2, CheckCircle2, Circle,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
-import { useNearMissStore, useChecklistStore } from '@/stores/appStore'
+import { useNearMissStore, useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { NEAR_MISS_STEP_CONFIG } from '@/types'
-import { MONTHLY_CHECKLIST_ITEMS } from '@/lib/checklistItems'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 
@@ -25,12 +24,13 @@ export const Dashboard: React.FC = () => {
   const { facility } = useFacilityStore()
   const { nearMisses } = useNearMissStore()
   const { doneItems } = useChecklistStore()
+  const { items: checklistItems } = useChecklistItemsStore()
 
   const now = new Date()
   const monthLabel = format(now, 'M月', { locale: ja })
 
-  const totalItems = MONTHLY_CHECKLIST_ITEMS.length
-  const doneCount = MONTHLY_CHECKLIST_ITEMS.filter((item) => item.id in doneItems).length
+  const totalItems = checklistItems.length
+  const doneCount = checklistItems.filter((item) => item.id in doneItems).length
   const remaining = totalItems - doneCount
 
   const nearMissPending = nearMisses.filter(

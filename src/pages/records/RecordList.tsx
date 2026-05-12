@@ -1,8 +1,7 @@
 import React, { useState } from 'react'
 import { History, ClipboardCheck, AlertCircle, FileText } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
-import { useChecklistStore, useNearMissStore } from '@/stores/appStore'
-import { MONTHLY_CHECKLIST_ITEMS } from '@/lib/checklistItems'
+import { useChecklistStore, useNearMissStore, useChecklistItemsStore } from '@/stores/appStore'
 import { NEAR_MISS_STEP_CONFIG } from '@/types'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
@@ -19,10 +18,11 @@ export const RecordList: React.FC = () => {
   const [tab, setTab] = useState<Tab>('all')
   const { doneItems } = useChecklistStore()
   const { nearMisses } = useNearMissStore()
+  const { items: checklistItems } = useChecklistItemsStore()
 
   interface RecordEntry { id: string; type: Tab; title: string; date: string; meta?: string; icon: React.ReactNode; color: string }
 
-  const checkRecords: RecordEntry[] = MONTHLY_CHECKLIST_ITEMS
+  const checkRecords: RecordEntry[] = checklistItems
     .filter((item) => item.id in doneItems)
     .map((item) => {
       const done = doneItems[item.id]

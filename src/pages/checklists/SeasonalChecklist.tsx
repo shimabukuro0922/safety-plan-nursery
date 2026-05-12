@@ -1,76 +1,187 @@
 import React, { useState } from 'react'
-import { Sun, Wind, Snowflake, Flower2, CheckCircle2, Circle } from 'lucide-react'
+import { Sun, Wind, Snowflake, Flower2, CheckCircle2, Circle, Plus, Pencil, Trash2, X, Check, RotateCcw } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
-import { useSeasonalChecklistStore } from '@/stores/appStore'
+import { useSeasonalChecklistStore, useSeasonalItemsStore } from '@/stores/appStore'
+import type { SeasonalItemDef } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'
 
-interface SeasonItem {
-  key: string
-  label: string
-}
-
-interface Season {
+interface SeasonMeta {
   key: string
   label: string
   icon: React.ReactNode
   color: string
-  items: SeasonItem[]
+  headerBg: string
 }
 
-const SEASONS: Season[] = [
-  {
-    key: 'spring',
-    label: '春季（3〜4月）',
-    icon: <Flower2 size={20} className="text-pink-500" />,
-    color: 'bg-pink-50 border-pink-200',
-    items: [
-      { key: 'spring_pool',   label: 'プール開き前点検' },
-      { key: 'spring_trip',   label: '春季遠足の安全確認' },
-      { key: 'spring_new',    label: '新入園児安全オリエンテーション' },
-      { key: 'spring_equip',  label: '園庭遊具の点検・整備' },
-    ],
-  },
-  {
-    key: 'summer',
-    label: '夏季（6〜7月）',
-    icon: <Sun size={20} className="text-yellow-500" />,
-    color: 'bg-yellow-50 border-yellow-200',
-    items: [
-      { key: 'summer_pool',   label: 'プール・水遊び安全確認' },
-      { key: 'summer_heat',   label: '熱中症対策確認（日陰・水分補給）' },
-      { key: 'summer_aed',    label: 'AED・救急備品チェック' },
-      { key: 'summer_sunstroke', label: '職員への熱中症対応研修' },
-    ],
-  },
-  {
-    key: 'autumn',
-    label: '秋季（9〜10月）',
-    icon: <Wind size={20} className="text-orange-500" />,
-    color: 'bg-orange-50 border-orange-200',
-    items: [
-      { key: 'autumn_trip',   label: '秋季遠足の安全確認' },
-      { key: 'autumn_drill',  label: '避難訓練実施' },
-      { key: 'autumn_crime',  label: '防犯・不審者対応確認' },
-      { key: 'autumn_equip',  label: '遊具・施設の秋季点検' },
-    ],
-  },
-  {
-    key: 'winter',
-    label: '冬季（12〜1月）',
-    icon: <Snowflake size={20} className="text-blue-500" />,
-    color: 'bg-blue-50 border-blue-200',
-    items: [
-      { key: 'winter_heat',   label: '暖房器具安全点検' },
-      { key: 'winter_infect', label: '感染症対策確認（インフルエンザ等）' },
-      { key: 'winter_route',  label: '避難経路の確認' },
-      { key: 'winter_fire',   label: '防火・火災避難訓練' },
-    ],
-  },
+const SEASON_META: SeasonMeta[] = [
+  { key: 'spring', label: '春季（3〜4月）', icon: <Flower2 size={20} className="text-pink-500" />,   color: 'bg-pink-50 border-pink-200',   headerBg: 'bg-pink-50' },
+  { key: 'summer', label: '夏季（6〜7月）', icon: <Sun size={20} className="text-yellow-500" />,      color: 'bg-yellow-50 border-yellow-200', headerBg: 'bg-yellow-50' },
+  { key: 'autumn', label: '秋季（9〜10月）', icon: <Wind size={20} className="text-orange-500" />,    color: 'bg-orange-50 border-orange-200', headerBg: 'bg-orange-50' },
+  { key: 'winter', label: '冬季（12〜1月）', icon: <Snowflake size={20} className="text-blue-500" />, color: 'bg-blue-50 border-blue-200',     headerBg: 'bg-blue-50' },
 ]
 
+// ==============================
+// シーズンカード
+// ==============================
+const SeasonCard: React.FC<{
+  meta: SeasonMeta
+  items: SeasonalItemDef[]
+  staffName: string
+  doneItems: Record<string, { done_at: string; done_by: string }>
+  onToggle: (key: string, label: string) => void
+  onAddItem: (seasonKey: string, label: string) => void
+  onUpdateItem: (key: string, label: string) => void
+  onDeleteItem: (key: string) => void
+}> = ({ meta, items, staffName, doneItems, onToggle, onAddItem, onUpdateItem, onDeleteItem }) => {
+  const [editMode, setEditMode] = useState(false)
+  const [editingKey, setEditingKey] = useState<string | null>(null)
+  const [editLabel, setEditLabel] = useState('')
+  const [newLabel, setNewLabel] = useState('')
+
+  const doneCount = items.filter((item) => item.key in doneItems).length
+
+  const startEdit = (item: SeasonalItemDef) => {
+    setEditingKey(item.key)
+    setEditLabel(item.label)
+  }
+
+  const saveEdit = () => {
+    if (!editLabel.trim()) return
+    onUpdateItem(editingKey!, editLabel.trim())
+    setEditingKey(null)
+    toast.success('更新しました')
+  }
+
+  const handleAdd = () => {
+    if (!newLabel.trim()) return
+    onAddItem(meta.key, newLabel.trim())
+    setNewLabel('')
+    toast.success('項目を追加しました')
+  }
+
+  return (
+    <Card className={`overflow-hidden border-2 ${meta.color}`}>
+      {/* シーズンヘッダー */}
+      <div className={`flex items-center justify-between px-4 py-3 ${meta.headerBg}`}>
+        <div className="flex items-center gap-3">
+          {meta.icon}
+          <p className="text-sm font-bold text-gray-900">{meta.label}</p>
+          <span className="text-xs text-gray-500">{doneCount}/{items.length}</span>
+        </div>
+        <button
+          onClick={() => { setEditMode((v) => !v); setEditingKey(null) }}
+          className={`flex items-center gap-1.5 text-xs px-2.5 py-1.5 rounded-lg transition-colors min-h-[36px] ${
+            editMode ? 'bg-gray-200 text-gray-700' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
+          }`}
+        >
+          {editMode ? <><X size={13} /> 完了</> : <><Pencil size={13} /> 編集</>}
+        </button>
+      </div>
+
+      {/* 項目一覧 */}
+      <div className="p-4 space-y-2">
+        {items.length === 0 && !editMode && (
+          <p className="text-xs text-gray-400 text-center py-2">
+            「編集」ボタンから項目を追加してください
+          </p>
+        )}
+
+        {editMode ? (
+          /* ===== 編集モード ===== */
+          <>
+            {items.map((item) =>
+              editingKey === item.key ? (
+                <div key={item.key} className="flex items-center gap-2">
+                  <input
+                    value={editLabel}
+                    onChange={(e) => setEditLabel(e.target.value)}
+                    autoFocus
+                    className="flex-1 border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+                  />
+                  <button onClick={saveEdit} className="p-2 text-green-600 hover:bg-green-50 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center">
+                    <Check size={16} />
+                  </button>
+                  <button onClick={() => setEditingKey(null)} className="p-2 text-gray-400 hover:bg-gray-100 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center">
+                    <X size={16} />
+                  </button>
+                </div>
+              ) : (
+                <div key={item.key} className="flex items-center gap-2 bg-white rounded-xl px-3 py-2.5 border border-gray-200">
+                  <span className="flex-1 text-sm text-gray-700 break-anywhere">{item.label}</span>
+                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                    <Pencil size={13} />
+                  </button>
+                  <button
+                    onClick={() => {
+                      if (window.confirm(`「${item.label}」を削除しますか？`)) onDeleteItem(item.key, item.label)
+                    }}
+                    className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                </div>
+              )
+            )}
+
+            {/* 新規追加 */}
+            <div className="flex gap-2 mt-2">
+              <input
+                value={newLabel}
+                onChange={(e) => setNewLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                placeholder="新しい項目を追加（Enter でも追加）"
+                className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+              />
+              <button
+                onClick={handleAdd}
+                className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
+              >
+                <Plus size={16} />
+              </button>
+            </div>
+          </>
+        ) : (
+          /* ===== 通常モード（チェックボックス） ===== */
+          items.map((item) => {
+            const done = item.key in doneItems
+            const record = doneItems[item.key]
+            return (
+              <button
+                key={item.key}
+                onClick={() => onToggle(item.key, item.label)}
+                className={`w-full text-left flex items-start gap-2.5 px-3 py-2.5 rounded-xl transition-colors min-h-[44px]
+                  ${done ? 'bg-green-50 border border-green-200' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
+              >
+                {done
+                  ? <CheckCircle2 size={18} className="text-green-500 shrink-0 mt-0.5" />
+                  : <Circle size={18} className="text-gray-300 shrink-0 mt-0.5" />
+                }
+                <div className="flex-1 min-w-0">
+                  <span className={`text-xs font-medium break-anywhere ${done ? 'text-green-700 line-through' : 'text-gray-700'}`}>
+                    {item.label}
+                  </span>
+                  {done && record && (
+                    <p className="text-xs text-green-600 mt-0.5">
+                      {record.done_by}　{new Date(record.done_at).toLocaleDateString('ja-JP')}
+                    </p>
+                  )}
+                </div>
+              </button>
+            )
+          })
+        )}
+      </div>
+    </Card>
+  )
+}
+
+// ==============================
+// メインページ
+// ==============================
 export const SeasonalChecklist: React.FC = () => {
   const { doneItems, markDone, markUndone, isDone } = useSeasonalChecklistStore()
+  const { items, addItem, updateItem, deleteItem, resetToDefault } = useSeasonalItemsStore()
   const { facility } = useFacilityStore()
   const [staffName, setStaffName] = useState(facility?.director_name ?? '')
 
@@ -85,11 +196,18 @@ export const SeasonalChecklist: React.FC = () => {
     }
   }
 
+  const handleResetAll = () => {
+    if (window.confirm('すべての季節前チェック項目をデフォルトに戻しますか？現在の設定は失われます。')) {
+      resetToDefault()
+      toast.success('デフォルト項目に戻しました')
+    }
+  }
+
   return (
     <div className="px-4 py-6 space-y-5">
       <SectionHeader
         title="季節前チェック表"
-        subtitle="季節ごとの安全確認項目をチェックして記録します"
+        subtitle="季節ごとの安全確認項目を記録します。各シーズンの「編集」から項目のカスタマイズができます"
       />
 
       {/* 実施者入力 */}
@@ -105,52 +223,28 @@ export const SeasonalChecklist: React.FC = () => {
         <p className="text-xs text-gray-400 mt-1">チェック時に実施者名として記録されます</p>
       </div>
 
-      <div className="space-y-3">
-        {SEASONS.map((season) => {
-          const doneCount = season.items.filter((item) => isDone(item.key)).length
-          return (
-            <Card key={season.key} className={`p-4 border-2 ${season.color}`}>
-              <div className="flex items-center justify-between mb-3">
-                <div className="flex items-center gap-3">
-                  {season.icon}
-                  <p className="text-sm font-bold text-gray-900">{season.label}</p>
-                </div>
-                <span className="text-xs text-gray-500">{doneCount}/{season.items.length}</span>
-              </div>
-              <ul className="space-y-2">
-                {season.items.map((item) => {
-                  const done = isDone(item.key)
-                  const record = doneItems[item.key]
-                  return (
-                    <li key={item.key}>
-                      <button
-                        onClick={() => handleToggle(item.key, item.label)}
-                        className={`w-full text-left flex items-start gap-2.5 px-3 py-2.5 rounded-xl transition-colors min-h-[44px]
-                          ${done ? 'bg-green-50 border border-green-200' : 'bg-white border border-gray-200 hover:bg-gray-50'}`}
-                      >
-                        {done
-                          ? <CheckCircle2 size={18} className="text-green-500 shrink-0 mt-0.5" />
-                          : <Circle size={18} className="text-gray-300 shrink-0 mt-0.5" />
-                        }
-                        <div className="flex-1 min-w-0">
-                          <span className={`text-xs font-medium break-anywhere ${done ? 'text-green-700 line-through' : 'text-gray-700'}`}>
-                            {item.label}
-                          </span>
-                          {done && record && (
-                            <p className="text-xs text-green-600 mt-0.5">
-                              {record.done_by}　{new Date(record.done_at).toLocaleDateString('ja-JP')}
-                            </p>
-                          )}
-                        </div>
-                      </button>
-                    </li>
-                  )
-                })}
-              </ul>
-            </Card>
-          )
-        })}
-      </div>
+      {SEASON_META.map((meta) => (
+        <SeasonCard
+          key={meta.key}
+          meta={meta}
+          items={items.filter((i) => i.seasonKey === meta.key)}
+          staffName={staffName}
+          doneItems={doneItems}
+          onToggle={handleToggle}
+          onAddItem={addItem}
+          onUpdateItem={updateItem}
+          onDeleteItem={(key) => { deleteItem(key); toast.success('削除しました') }}
+        />
+      ))}
+
+      <button
+        onClick={handleResetAll}
+        className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
+      >
+        <RotateCcw size={12} />
+        すべてデフォルト項目に戻す
+      </button>
+
       <div className="h-4" />
     </div>
   )

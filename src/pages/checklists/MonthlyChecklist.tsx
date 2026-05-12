@@ -1,14 +1,167 @@
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, FileText, Check } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Check, Settings, Plus, Pencil, Trash2, RotateCcw } from 'lucide-react'
 import { Button, Card, ProgressBar, Modal } from '@/components/ui'
-import { useChecklistStore } from '@/stores/appStore'
+import { useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
+import type { ChecklistItemDef } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { MONTHLY_CHECKLIST_ITEMS } from '@/lib/checklistItems'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
+// ==============================
+// 項目管理モーダル
+// ==============================
+const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ open, onClose }) => {
+  const { items, addItem, updateItem, deleteItem, resetToDefault } = useChecklistItemsStore()
+  const [editingId, setEditingId] = useState<string | null>(null)
+  const [editCategory, setEditCategory] = useState('')
+  const [editTitle, setEditTitle] = useState('')
+  const [editDescription, setEditDescription] = useState('')
+  const [newCategory, setNewCategory] = useState('')
+  const [newTitle, setNewTitle] = useState('')
+  const [newDescription, setNewDescription] = useState('')
+
+  const startEdit = (item: ChecklistItemDef) => {
+    setEditingId(item.id)
+    setEditCategory(item.categoryName)
+    setEditTitle(item.title)
+    setEditDescription(item.description)
+  }
+
+  const saveEdit = () => {
+    if (!editTitle.trim() || !editCategory.trim()) {
+      toast.error('カテゴリと項目名は必須です')
+      return
+    }
+    updateItem(editingId!, { categoryName: editCategory.trim(), title: editTitle.trim(), description: editDescription.trim() })
+    setEditingId(null)
+    toast.success('更新しました')
+  }
+
+  const handleAdd = () => {
+    if (!newTitle.trim() || !newCategory.trim()) {
+      toast.error('カテゴリと項目名は必須です')
+      return
+    }
+    addItem({ categoryName: newCategory.trim(), title: newTitle.trim(), description: newDescription.trim() })
+    setNewCategory('')
+    setNewTitle('')
+    setNewDescription('')
+    toast.success('項目を追加しました')
+  }
+
+  const handleDelete = (id: string, title: string) => {
+    if (window.confirm(`「${title}」を削除しますか？`)) {
+      deleteItem(id)
+      toast.success('削除しました')
+    }
+  }
+
+  const handleReset = () => {
+    if (window.confirm('すべての項目をデフォルトに戻しますか？現在の設定は失われます。')) {
+      resetToDefault()
+      setEditingId(null)
+      toast.success('デフォルト項目に戻しました')
+    }
+  }
+
+  return (
+    <Modal open={open} onClose={() => { setEditingId(null); onClose() }} title="チェック項目を管理">
+      <div className="space-y-4">
+        {/* 既存項目一覧 */}
+        <div className="space-y-2 max-h-[40vh] overflow-y-auto pr-1">
+          {items.length === 0 && (
+            <p className="text-sm text-gray-400 text-center py-4">項目がありません</p>
+          )}
+          {items.map((item) =>
+            editingId === item.id ? (
+              <div key={item.id} className="border border-blue-300 rounded-xl p-3 space-y-2 bg-blue-50">
+                <input
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  placeholder="カテゴリ名（例：午睡）"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  value={editTitle}
+                  onChange={(e) => setEditTitle(e.target.value)}
+                  placeholder="項目名（必須）"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <input
+                  value={editDescription}
+                  onChange={(e) => setEditDescription(e.target.value)}
+                  placeholder="説明・備考（任意）"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="flex gap-2">
+                  <Button size="sm" variant="primary" fullWidth onClick={saveEdit}>保存する</Button>
+                  <Button size="sm" variant="secondary" onClick={() => setEditingId(null)}>キャンセル</Button>
+                </div>
+              </div>
+            ) : (
+              <div key={item.id} className="flex items-start gap-2 p-3 bg-gray-50 rounded-xl">
+                <div className="flex-1 min-w-0">
+                  <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">{item.categoryName}</span>
+                  <p className="text-sm text-gray-800 mt-1.5 break-anywhere font-medium">{item.title}</p>
+                  {item.description && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{item.description}</p>}
+                </div>
+                <div className="flex gap-1 shrink-0 mt-0.5">
+                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                    <Pencil size={14} />
+                  </button>
+                  <button onClick={() => handleDelete(item.id, item.title)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                    <Trash2 size={14} />
+                  </button>
+                </div>
+              </div>
+            )
+          )}
+        </div>
+
+        {/* 新規追加フォーム */}
+        <div className="border-t border-gray-200 pt-4 space-y-2">
+          <p className="text-xs font-semibold text-gray-700">新しい項目を追加</p>
+          <input
+            value={newCategory}
+            onChange={(e) => setNewCategory(e.target.value)}
+            placeholder="カテゴリ名（例：午睡、AED・救急）"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            value={newTitle}
+            onChange={(e) => setNewTitle(e.target.value)}
+            placeholder="項目名（必須）"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <input
+            value={newDescription}
+            onChange={(e) => setNewDescription(e.target.value)}
+            placeholder="説明・備考（任意）"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+          />
+          <Button variant="primary" fullWidth onClick={handleAdd}>
+            <Plus size={14} /> 追加する
+          </Button>
+        </div>
+
+        {/* リセット */}
+        <button
+          onClick={handleReset}
+          className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
+        >
+          <RotateCcw size={12} />
+          デフォルト項目に戻す
+        </button>
+      </div>
+    </Modal>
+  )
+}
+
+// ==============================
+// チェックカード（モバイル）
+// ==============================
 const ChecklistCard: React.FC<{
   itemId: string
   categoryName: string
@@ -45,22 +198,24 @@ const ChecklistCard: React.FC<{
         実施済みにする
       </button>
     ) : (
-      <button
-        onClick={() => onUndone(itemId)}
-        className="mt-2 text-xs text-gray-400 underline"
-      >
+      <button onClick={() => onUndone(itemId)} className="mt-2 text-xs text-gray-400 underline">
         取り消す
       </button>
     )}
   </Card>
 )
 
+// ==============================
+// メインページ
+// ==============================
 export const MonthlyChecklist: React.FC = () => {
   const navigate = useNavigate()
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
+  const [manageOpen, setManageOpen] = useState(false)
   const { doneItems, markDone, markUndone } = useChecklistStore()
+  const { items: checklistItems } = useChecklistItemsStore()
   const { facility } = useFacilityStore()
 
   const adjustMonth = (delta: number) => {
@@ -82,125 +237,150 @@ export const MonthlyChecklist: React.FC = () => {
   }
 
   const grouped = useMemo(() => {
-    const map: Record<string, typeof MONTHLY_CHECKLIST_ITEMS> = {}
-    MONTHLY_CHECKLIST_ITEMS.forEach((item) => {
+    const map: Record<string, typeof checklistItems> = {}
+    checklistItems.forEach((item) => {
       if (!map[item.categoryName]) map[item.categoryName] = []
       map[item.categoryName].push(item)
     })
     return map
-  }, [])
+  }, [checklistItems])
 
-  const doneCount = MONTHLY_CHECKLIST_ITEMS.filter((item) => item.id in doneItems).length
-  const totalCount = MONTHLY_CHECKLIST_ITEMS.length
+  const doneCount = checklistItems.filter((item) => item.id in doneItems).length
+  const totalCount = checklistItems.length
   const pendingCount = totalCount - doneCount
 
   return (
     <div className="px-4 py-6 space-y-5">
-      <div className="flex items-center justify-between">
-        <button onClick={() => adjustMonth(-1)}
+      <div className="flex items-center justify-between gap-2">
+        <button
+          onClick={() => adjustMonth(-1)}
           className="p-2 rounded-xl border border-gray-200 bg-white min-w-[44px] min-h-[44px] flex items-center justify-center active:bg-gray-50"
-          aria-label="前月">
+          aria-label="前月"
+        >
           <ChevronLeft size={18} />
         </button>
-        <h2 className="text-base font-bold text-gray-900">{year}年{month}月　月次チェック表</h2>
-        <button onClick={() => adjustMonth(+1)}
+        <h2 className="text-sm font-bold text-gray-900 text-center">{year}年{month}月　月次チェック表</h2>
+        <button
+          onClick={() => adjustMonth(+1)}
           className="p-2 rounded-xl border border-gray-200 bg-white min-w-[44px] min-h-[44px] flex items-center justify-center active:bg-gray-50"
-          aria-label="翌月">
+          aria-label="翌月"
+        >
           <ChevronRight size={18} />
         </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-xl p-4">
-        <ProgressBar done={doneCount} total={totalCount} />
-      </div>
+      {/* 項目管理ボタン */}
+      <button
+        onClick={() => setManageOpen(true)}
+        className="w-full flex items-center justify-center gap-2 py-2.5 border border-dashed border-gray-300 rounded-xl text-xs text-gray-500 hover:bg-gray-50 hover:border-gray-400 transition-colors min-h-[44px]"
+      >
+        <Settings size={14} />
+        チェック項目を追加・編集する
+      </button>
 
-      {pendingCount === 0 && totalCount > 0 && (
-        <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2">
-          <Check size={18} className="text-green-600 shrink-0" />
-          <p className="text-sm text-green-700 font-medium">今月のチェックが完了しています</p>
-        </div>
-      )}
+      {totalCount === 0 ? (
+        <Card className="p-8 text-center">
+          <Settings size={32} className="mx-auto mb-2 text-gray-300" />
+          <p className="text-sm text-gray-500 font-medium">チェック項目がありません</p>
+          <p className="text-xs text-gray-400 mt-1">「チェック項目を追加・編集する」から項目を登録してください</p>
+        </Card>
+      ) : (
+        <>
+          <div className="bg-white border border-gray-200 rounded-xl p-4">
+            <ProgressBar done={doneCount} total={totalCount} />
+          </div>
 
-      {/* モバイル: カード形式 */}
-      <div className="md:hidden space-y-5">
-        {Object.entries(grouped).map(([catName, catItems]) => (
-          <div key={catName}>
-            <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">{catName}</p>
-            <div className="space-y-2">
-              {catItems.map((item) => {
-                const done = doneItems[item.id]
-                return (
-                  <ChecklistCard
-                    key={item.id}
-                    itemId={item.id}
-                    categoryName={item.categoryName}
-                    title={item.title}
-                    description={item.description}
-                    isDone={!!done}
-                    doneAt={done?.done_at ?? null}
-                    doneBy={done?.done_by ?? null}
-                    onDone={handleDone}
-                    onUndone={handleUndone}
-                  />
-                )
-              })}
+          {pendingCount === 0 && totalCount > 0 && (
+            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2">
+              <Check size={18} className="text-green-600 shrink-0" />
+              <p className="text-sm text-green-700 font-medium">今月のチェックが完了しています</p>
+            </div>
+          )}
+
+          {/* モバイル: カード形式 */}
+          <div className="md:hidden space-y-5">
+            {Object.entries(grouped).map(([catName, catItems]) => (
+              <div key={catName}>
+                <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">{catName}</p>
+                <div className="space-y-2">
+                  {catItems.map((item) => {
+                    const done = doneItems[item.id]
+                    return (
+                      <ChecklistCard
+                        key={item.id}
+                        itemId={item.id}
+                        categoryName={item.categoryName}
+                        title={item.title}
+                        description={item.description}
+                        isDone={!!done}
+                        doneAt={done?.done_at ?? null}
+                        doneBy={done?.done_by ?? null}
+                        onDone={handleDone}
+                        onUndone={handleUndone}
+                      />
+                    )
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+
+          {/* PC: テーブル形式 */}
+          <div className="hidden md:block">
+            <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
+              <table className="min-w-full text-sm">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-28">カテゴリ</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs">チェック項目</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-24">状態</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-32">実施日時</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-36">操作</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-gray-100">
+                  {checklistItems.map((item) => {
+                    const done = doneItems[item.id]
+                    return (
+                      <tr key={item.id} className={done ? 'opacity-60' : ''}>
+                        <td className="px-4 py-3">
+                          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+                            {item.categoryName}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3">
+                          <p className={`text-sm break-anywhere ${done ? 'line-through text-gray-400' : 'text-gray-900'}`}>{item.title}</p>
+                          {item.description && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{item.description}</p>}
+                        </td>
+                        <td className="px-4 py-3">
+                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${done ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+                            {done ? '実施済み' : '未実施'}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-xs text-gray-500">
+                          {done?.done_at ? format(new Date(done.done_at), 'M/d HH:mm', { locale: ja }) : '-'}
+                        </td>
+                        <td className="px-4 py-3">
+                          {!done ? (
+                            <button
+                              onClick={() => handleDone(item.id)}
+                              className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors min-h-[32px]"
+                            >
+                              実施済みにする
+                            </button>
+                          ) : (
+                            <button onClick={() => handleUndone(item.id)} className="text-xs text-gray-400 underline">取り消す</button>
+                          )}
+                        </td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
             </div>
           </div>
-        ))}
-      </div>
-
-      {/* PC: テーブル形式 */}
-      <div className="hidden md:block">
-        <div className="bg-white border border-gray-200 rounded-xl overflow-hidden">
-          <table className="min-w-full text-sm">
-            <thead className="bg-gray-50">
-              <tr>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-28">カテゴリ</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs">チェック項目</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-24">状態</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-32">実施日時</th>
-                <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-36">操作</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-gray-100">
-              {MONTHLY_CHECKLIST_ITEMS.map((item) => {
-                const done = doneItems[item.id]
-                return (
-                  <tr key={item.id} className={done ? 'opacity-60' : ''}>
-                    <td className="px-4 py-3">
-                      <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                        {item.categoryName}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3">
-                      <p className={`text-sm break-anywhere ${done ? 'line-through text-gray-400' : 'text-gray-900'}`}>{item.title}</p>
-                      {item.description && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{item.description}</p>}
-                    </td>
-                    <td className="px-4 py-3">
-                      <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${done ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                        {done ? '実施済み' : '未実施'}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-xs text-gray-500">
-                      {done?.done_at ? format(new Date(done.done_at), 'M/d HH:mm', { locale: ja }) : '-'}
-                    </td>
-                    <td className="px-4 py-3">
-                      {!done ? (
-                        <button onClick={() => handleDone(item.id)}
-                          className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors min-h-[32px]">
-                          実施済みにする
-                        </button>
-                      ) : (
-                        <button onClick={() => handleUndone(item.id)} className="text-xs text-gray-400 underline">取り消す</button>
-                      )}
-                    </td>
-                  </tr>
-                )
-              })}
-            </tbody>
-          </table>
-        </div>
-      </div>
+        </>
+      )}
 
       <div className="pt-2 space-y-2">
         <Button variant="secondary" fullWidth onClick={() => navigate('/reports/new')}>
@@ -208,6 +388,8 @@ export const MonthlyChecklist: React.FC = () => {
           この結果から報告書を作成する
         </Button>
       </div>
+
+      <ItemManageModal open={manageOpen} onClose={() => setManageOpen(false)} />
 
       <div className="h-4" />
     </div>
