@@ -70,7 +70,7 @@ export const useNearMissStore = create<NearMissState>()(
 // チェックリスト（月次）
 // ==============================
 interface ChecklistState {
-  doneItems: Record<string, { done_at: string; done_by: string; notes: string | null }>
+  doneItems: Record<string, { done_at: string; done_by: string; notes?: string }>
   markDone: (itemId: string, done_by: string, notes?: string) => void
   markUndone: (itemId: string) => void
   isDone: (itemId: string) => boolean
