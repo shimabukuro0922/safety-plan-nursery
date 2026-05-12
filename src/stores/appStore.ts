@@ -249,7 +249,7 @@ interface ChecklistItemsState {
 export const useChecklistItemsStore = create<ChecklistItemsState>()(
   persist(
     (set) => ({
-      items: DEFAULT_CHECKLIST_ITEMS,
+      items: [],
       addItem: (item) => {
         const id = `ci_${Date.now()}`
         set((state) => ({ items: [...state.items, { ...item, id }] }))
@@ -264,7 +264,7 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
       },
       resetToDefault: () => set({ items: DEFAULT_CHECKLIST_ITEMS }),
     }),
-    { name: 'checklist-items-store' }
+    { name: 'checklist-items-store-v2' }
   )
 )
 
@@ -298,10 +298,12 @@ interface AnnualPlanState {
   resetToDefault: () => void
 }
 
+const BLANK_ANNUAL_PLANS: AnnualPlanMonth[] = [1,2,3,4,5,6,7,8,9,10,11,12].map((m) => ({ month: m, themes: [], highRisk: [] }))
+
 export const useAnnualPlanStore = create<AnnualPlanState>()(
   persist(
     (set) => ({
-      plans: DEFAULT_ANNUAL_PLANS,
+      plans: BLANK_ANNUAL_PLANS,
       updateMonth: (month, themes, highRisk) => {
         set((state) => ({
           plans: state.plans.map((p) => p.month === month ? { ...p, themes, highRisk } : p),
@@ -309,7 +311,7 @@ export const useAnnualPlanStore = create<AnnualPlanState>()(
       },
       resetToDefault: () => set({ plans: DEFAULT_ANNUAL_PLANS }),
     }),
-    { name: 'annual-plan-store' }
+    { name: 'annual-plan-store-v2' }
   )
 )
 
@@ -352,7 +354,7 @@ interface SeasonalItemsState {
 export const useSeasonalItemsStore = create<SeasonalItemsState>()(
   persist(
     (set) => ({
-      items: DEFAULT_SEASONAL_ITEMS,
+      items: [],
       addItem: (seasonKey, label) => {
         const key = `${seasonKey}_custom_${Date.now()}`
         set((state) => ({ items: [...state.items, { key, seasonKey, label }] }))
@@ -367,6 +369,6 @@ export const useSeasonalItemsStore = create<SeasonalItemsState>()(
       },
       resetToDefault: () => set({ items: DEFAULT_SEASONAL_ITEMS }),
     }),
-    { name: 'seasonal-items-store' }
+    { name: 'seasonal-items-store-v2' }
   )
 )

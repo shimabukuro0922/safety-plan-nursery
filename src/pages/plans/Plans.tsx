@@ -238,9 +238,9 @@ export const Plans: React.FC = () => {
     setOpenMonth((prev) => (prev === month ? null : month))
 
   const handleReset = () => {
-    if (window.confirm('年間カレンダーをデフォルト内容に戻しますか？現在の設定は失われます。')) {
+    if (window.confirm('サンプル内容を読み込みますか？現在の設定はすべて置き換えられます。')) {
       resetToDefault()
-      toast.success('デフォルト内容に戻しました')
+      toast.success('サンプル内容を読み込みました')
     }
   }
 
@@ -281,7 +281,7 @@ export const Plans: React.FC = () => {
         className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
       >
         <RotateCcw size={12} />
-        デフォルト内容に戻す
+        サンプル内容を読み込む
       </button>
 
       <div className="h-4" />

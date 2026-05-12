@@ -59,10 +59,10 @@ const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
   }
 
   const handleReset = () => {
-    if (window.confirm('すべての項目をデフォルトに戻しますか？現在の設定は失われます。')) {
+    if (window.confirm('サンプル項目（10項目）を読み込みますか？現在の項目はすべて置き換えられます。')) {
       resetToDefault()
       setEditingId(null)
-      toast.success('デフォルト項目に戻しました')
+      toast.success('サンプル項目を読み込みました')
     }
   }
 
@@ -152,7 +152,7 @@ const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
           className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
         >
           <RotateCcw size={12} />
-          デフォルト項目に戻す
+          サンプル項目を読み込む（10項目）
         </button>
       </div>
     </Modal>

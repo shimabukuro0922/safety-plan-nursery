@@ -197,9 +197,9 @@ export const SeasonalChecklist: React.FC = () => {
   }
 
   const handleResetAll = () => {
-    if (window.confirm('すべての季節前チェック項目をデフォルトに戻しますか？現在の設定は失われます。')) {
+    if (window.confirm('サンプル項目を読み込みますか？現在の設定はすべて置き換えられます。')) {
       resetToDefault()
-      toast.success('デフォルト項目に戻しました')
+      toast.success('サンプル項目を読み込みました')
     }
   }
 
@@ -242,7 +242,7 @@ export const SeasonalChecklist: React.FC = () => {
         className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 transition-colors py-2"
       >
         <RotateCcw size={12} />
-        すべてデフォルト項目に戻す
+        サンプル項目を読み込む
       </button>
 
       <div className="h-4" />
