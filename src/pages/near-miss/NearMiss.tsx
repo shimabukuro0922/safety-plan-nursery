@@ -5,7 +5,7 @@ import {
 import { Card, Button, SectionHeader, Modal } from '@/components/ui'
 import { useNearMissStore } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
-import type { NearMiss, NearMissStep, NearMissScene } from '@/types'
+import type { NearMiss as NearMissRecord, NearMissStep, NearMissScene } from '@/types'
 import { NEAR_MISS_SCENE_LABELS, NEAR_MISS_STEP_CONFIG } from '@/types'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
@@ -39,7 +39,7 @@ const StepFlow: React.FC<{ current: NearMissStep }> = ({ current }) => {
 }
 
 // 詳細・編集モーダル
-const NearMissDetail: React.FC<{ nm: NearMiss; onClose: () => void }> = ({ nm, onClose }) => {
+const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({ nm, onClose }) => {
   const { updateNearMiss, advanceStep, deleteNearMiss } = useNearMissStore()
   const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step]
   const nextStep = STEP_FLOW[STEP_FLOW.indexOf(nm.step) + 1]
@@ -256,7 +256,7 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 // メインページ
 export const NearMiss: React.FC = () => {
   const { nearMisses } = useNearMissStore()
-  const [selected, setSelected] = useState<NearMiss | null>(null)
+  const [selected, setSelected] = useState<NearMissRecord | null>(null)
   const [showNew, setShowNew] = useState(false)
 
   const stepOrder: Record<NearMissStep, number> = {

@@ -1,6 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
-import type { NearMiss, NearMissStep, NearMissScene, ChecklistItem } from '@/types'
+import type { NearMiss, NearMissStep, NearMissScene } from '@/types'
 
 // ==============================
 // ヒヤリハット
@@ -80,7 +80,7 @@ export const useChecklistStore = create<ChecklistState>()(
   persist(
     (set, get) => ({
       doneItems: {},
-      markDone: (itemId, done_by, notes = null) => {
+      markDone: (itemId, done_by, notes = undefined) => {
         set((state) => ({
           doneItems: {
             ...state.doneItems,
