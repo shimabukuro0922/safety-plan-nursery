@@ -16,6 +16,8 @@ const BACKUP_KEYS = [
   'seasonal-items-store-v3',
   'near-miss-store',
   'report-store',
+  'notice-category-store-v1',
+  'staff-material-type-store-v1',
 ]
 
 function exportBackup() {

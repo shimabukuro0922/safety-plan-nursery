@@ -372,3 +372,101 @@ export const useSeasonalItemsStore = create<SeasonalItemsState>()(
     { name: 'seasonal-items-store-v3' }
   )
 )
+
+// ==============================
+// 保護者周知文カテゴリ
+// ==============================
+export interface NoticeCategoryDef {
+  id: string
+  name: string
+  isDefault: boolean
+}
+
+const DEFAULT_NOTICE_CATEGORIES: NoticeCategoryDef[] = [
+  { id: 'nap',        name: '午睡の安全',     isDefault: true },
+  { id: 'eating',     name: '食事・アレルギー', isDefault: true },
+  { id: 'water_play', name: '水遊び・プール',  isDefault: true },
+  { id: 'outdoor',    name: '園庭・外遊び',    isDefault: true },
+  { id: 'excursion',  name: '園外活動・散歩',  isDefault: true },
+  { id: 'first_aid',  name: '救急備品・AED',   isDefault: true },
+  { id: 'disaster',   name: '災害・避難訓練',  isDefault: true },
+  { id: 'intrusion',  name: '不審者対応',      isDefault: true },
+  { id: 'training',   name: '職員研修',        isDefault: true },
+  { id: 'infection',  name: '感染症対策',      isDefault: true },
+]
+
+interface NoticeCategoryState {
+  categories: NoticeCategoryDef[]
+  addCategory: (name: string) => void
+  updateCategory: (id: string, name: string) => void
+  deleteCategory: (id: string) => void
+  resetToDefault: () => void
+}
+
+export const useNoticeCategoryStore = create<NoticeCategoryState>()(
+  persist(
+    (set) => ({
+      categories: DEFAULT_NOTICE_CATEGORIES,
+      addCategory: (name) => {
+        const id = `cat_${Date.now()}`
+        set((state) => ({ categories: [...state.categories, { id, name, isDefault: false }] }))
+      },
+      updateCategory: (id, name) => {
+        set((state) => ({
+          categories: state.categories.map((c) => c.id === id ? { ...c, name } : c),
+        }))
+      },
+      deleteCategory: (id) => {
+        set((state) => ({ categories: state.categories.filter((c) => c.id !== id) }))
+      },
+      resetToDefault: () => set({ categories: DEFAULT_NOTICE_CATEGORIES }),
+    }),
+    { name: 'notice-category-store-v1' }
+  )
+)
+
+// ==============================
+// 職員資料 種別
+// ==============================
+export interface StaffMaterialTypeDef {
+  key: string
+  label: string
+  description: string
+  isDefault: boolean
+}
+
+const DEFAULT_STAFF_MATERIAL_TYPES: StaffMaterialTypeDef[] = [
+  { key: 'morning',  label: '朝礼用1枚資料', description: '毎朝の安全確認事項をA4一枚にまとめたもの',   isDefault: true },
+  { key: 'training', label: '園内研修用資料', description: '定期研修で使える詳細な解説・演習シート',       isDefault: true },
+  { key: 'newcomer', label: '新人向けガイド', description: '新入職員が最初に学ぶ安全の基礎',             isDefault: true },
+]
+
+interface StaffMaterialTypeState {
+  types: StaffMaterialTypeDef[]
+  addType: (label: string, description: string) => void
+  updateType: (key: string, label: string, description: string) => void
+  deleteType: (key: string) => void
+  resetToDefault: () => void
+}
+
+export const useStaffMaterialTypeStore = create<StaffMaterialTypeState>()(
+  persist(
+    (set) => ({
+      types: DEFAULT_STAFF_MATERIAL_TYPES,
+      addType: (label, description) => {
+        const key = `custom_${Date.now()}`
+        set((state) => ({ types: [...state.types, { key, label, description, isDefault: false }] }))
+      },
+      updateType: (key, label, description) => {
+        set((state) => ({
+          types: state.types.map((t) => t.key === key ? { ...t, label, description } : t),
+        }))
+      },
+      deleteType: (key) => {
+        set((state) => ({ types: state.types.filter((t) => t.key !== key) }))
+      },
+      resetToDefault: () => set({ types: DEFAULT_STAFF_MATERIAL_TYPES }),
+    }),
+    { name: 'staff-material-type-store-v1' }
+  )
+)
