@@ -1,6 +1,6 @@
 import React, { useState, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, FileText, Check, Settings, Plus, Pencil, Trash2, RotateCcw } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, Check, Settings, Plus, Pencil, Trash2, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react'
 import { Button, Card, ProgressBar, Modal } from '@/components/ui'
 import { useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
 import type { ChecklistItemDef } from '@/stores/appStore'
@@ -293,9 +293,20 @@ export const MonthlyChecklist: React.FC = () => {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [manageOpen, setManageOpen] = useState(false)
-  const { doneItems, markDone, markUndone } = useChecklistStore()
-  const { items: checklistItems } = useChecklistItemsStore()
+  const { doneItems, markDone, markUndone, lastMarkedMonth, resetForNewMonth } = useChecklistStore()
+  const { items: checklistItems, resetToDefault } = useChecklistItemsStore()
   const { facility } = useFacilityStore()
+
+  // 現在表示中の月キー（YYYY-MM）
+  const currentMonthKey = `${year}-${String(month).padStart(2, '0')}`
+  // 今月かどうか
+  const isCurrentMonth = currentMonthKey === now.toISOString().slice(0, 7)
+  // 先月以前のデータが残っていて、今月を表示している場合 → リセットバナーを表示
+  const showResetBanner =
+    isCurrentMonth &&
+    lastMarkedMonth !== null &&
+    lastMarkedMonth !== currentMonthKey &&
+    Object.keys(doneItems).length > 0
 
   const adjustMonth = (delta: number) => {
     let m = month + delta
@@ -348,6 +359,31 @@ export const MonthlyChecklist: React.FC = () => {
         </button>
       </div>
 
+      {/* 月またぎリセットバナー */}
+      {showResetBanner && (
+        <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
+          <AlertTriangle size={18} className="text-amber-500 shrink-0 mt-0.5" />
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-bold text-amber-800">先月の記録が残っています</p>
+            <p className="text-xs text-amber-700 mt-0.5">
+              {lastMarkedMonth?.replace('-', '年')}月の実施済み記録がそのまま表示されています。今月の新しい記録を始めましょう。
+            </p>
+            <button
+              onClick={() => {
+                if (window.confirm('先月の実施記録をすべてクリアして、今月を新しく始めますか？')) {
+                  resetForNewMonth()
+                  toast.success('今月の記録を開始しました')
+                }
+              }}
+              className="mt-2 flex items-center gap-1.5 text-xs font-semibold text-amber-800 bg-amber-100 border border-amber-300 px-3 py-1.5 rounded-lg hover:bg-amber-200 transition-colors"
+            >
+              <RefreshCw size={12} />
+              今月の記録を新しく始める
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* 項目管理ボタン */}
       <button
         onClick={() => setManageOpen(true)}
@@ -358,10 +394,23 @@ export const MonthlyChecklist: React.FC = () => {
       </button>
 
       {totalCount === 0 ? (
-        <Card className="p-8 text-center">
-          <Settings size={32} className="mx-auto mb-2 text-gray-300" />
-          <p className="text-sm text-gray-500 font-medium">チェック項目がありません</p>
-          <p className="text-xs text-gray-400 mt-1">「チェック項目を追加・編集する」から項目を登録してください</p>
+        <Card className="p-6 text-center space-y-4">
+          <div>
+            <Settings size={32} className="mx-auto mb-2 text-gray-300" />
+            <p className="text-sm text-gray-600 font-semibold">チェック項目がまだありません</p>
+            <p className="text-xs text-gray-400 mt-1">サンプルを読み込むか、独自の項目を追加してください</p>
+          </div>
+          <Button variant="primary" fullWidth onClick={() => { resetToDefault(); toast.success('サンプル項目（10項目）を読み込みました') }}>
+            <RotateCcw size={14} />
+            サンプル項目（10項目）を読み込む
+          </Button>
+          <button
+            onClick={() => setManageOpen(true)}
+            className="w-full py-2.5 border border-dashed border-blue-300 rounded-xl text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+          >
+            <Plus size={14} className="inline mr-1" />
+            自分で項目を追加する
+          </button>
         </Card>
       ) : (
         <>

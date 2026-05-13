@@ -6,7 +6,7 @@ import {
   Moon, GraduationCap, Siren,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
-import { useNearMissStore, useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
+import { useNearMissStore, useChecklistStore, useChecklistItemsStore, useNapCheckStore } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { NEAR_MISS_STEP_CONFIG } from '@/types'
 import { format } from 'date-fns'
@@ -26,6 +26,7 @@ export const Dashboard: React.FC = () => {
   const { nearMisses } = useNearMissStore()
   const { doneItems } = useChecklistStore()
   const { items: checklistItems } = useChecklistItemsStore()
+  const { records: napRecords } = useNapCheckStore()
 
   const now = new Date()
   const monthLabel = format(now, 'M月', { locale: ja })
@@ -47,6 +48,14 @@ export const Dashboard: React.FC = () => {
   }
   const donePillars = Object.values(pillarDone).filter(Boolean).length
   const recentNearMisses = nearMisses.slice(0, 2)
+
+  // 今日の午睡見守り状況
+  const todayKey = format(now, 'yyyy-MM-dd')
+  const todayNapRecords = napRecords.filter((r) => r.date === todayKey)
+  const lastNapCheck = todayNapRecords.sort((a, b) => b.checked_at.localeCompare(a.checked_at))[0]
+  const napMinutesSinceLast = lastNapCheck
+    ? Math.floor((Date.now() - new Date(lastNapCheck.checked_at).getTime()) / 60000)
+    : null
 
   return (
     <div className="px-4 py-6 space-y-6">
@@ -154,6 +163,41 @@ export const Dashboard: React.FC = () => {
           <p className="text-xs text-gray-500 break-anywhere">
             ヒヤリハット記録はまだありません。<br />気になることを小さくても記録しておきましょう。
           </p>
+        </Card>
+      )}
+
+      {/* 午睡見守り状況 */}
+      {todayNapRecords.length > 0 && (
+        <Card
+          className={`p-4 cursor-pointer ${
+            napMinutesSinceLast === null ? 'border-gray-200' :
+            napMinutesSinceLast < 5  ? 'border-green-300 bg-green-50' :
+            napMinutesSinceLast < 10 ? 'border-yellow-300 bg-yellow-50' :
+            'border-red-300 bg-red-50'
+          }`}
+          onClick={() => navigate('/nap')}
+        >
+          <div className="flex items-center gap-3">
+            <Moon size={20} className={
+              napMinutesSinceLast === null ? 'text-gray-400' :
+              napMinutesSinceLast < 5  ? 'text-green-600' :
+              napMinutesSinceLast < 10 ? 'text-yellow-600' :
+              'text-red-600'
+            } />
+            <div className="flex-1 min-w-0">
+              <p className={`text-sm font-semibold ${
+                napMinutesSinceLast !== null && napMinutesSinceLast >= 10 ? 'text-red-800' : 'text-gray-900'
+              }`}>午睡見守り</p>
+              <p className="text-xs text-gray-600 mt-0.5">
+                本日 {todayNapRecords.length}回確認済み ·{' '}
+                {napMinutesSinceLast === null ? '—' :
+                 napMinutesSinceLast < 1 ? '直前に確認' :
+                 `最終確認 ${napMinutesSinceLast}分前`}
+                {napMinutesSinceLast !== null && napMinutesSinceLast >= 10 && ' ⚠️'}
+              </p>
+            </div>
+            <ChevronRight size={16} className="text-gray-400 shrink-0" />
+          </div>
         </Card>
       )}
 

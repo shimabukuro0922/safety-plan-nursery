@@ -71,16 +71,20 @@ export const useNearMissStore = create<NearMissState>()(
 // ==============================
 interface ChecklistState {
   doneItems: Record<string, { done_at: string; done_by: string; notes?: string }>
+  lastMarkedMonth: string | null  // "YYYY-MM" 形式
   markDone: (itemId: string, done_by: string, notes?: string) => void
   markUndone: (itemId: string) => void
   isDone: (itemId: string) => boolean
+  resetForNewMonth: () => void
 }
 
 export const useChecklistStore = create<ChecklistState>()(
   persist(
     (set, get) => ({
       doneItems: {},
+      lastMarkedMonth: null,
       markDone: (itemId, done_by, notes = undefined) => {
+        const monthKey = new Date().toISOString().slice(0, 7) // "YYYY-MM"
         set((state) => ({
           doneItems: {
             ...state.doneItems,
@@ -90,6 +94,7 @@ export const useChecklistStore = create<ChecklistState>()(
               notes,
             },
           },
+          lastMarkedMonth: monthKey,
         }))
       },
       markUndone: (itemId) => {
@@ -100,6 +105,9 @@ export const useChecklistStore = create<ChecklistState>()(
       },
       isDone: (itemId) => {
         return itemId in get().doneItems
+      },
+      resetForNewMonth: () => {
+        set({ doneItems: {}, lastMarkedMonth: new Date().toISOString().slice(0, 7) })
       },
     }),
     { name: 'checklist-store' }

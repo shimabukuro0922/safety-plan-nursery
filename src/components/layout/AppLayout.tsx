@@ -1,10 +1,10 @@
 import React, { useState } from 'react'
-import { NavLink, useLocation } from 'react-router-dom'
+import { NavLink, useLocation, useNavigate } from 'react-router-dom'
 import {
   LayoutDashboard, ClipboardCheck, History,
   FileText, Settings, ChevronLeft,
   ShieldCheck, CalendarDays, AlertCircle, Users, Bell, HelpCircle,
-  Moon, GraduationCap, Siren,
+  Moon, GraduationCap, Siren, MoreHorizontal, X,
 } from 'lucide-react'
 import { GuideModal } from '@/components/GuideModal'
 
@@ -18,8 +18,20 @@ const NAV_ITEMS: NavItem[] = [
   { label: 'ホーム',       path: '/dashboard',         icon: <LayoutDashboard size={20} /> },
   { label: 'チェック',     path: '/checklists/monthly', icon: <ClipboardCheck size={20} /> },
   { label: 'ヒヤリ',       path: '/near-miss',          icon: <AlertCircle size={20} /> },
-  { label: '記録',         path: '/records',            icon: <History size={20} /> },
-  { label: '報告書',       path: '/reports',            icon: <FileText size={20} /> },
+  { label: '午睡',         path: '/nap',                icon: <Moon size={20} /> },
+  { label: 'もっと',       path: '',                    icon: <MoreHorizontal size={20} /> },
+]
+
+const MORE_ITEMS = [
+  { label: '緊急対応カード',     path: '/emergency', icon: <Siren size={20} className="text-red-500" /> },
+  { label: '職員研修・資格管理', path: '/training',  icon: <GraduationCap size={20} className="text-purple-500" /> },
+  { label: '実施記録・証跡',     path: '/records',   icon: <History size={20} className="text-blue-500" /> },
+  { label: '報告書',             path: '/reports',   icon: <FileText size={20} className="text-gray-500" /> },
+  { label: '年間安全カレンダー', path: '/plans',     icon: <CalendarDays size={20} className="text-green-500" /> },
+  { label: '季節前チェック',     path: '/checklists/seasonal', icon: <ClipboardCheck size={20} className="text-teal-500" /> },
+  { label: '職員共有シート',     path: '/materials/staff',    icon: <Users size={20} className="text-orange-500" /> },
+  { label: '保護者周知文',       path: '/materials/guardian', icon: <Bell size={20} className="text-pink-500" /> },
+  { label: '設定',               path: '/settings',  icon: <Settings size={20} className="text-gray-500" /> },
 ]
 
 const PC_NAV_ITEMS = [
@@ -124,28 +136,87 @@ const Sidebar: React.FC = () => {
   )
 }
 
-const BottomNav: React.FC = () => (
-  <nav
-    className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50"
-    style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
-  >
-    <div className="flex h-16">
-      {NAV_ITEMS.map((item) => (
-        <NavLink
-          key={item.path}
-          to={item.path}
-          className={({ isActive }) =>
-            `flex-1 flex flex-col items-center justify-center gap-0.5 text-xs transition-colors
-            ${isActive ? 'text-blue-600' : 'text-gray-400'}`
-          }
-        >
-          {item.icon}
-          <span className="text-[10px] font-medium">{item.label}</span>
-        </NavLink>
-      ))}
-    </div>
-  </nav>
-)
+const BottomNav: React.FC = () => {
+  const [moreOpen, setMoreOpen] = useState(false)
+  const navigate = useNavigate()
+  const location = useLocation()
+
+  return (
+    <>
+      <nav
+        className="md:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 z-50"
+        style={{ paddingBottom: 'env(safe-area-inset-bottom, 0px)' }}
+      >
+        <div className="flex h-16">
+          {NAV_ITEMS.map((item) =>
+            item.path === '' ? (
+              <button
+                key="more"
+                onClick={() => setMoreOpen(true)}
+                className={`flex-1 flex flex-col items-center justify-center gap-0.5 text-xs transition-colors
+                  ${moreOpen ? 'text-blue-600' : 'text-gray-400'}`}
+              >
+                {item.icon}
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </button>
+            ) : (
+              <NavLink
+                key={item.path}
+                to={item.path}
+                className={({ isActive }) =>
+                  `flex-1 flex flex-col items-center justify-center gap-0.5 text-xs transition-colors
+                  ${isActive ? 'text-blue-600' : 'text-gray-400'}`
+                }
+              >
+                {item.icon}
+                <span className="text-[10px] font-medium">{item.label}</span>
+              </NavLink>
+            )
+          )}
+        </div>
+      </nav>
+
+      {/* もっとメニュー（ドロワー） */}
+      {moreOpen && (
+        <div className="md:hidden fixed inset-0 z-[60] flex flex-col justify-end">
+          {/* オーバーレイ */}
+          <div
+            className="absolute inset-0 bg-black/40"
+            onClick={() => setMoreOpen(false)}
+          />
+          {/* ドロワー本体 */}
+          <div
+            className="relative bg-white rounded-t-2xl shadow-xl"
+            style={{ paddingBottom: 'env(safe-area-inset-bottom, 16px)' }}
+          >
+            <div className="flex items-center justify-between px-5 pt-4 pb-2">
+              <p className="text-sm font-bold text-gray-800">メニュー</p>
+              <button
+                onClick={() => setMoreOpen(false)}
+                className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
+              >
+                <X size={18} />
+              </button>
+            </div>
+            <div className="px-3 pb-4 grid grid-cols-3 gap-1">
+              {MORE_ITEMS.map((item) => (
+                <button
+                  key={item.path}
+                  onClick={() => { navigate(item.path); setMoreOpen(false) }}
+                  className={`flex flex-col items-center gap-1.5 p-3 rounded-xl transition-colors text-center
+                    ${location.pathname === item.path ? 'bg-blue-50' : 'hover:bg-gray-50'}`}
+                >
+                  {item.icon}
+                  <span className="text-[11px] font-medium text-gray-700 leading-tight break-words w-full">{item.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
+  )
+}
 
 const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
   const location = useLocation()

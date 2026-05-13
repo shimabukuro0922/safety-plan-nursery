@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Moon, CheckCircle2, Clock, Trash2, Users } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
@@ -11,6 +11,13 @@ export const NapCheck: React.FC = () => {
   const { facility } = useFacilityStore()
   const { records, addRecord, clearToday } = useNapCheckStore()
   const [checkerName, setCheckerName] = useState(facility?.director_name ?? '')
+
+  // 30秒ごとに再レンダリングして経過時間を最新に保つ
+  const [, setTick] = useState(0)
+  useEffect(() => {
+    const id = setInterval(() => setTick((t) => t + 1), 30_000)
+    return () => clearInterval(id)
+  }, [])
 
   const now = new Date()
   const todayKey = format(now, 'yyyy-MM-dd')
