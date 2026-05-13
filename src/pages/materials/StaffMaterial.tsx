@@ -204,15 +204,29 @@ export const StaffMaterial: React.FC = () => {
 
   const doGenerate = async () => {
     setIsGenerating(true)
-    await new Promise((r) => setTimeout(r, 1800))
-    setIsGenerating(false)
-    const content = buildContent(selected, selectedType?.label ?? '', theme.trim())
-    setGenerated(content)
-    setEditedContent(content)
+    try {
+      const res = await fetch('/api/generate-staff', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          typeKey: selected,
+          typeLabel: selectedType?.label ?? '',
+          theme: theme.trim(),
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? '生成に失敗しました')
+      setGenerated(data.text)
+      setEditedContent(data.text)
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : '生成に失敗しました')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
-  const handleGenerate = async () => { await doGenerate(); toast.success('資料を作成しました') }
-  const handleRegenerate = async () => { await doGenerate(); toast.success('作り直しました') }
+  const handleGenerate = async () => { await doGenerate(); if (!isGenerating) toast.success('資料を作成しました') }
+  const handleRegenerate = async () => { await doGenerate(); if (!isGenerating) toast.success('作り直しました') }
 
   const handleSelectType = (key: string) => {
     setSelected(key)

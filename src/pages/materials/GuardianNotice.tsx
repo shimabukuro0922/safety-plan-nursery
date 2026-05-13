@@ -37,15 +37,27 @@ export const GuardianNotice: React.FC = () => {
   const handleGenerate = async () => {
     if (selectedCats.length === 0) { toast.error('カテゴリを1つ以上選択してください'); return }
     setIsGenerating(true)
-    await new Promise((r) => setTimeout(r, 1200))
-    const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
-    const facilityName = facility?.name ?? '当園'
-    const now = new Date()
-    const content = `保護者の皆様へ\n\n平素より${facilityName}の教育活動にご理解・ご協力をいただき、誠にありがとうございます。\n\n今月は「${catNames.join('・')}」について、職員全員で安全確認を実施いたしました。\n\nお子様の安全のために、ご家庭でも以下の点についてお声がけいただけますと幸いです。\n\n・外遊びから戻ったら手洗い・うがいを習慣にする\n・体調が優れないときはすぐにご連絡ください\n\nご不明な点がございましたら、担任またはフロントまでお気軽にご相談ください。\n\n${now.getFullYear()}年${now.getMonth() + 1}月\n${facilityName}`
-    setGenerated(content)
-    setEditedContent(content)
-    setIsGenerating(false)
-    toast.success('保護者周知文を作成しました')
+    try {
+      const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
+      const res = await fetch('/api/generate-notice', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          categories: catNames,
+          style,
+          facilityName: facility?.name ?? '当園',
+        }),
+      })
+      const data = await res.json()
+      if (!res.ok) throw new Error(data.error ?? '生成に失敗しました')
+      setGenerated(data.text)
+      setEditedContent(data.text)
+      toast.success('保護者周知文を作成しました')
+    } catch (e: unknown) {
+      toast.error(e instanceof Error ? e.message : '生成に失敗しました')
+    } finally {
+      setIsGenerating(false)
+    }
   }
 
   const startEdit = (id: string, name: string) => { setEditingId(id); setEditName(name) }
