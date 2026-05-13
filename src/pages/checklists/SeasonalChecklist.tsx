@@ -114,7 +114,7 @@ const SeasonCard: React.FC<{
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm(`「${item.label}」を削除しますか？`)) onDeleteItem(item.key, item.label)
+                      if (window.confirm(`「${item.label}」を削除しますか？`)) onDeleteItem(item.key)
                     }}
                     className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
                   >
