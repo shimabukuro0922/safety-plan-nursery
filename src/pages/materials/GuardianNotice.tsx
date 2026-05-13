@@ -19,6 +19,7 @@ export const GuardianNotice: React.FC = () => {
   const [style, setStyle] = useState('gentle')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generated, setGenerated] = useState<string | null>(null)
+  const [editedContent, setEditedContent] = useState('')
 
   // 編集モード
   const [editMode, setEditMode] = useState(false)
@@ -40,9 +41,9 @@ export const GuardianNotice: React.FC = () => {
     const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
     const facilityName = facility?.name ?? '当園'
     const now = new Date()
-    setGenerated(
-      `保護者の皆様へ\n\n平素より${facilityName}の教育活動にご理解・ご協力をいただき、誠にありがとうございます。\n\n今月は「${catNames.join('・')}」について、職員全員で安全確認を実施いたしました。\n\nお子様の安全のために、ご家庭でも以下の点についてお声がけいただけますと幸いです。\n\n・外遊びから戻ったら手洗い・うがいを習慣にする\n・体調が優れないときはすぐにご連絡ください\n\nご不明な点がございましたら、担任またはフロントまでお気軽にご相談ください。\n\n${now.getFullYear()}年${now.getMonth() + 1}月\n${facilityName}`
-    )
+    const content = `保護者の皆様へ\n\n平素より${facilityName}の教育活動にご理解・ご協力をいただき、誠にありがとうございます。\n\n今月は「${catNames.join('・')}」について、職員全員で安全確認を実施いたしました。\n\nお子様の安全のために、ご家庭でも以下の点についてお声がけいただけますと幸いです。\n\n・外遊びから戻ったら手洗い・うがいを習慣にする\n・体調が優れないときはすぐにご連絡ください\n\nご不明な点がございましたら、担任またはフロントまでお気軽にご相談ください。\n\n${now.getFullYear()}年${now.getMonth() + 1}月\n${facilityName}`
+    setGenerated(content)
+    setEditedContent(content)
     setIsGenerating(false)
     toast.success('保護者周知文を作成しました')
   }
@@ -195,7 +196,8 @@ export const GuardianNotice: React.FC = () => {
             <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
           </div>
           <textarea
-            defaultValue={generated}
+            value={editedContent}
+            onChange={(e) => setEditedContent(e.target.value)}
             className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[240px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
           />
           <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
