@@ -1,11 +1,62 @@
-import React, { useState } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users } from 'lucide-react'
+import React, { useState, useRef } from 'react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'
 
+// ==============================
+// バックアップ・復元ユーティリティ
+// ==============================
+const BACKUP_KEYS = [
+  'facility-store',
+  'checklist-store',
+  'checklist-items-store-v3',
+  'annual-plan-store-v3',
+  'seasonal-checklist-store',
+  'seasonal-items-store-v3',
+  'near-miss-store',
+  'report-store',
+]
+
+function exportBackup() {
+  const data: Record<string, string> = {}
+  BACKUP_KEYS.forEach((key) => {
+    const val = localStorage.getItem(key)
+    if (val) data[key] = val
+  })
+  const json = JSON.stringify(data, null, 2)
+  const blob = new Blob([json], { type: 'application/json' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  const now = new Date()
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`
+  a.href = url
+  a.download = `safety-plan-backup-${dateStr}.json`
+  a.click()
+  URL.revokeObjectURL(url)
+}
+
+function importBackup(file: File, onSuccess: () => void, onError: () => void) {
+  const reader = new FileReader()
+  reader.onload = (e) => {
+    try {
+      const data = JSON.parse(e.target?.result as string) as Record<string, string>
+      Object.entries(data).forEach(([key, value]) => {
+        localStorage.setItem(key, value)
+      })
+      onSuccess()
+    } catch {
+      onError()
+    }
+  }
+  reader.readAsText(file)
+}
+
 export const Settings: React.FC = () => {
   const { facility, setFacility } = useFacilityStore()
+  const fileInputRef = useRef<HTMLInputElement>(null)
+  const [restoreConfirm, setRestoreConfirm] = useState(false)
+  const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [form, setForm] = useState({
     name: facility?.name ?? '',
     director_name: facility?.director_name ?? '',
@@ -73,6 +124,79 @@ export const Settings: React.FC = () => {
             <Save size={16} />
             保存する
           </Button>
+        </Card>
+      </div>
+
+      {/* バックアップ・復元 */}
+      <div>
+        <SectionHeader
+          title="データのバックアップ・復元"
+          subtitle="万が一データが消えた場合に備えて、定期的にバックアップを保存してください"
+        />
+        <Card className="p-5 space-y-4">
+          {/* バックアップ */}
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">バックアップを保存する</p>
+            <p className="text-xs text-gray-500 mb-3">
+              チェック表・年間カレンダー・ヒヤリハットなど全データをJSONファイルとしてダウンロードします
+            </p>
+            <Button variant="primary" fullWidth onClick={() => { exportBackup(); toast.success('バックアップファイルを保存しました') }}>
+              <Download size={16} />
+              バックアップをダウンロード
+            </Button>
+          </div>
+
+          <hr className="border-gray-100" />
+
+          {/* 復元 */}
+          <div>
+            <p className="text-sm font-semibold text-gray-800 mb-1">バックアップから復元する</p>
+            <p className="text-xs text-gray-500 mb-3">
+              以前保存したJSONファイルを選択すると、データが復元されます。<br />
+              <span className="text-orange-600 font-medium">※ 現在のデータは上書きされます</span>
+            </p>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".json"
+              className="hidden"
+              onChange={(e) => {
+                const file = e.target.files?.[0]
+                if (file) { setPendingFile(file); setRestoreConfirm(true) }
+                e.target.value = ''
+              }}
+            />
+            {restoreConfirm && pendingFile ? (
+              <div className="bg-orange-50 border border-orange-200 rounded-xl p-4 space-y-3">
+                <div className="flex items-start gap-2">
+                  <AlertTriangle size={16} className="text-orange-500 shrink-0 mt-0.5" />
+                  <p className="text-sm text-orange-800">
+                    「{pendingFile.name}」から復元します。<br />現在のデータはすべて上書きされますがよろしいですか？
+                  </p>
+                </div>
+                <div className="flex gap-2">
+                  <Button variant="primary" size="sm" fullWidth onClick={() => {
+                    importBackup(
+                      pendingFile,
+                      () => { toast.success('復元しました。ページを再読み込みします'); setTimeout(() => location.reload(), 1000) },
+                      () => { toast.error('ファイルの読み込みに失敗しました') }
+                    )
+                    setRestoreConfirm(false); setPendingFile(null)
+                  }}>
+                    復元する
+                  </Button>
+                  <Button variant="secondary" size="sm" onClick={() => { setRestoreConfirm(false); setPendingFile(null) }}>
+                    キャンセル
+                  </Button>
+                </div>
+              </div>
+            ) : (
+              <Button variant="secondary" fullWidth onClick={() => fileInputRef.current?.click()}>
+                <Upload size={16} />
+                バックアップファイルを選択
+              </Button>
+            )}
+          </div>
         </Card>
       </div>
 
