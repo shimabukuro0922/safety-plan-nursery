@@ -170,40 +170,119 @@ const ChecklistCard: React.FC<{
   isDone: boolean
   doneAt: string | null
   doneBy: string | null
-  onDone: (id: string) => void
+  doneNotes: string | null
+  onDone: (id: string, notes: string) => void
   onUndone: (id: string) => void
-}> = ({ itemId, categoryName, title, description, isDone, doneAt, doneBy, onDone, onUndone }) => (
-  <Card className={`p-4 ${isDone ? 'opacity-70' : ''}`}>
-    <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
-      {categoryName}
-    </span>
-    <p className={`mt-2 text-sm font-medium break-anywhere leading-relaxed ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
-      {title}
-    </p>
-    {description && (
-      <p className="mt-1 text-xs text-gray-500 break-anywhere leading-relaxed">{description}</p>
-    )}
-    {isDone && doneAt && (
-      <p className="mt-2 text-xs text-green-600">
-        ✓ {format(new Date(doneAt), 'M月d日 HH:mm', { locale: ja })}
-        {doneBy ? ` · ${doneBy}` : ''}
+}> = ({ itemId, categoryName, title, description, isDone, doneAt, doneBy, doneNotes, onDone, onUndone }) => {
+  const [notes, setNotes] = useState('')
+  return (
+    <Card className={`p-4 ${isDone ? 'opacity-70' : ''}`}>
+      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+        {categoryName}
+      </span>
+      <p className={`mt-2 text-sm font-medium break-anywhere leading-relaxed ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
+        {title}
       </p>
-    )}
-    {!isDone ? (
-      <button
-        onClick={() => onDone(itemId)}
-        className="mt-3 w-full flex items-center justify-center gap-1.5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl min-h-[44px] active:bg-green-700 transition-colors"
-      >
-        <Check size={16} />
-        実施済みにする
-      </button>
-    ) : (
-      <button onClick={() => onUndone(itemId)} className="mt-2 text-xs text-gray-400 underline">
-        取り消す
-      </button>
-    )}
-  </Card>
-)
+      {description && (
+        <p className="mt-1 text-xs text-gray-500 break-anywhere leading-relaxed">{description}</p>
+      )}
+      {!isDone ? (
+        <>
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="実施内容・気づいた点を記録（任意）"
+            rows={2}
+            className="mt-3 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none leading-relaxed"
+          />
+          <button
+            onClick={() => onDone(itemId, notes)}
+            className="mt-2 w-full flex items-center justify-center gap-1.5 py-2.5 bg-green-600 text-white text-sm font-medium rounded-xl min-h-[44px] active:bg-green-700 transition-colors"
+          >
+            <Check size={16} />
+            実施済みにする
+          </button>
+        </>
+      ) : (
+        <>
+          {doneNotes && (
+            <p className="mt-2 text-xs text-gray-600 bg-gray-50 rounded-lg px-3 py-2 break-anywhere leading-relaxed">
+              📝 {doneNotes}
+            </p>
+          )}
+          <p className="mt-2 text-xs text-green-600">
+            ✓ {doneAt ? format(new Date(doneAt), 'M月d日 HH:mm', { locale: ja }) : ''}
+            {doneBy ? ` · ${doneBy}` : ''}
+          </p>
+          <button onClick={() => onUndone(itemId)} className="mt-1 text-xs text-gray-400 underline">
+            取り消す
+          </button>
+        </>
+      )}
+    </Card>
+  )
+}
+
+// ==============================
+// テーブル行（PC）
+// ==============================
+const TableRow: React.FC<{
+  item: ChecklistItemDef
+  done: { done_at: string; done_by: string; notes?: string } | undefined
+  onDone: (id: string, notes: string) => void
+  onUndone: (id: string) => void
+}> = ({ item, done, onDone, onUndone }) => {
+  const [notes, setNotes] = useState('')
+  return (
+    <tr className={done ? 'bg-gray-50' : 'hover:bg-blue-50/30'}>
+      <td className="px-4 py-3">
+        <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+          {item.categoryName}
+        </span>
+      </td>
+      <td className="px-4 py-3">
+        <p className={`text-sm break-anywhere ${done ? 'line-through text-gray-400' : 'text-gray-900'}`}>{item.title}</p>
+        {item.description && <p className="text-xs text-gray-400 mt-0.5 break-anywhere">{item.description}</p>}
+      </td>
+      <td className="px-4 py-3">
+        {!done ? (
+          <textarea
+            value={notes}
+            onChange={(e) => setNotes(e.target.value)}
+            placeholder="実施内容・気づきを記録（任意）"
+            rows={2}
+            className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-w-[160px]"
+          />
+        ) : (
+          <p className="text-xs text-gray-600 break-anywhere">
+            {done.notes ? `📝 ${done.notes}` : <span className="text-gray-300">—</span>}
+          </p>
+        )}
+      </td>
+      <td className="px-4 py-3">
+        <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${done ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
+          {done ? '実施済み' : '未実施'}
+        </span>
+      </td>
+      <td className="px-4 py-3 text-xs text-gray-500">
+        {done?.done_at ? format(new Date(done.done_at), 'M/d HH:mm', { locale: ja }) : '-'}
+        {done?.done_by && <p className="text-gray-400">{done.done_by}</p>}
+      </td>
+      <td className="px-4 py-3">
+        {!done ? (
+          <button
+            onClick={() => onDone(item.id, notes)}
+            className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors min-h-[32px] whitespace-nowrap"
+          >
+            実施済みにする
+          </button>
+        ) : (
+          <button onClick={() => onUndone(item.id)} className="text-xs text-gray-400 underline">取り消す</button>
+        )}
+      </td>
+    </tr>
+  )
+}
 
 // ==============================
 // メインページ
@@ -226,8 +305,8 @@ export const MonthlyChecklist: React.FC = () => {
     setMonth(m); setYear(y)
   }
 
-  const handleDone = (id: string) => {
-    markDone(id, facility?.director_name ?? '操作者')
+  const handleDone = (id: string, notes?: string) => {
+    markDone(id, facility?.director_name ?? '操作者', notes || undefined)
     toast.success('実施済みとして記録しました')
   }
 
@@ -315,6 +394,7 @@ export const MonthlyChecklist: React.FC = () => {
                         isDone={!!done}
                         doneAt={done?.done_at ?? null}
                         doneBy={done?.done_by ?? null}
+                        doneNotes={done?.notes ?? null}
                         onDone={handleDone}
                         onUndone={handleUndone}
                       />
@@ -333,6 +413,7 @@ export const MonthlyChecklist: React.FC = () => {
                   <tr>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-28">カテゴリ</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs">チェック項目</th>
+                    <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs">実施内容・記録</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-24">状態</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-32">実施日時</th>
                     <th className="px-4 py-3 text-left font-semibold text-gray-600 text-xs w-36">操作</th>
@@ -342,37 +423,13 @@ export const MonthlyChecklist: React.FC = () => {
                   {checklistItems.map((item) => {
                     const done = doneItems[item.id]
                     return (
-                      <tr key={item.id} className={done ? 'opacity-60' : ''}>
-                        <td className="px-4 py-3">
-                          <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
-                            {item.categoryName}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3">
-                          <p className={`text-sm break-anywhere ${done ? 'line-through text-gray-400' : 'text-gray-900'}`}>{item.title}</p>
-                          {item.description && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{item.description}</p>}
-                        </td>
-                        <td className="px-4 py-3">
-                          <span className={`text-xs px-2 py-0.5 rounded-full font-medium ${done ? 'bg-green-100 text-green-700' : 'bg-orange-100 text-orange-700'}`}>
-                            {done ? '実施済み' : '未実施'}
-                          </span>
-                        </td>
-                        <td className="px-4 py-3 text-xs text-gray-500">
-                          {done?.done_at ? format(new Date(done.done_at), 'M/d HH:mm', { locale: ja }) : '-'}
-                        </td>
-                        <td className="px-4 py-3">
-                          {!done ? (
-                            <button
-                              onClick={() => handleDone(item.id)}
-                              className="text-xs bg-green-600 text-white px-3 py-1.5 rounded-lg hover:bg-green-700 transition-colors min-h-[32px]"
-                            >
-                              実施済みにする
-                            </button>
-                          ) : (
-                            <button onClick={() => handleUndone(item.id)} className="text-xs text-gray-400 underline">取り消す</button>
-                          )}
-                        </td>
-                      </tr>
+                      <TableRow
+                        key={item.id}
+                        item={item}
+                        done={done}
+                        onDone={handleDone}
+                        onUndone={handleUndone}
+                      />
                     )
                   })}
                 </tbody>
