@@ -38,7 +38,7 @@ export const Dashboard: React.FC = () => {
   ).length
 
   const pillarDone: Record<string, boolean> = {
-    facility: doneCount >= Math.ceil(totalItems / 2),
+    facility: totalItems > 0 && doneCount >= Math.ceil(totalItems / 2),
     training: false,
     staff: false,
     nearmiss: nearMisses.length > 0 && nearMissPending === 0,
