@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ClipboardCheck, ChevronRight, CalendarDays,
   AlertCircle, Users, Bell, Building2, CheckCircle2, Circle,
+  Moon, GraduationCap, Siren,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useNearMissStore, useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
@@ -155,6 +156,34 @@ export const Dashboard: React.FC = () => {
           </p>
         </Card>
       )}
+
+      {/* 現場サポートツール */}
+      <div>
+        <SectionHeader title="現場サポートツール" />
+        <div className="grid grid-cols-3 gap-2">
+          <button
+            onClick={() => navigate('/emergency')}
+            className="flex flex-col items-center gap-2 p-4 bg-red-50 border border-red-200 rounded-2xl hover:bg-red-100 transition-colors"
+          >
+            <Siren size={24} className="text-red-500" />
+            <span className="text-xs font-semibold text-red-700 text-center leading-tight">緊急対応<br />カード</span>
+          </button>
+          <button
+            onClick={() => navigate('/nap')}
+            className="flex flex-col items-center gap-2 p-4 bg-blue-50 border border-blue-200 rounded-2xl hover:bg-blue-100 transition-colors"
+          >
+            <Moon size={24} className="text-blue-500" />
+            <span className="text-xs font-semibold text-blue-700 text-center leading-tight">午睡<br />見守り記録</span>
+          </button>
+          <button
+            onClick={() => navigate('/training')}
+            className="flex flex-col items-center gap-2 p-4 bg-purple-50 border border-purple-200 rounded-2xl hover:bg-purple-100 transition-colors"
+          >
+            <GraduationCap size={24} className="text-purple-500" />
+            <span className="text-xs font-semibold text-purple-700 text-center leading-tight">職員研修<br />資格管理</span>
+          </button>
+        </div>
+      </div>
 
       <div className="h-4" />
     </div>

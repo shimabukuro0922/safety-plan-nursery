@@ -19,6 +19,9 @@ const StaffMaterial = React.lazy(() => import('@/pages/materials/StaffMaterial')
 const GuardianNotice = React.lazy(() => import('@/pages/materials/GuardianNotice'))
 const Settings = React.lazy(() => import('@/pages/settings/Settings'))
 const NearMiss = React.lazy(() => import('@/pages/near-miss/NearMiss'))
+const EmergencyGuide = React.lazy(() => import('@/pages/emergency/EmergencyGuide'))
+const NapCheck = React.lazy(() => import('@/pages/nap/NapCheck'))
+const StaffTraining = React.lazy(() => import('@/pages/training/StaffTraining'))
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
@@ -48,6 +51,9 @@ function AppRoutes() {
         <Route path="/reports/new" element={<RequireSetup><ReportCreate /></RequireSetup>} />
         <Route path="/reports/:id" element={<RequireSetup><ReportEditPage /></RequireSetup>} />
         <Route path="/near-miss" element={<RequireSetup><NearMiss /></RequireSetup>} />
+        <Route path="/emergency" element={<RequireSetup><EmergencyGuide /></RequireSetup>} />
+        <Route path="/nap" element={<RequireSetup><NapCheck /></RequireSetup>} />
+        <Route path="/training" element={<RequireSetup><StaffTraining /></RequireSetup>} />
         <Route path="/settings" element={<RequireSetup><Settings /></RequireSetup>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

@@ -4,6 +4,7 @@ import {
   LayoutDashboard, ClipboardCheck, History,
   FileText, Settings, ChevronLeft,
   ShieldCheck, CalendarDays, AlertCircle, Users, Bell, HelpCircle,
+  Moon, GraduationCap, Siren,
 } from 'lucide-react'
 import { GuideModal } from '@/components/GuideModal'
 
@@ -49,6 +50,14 @@ const PC_NAV_ITEMS = [
     items: [
       { label: '実施記録・証跡', path: '/records',  icon: <History size={16} /> },
       { label: '報告書',         path: '/reports',  icon: <FileText size={16} /> },
+    ],
+  },
+  {
+    section: '現場サポート',
+    items: [
+      { label: '緊急対応カード',       path: '/emergency', icon: <Siren size={16} /> },
+      { label: '午睡見守り記録',       path: '/nap',       icon: <Moon size={16} /> },
+      { label: '職員研修・資格管理',   path: '/training',  icon: <GraduationCap size={16} /> },
     ],
   },
   {
@@ -191,6 +200,9 @@ function getPageTitle(pathname: string): string {
     '/records':             '実施記録・証跡',
     '/reports':             '報告書',
     '/reports/new':         '報告書を作成',
+    '/emergency':           '緊急対応カード',
+    '/nap':                 '午睡見守り記録',
+    '/training':            '職員研修・資格管理',
     '/settings':            '設定',
   }
   if (map[pathname]) return map[pathname]

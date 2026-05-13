@@ -470,3 +470,75 @@ export const useStaffMaterialTypeStore = create<StaffMaterialTypeState>()(
     { name: 'staff-material-type-store-v1' }
   )
 )
+
+// ==============================
+// 午睡見守り記録
+// ==============================
+export interface NapCheckRecord {
+  id: string
+  date: string
+  checked_at: string
+  checked_by: string
+}
+
+interface NapCheckState {
+  records: NapCheckRecord[]
+  addRecord: (data: Omit<NapCheckRecord, 'id'>) => void
+  clearToday: (date: string) => void
+}
+
+export const useNapCheckStore = create<NapCheckState>()(
+  persist(
+    (set) => ({
+      records: [],
+      addRecord: (data) => {
+        set((state) => ({
+          records: [...state.records, { ...data, id: `nap_${Date.now()}` }],
+        }))
+      },
+      clearToday: (date) => {
+        set((state) => ({
+          records: state.records.filter((r) => r.date !== date),
+        }))
+      },
+    }),
+    { name: 'nap-check-store-v1' }
+  )
+)
+
+// ==============================
+// 職員研修・資格管理
+// ==============================
+export interface TrainingRecord {
+  id: string
+  staff_name: string
+  training_type: string
+  completed_date: string
+  expiry_date: string | null
+  notes: string | null
+}
+
+interface StaffTrainingState {
+  records: TrainingRecord[]
+  addRecord: (data: Omit<TrainingRecord, 'id'>) => void
+  deleteRecord: (id: string) => void
+}
+
+export const useStaffTrainingStore = create<StaffTrainingState>()(
+  persist(
+    (set) => ({
+      records: [],
+      addRecord: (data) => {
+        set((state) => ({
+          records: [...state.records, { ...data, id: `tr_${Date.now()}` }],
+        }))
+      },
+      deleteRecord: (id) => {
+        set((state) => ({
+          records: state.records.filter((r) => r.id !== id),
+        }))
+      },
+    }),
+    { name: 'staff-training-store-v1' }
+  )
+)
