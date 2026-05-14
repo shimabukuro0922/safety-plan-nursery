@@ -204,6 +204,15 @@ export const StaffMaterial: React.FC = () => {
 
   const selectedType = types.find((t) => t.key === selected) ?? types[0]
 
+  // 現在選択中の種別が削除されたとき、最初の種別にリセット
+  React.useEffect(() => {
+    if (types.length > 0 && !types.find((t) => t.key === selected)) {
+      setSelected(types[0].key)
+      setGenerated(null)
+      setEditedContent('')
+    }
+  }, [types, selected])
+
   const doGenerate = async (): Promise<boolean> => {
     setIsGenerating(true)
     try {

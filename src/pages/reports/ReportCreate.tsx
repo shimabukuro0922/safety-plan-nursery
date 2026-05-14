@@ -163,7 +163,7 @@ export const ReportCreate: React.FC = () => {
           </div>
 
           <div className="flex gap-2">
-            <Button variant="secondary" fullWidth onClick={() => setStep(2)}>戻る</Button>
+            <Button variant="secondary" fullWidth disabled={isGenerating} onClick={() => setStep(2)}>戻る</Button>
             <Button
               variant="primary"
               fullWidth

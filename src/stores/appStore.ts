@@ -294,7 +294,7 @@ interface ChecklistItemsState {
 export const useChecklistItemsStore = create<ChecklistItemsState>()(
   persist(
     (set) => ({
-      items: [],
+      items: DEFAULT_CHECKLIST_ITEMS,  // 新規ユーザーはデフォルト項目から開始
       addItem: (item) => {
         const id = `ci_${Date.now()}`
         set((state) => ({ items: [...state.items, { ...item, id }] }))
@@ -319,7 +319,15 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
         if (supabaseId) syncPushChecklistItems(DEFAULT_CHECKLIST_ITEMS, supabaseId).catch(console.error)
       },
     }),
-    { name: 'checklist-items-store-v3' }
+    {
+      name: 'checklist-items-store-v3',
+      // 既存ユーザーで items が空配列の場合はデフォルト項目を自動補完
+      onRehydrateStorage: () => (state) => {
+        if (state && state.items.length === 0) {
+          state.items = DEFAULT_CHECKLIST_ITEMS
+        }
+      },
+    }
   )
 )
 
@@ -409,7 +417,7 @@ interface SeasonalItemsState {
 export const useSeasonalItemsStore = create<SeasonalItemsState>()(
   persist(
     (set) => ({
-      items: [],
+      items: DEFAULT_SEASONAL_ITEMS,
       addItem: (seasonKey, label) => {
         const key = `${seasonKey}_custom_${Date.now()}`
         set((state) => ({ items: [...state.items, { key, seasonKey, label }] }))
@@ -424,7 +432,15 @@ export const useSeasonalItemsStore = create<SeasonalItemsState>()(
       },
       resetToDefault: () => set({ items: DEFAULT_SEASONAL_ITEMS }),
     }),
-    { name: 'seasonal-items-store-v3' }
+    {
+      name: 'seasonal-items-store-v3',
+      // 既存ユーザーで items が空配列の場合はデフォルト項目を自動補完
+      onRehydrateStorage: () => (state) => {
+        if (state && state.items.length === 0) {
+          state.items = DEFAULT_SEASONAL_ITEMS
+        }
+      },
+    }
   )
 )
 

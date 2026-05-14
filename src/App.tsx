@@ -1,4 +1,44 @@
 import React, { Suspense } from 'react'
+
+// ==============================
+// エラーバウンダリ
+// ==============================
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  { hasError: boolean }
+> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props)
+    this.state = { hasError: false }
+  }
+  static getDerivedStateFromError() {
+    return { hasError: true }
+  }
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error('[ErrorBoundary]', error, info)
+  }
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen flex flex-col items-center justify-center px-6 text-center bg-white">
+          <p className="text-5xl mb-4">⚠️</p>
+          <p className="text-lg font-bold text-gray-800 mb-2">エラーが発生しました</p>
+          <p className="text-sm text-gray-500 mb-6 leading-relaxed">
+            ページを再読み込みして再試行してください。<br />
+            問題が続く場合はブラウザのキャッシュをクリアしてください。
+          </p>
+          <button
+            onClick={() => location.reload()}
+            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+          >
+            再読み込み
+          </button>
+        </div>
+      )
+    }
+    return this.props.children
+  }
+}
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
@@ -72,15 +112,18 @@ function AppRoutes() {
 
 function App() {
   return (
-    <QueryClientProvider client={queryClient}>
-      <BrowserRouter>
-        <SyncProvider>
-          <AppLayout>
-            <AppRoutes />
-          </AppLayout>
-        </SyncProvider>
-      </BrowserRouter>
-
+    <ErrorBoundary>
+      <QueryClientProvider client={queryClient}>
+        <BrowserRouter>
+          <SyncProvider>
+            <AppLayout>
+              <ErrorBoundary>
+                <AppRoutes />
+              </ErrorBoundary>
+            </AppLayout>
+          </SyncProvider>
+        </BrowserRouter>
+      </QueryClientProvider>
       <Toaster
         position="top-center"
         toastOptions={{
@@ -88,7 +131,7 @@ function App() {
           style: { borderRadius: '12px', fontSize: '14px', maxWidth: '360px' },
         }}
       />
-    </QueryClientProvider>
+    </ErrorBoundary>
   )
 }
 

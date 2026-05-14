@@ -88,9 +88,13 @@ export const Settings: React.FC = () => {
 
   const handleSave = () => {
     if (!facility) return
+    if (!form.name.trim()) {
+      toast.error('施設名を入力してください')
+      return
+    }
     setFacility({
       ...facility,
-      name: form.name,
+      name: form.name.trim(),
       director_name: form.director_name || null,
       address: form.address || null,
       phone: form.phone || null,

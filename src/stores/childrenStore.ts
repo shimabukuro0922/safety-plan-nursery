@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { pushChild as syncPushChild, deleteChildRemote } from '@/lib/sync'
+import { usePhotoStore } from '@/stores/photoStore'
 
 function getSupabaseId(): string | null {
   return useFacilityStore.getState().facility?.supabaseId ?? null
@@ -66,6 +67,16 @@ export const useChildrenStore = create<ChildrenState>()(
         const supabaseId = getSupabaseId()
         set((state) => ({ children: state.children.filter((c) => c.id !== id) }))
         if (supabaseId) deleteChildRemote(id, supabaseId).catch(console.error)
+        // Cascade: remove deleted child from all photo tags and recompute hasNGChild
+        const { photos, updatePhoto } = usePhotoStore.getState()
+        const remainingChildren = useChildrenStore.getState().children
+        photos.forEach((photo) => {
+          if (photo.taggedChildIds.includes(id)) {
+            const newTaggedIds = photo.taggedChildIds.filter((cid) => cid !== id)
+            const newHasNG = remainingChildren.some((c) => c.isPhotoNG && newTaggedIds.includes(c.id))
+            updatePhoto(photo.id, { taggedChildIds: newTaggedIds, hasNGChild: newHasNG })
+          }
+        })
       },
       setPhotoNG: (id, isNG, reason) => {
         set((state) => ({

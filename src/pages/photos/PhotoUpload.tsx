@@ -27,7 +27,8 @@ const PhotoPreviewCard: React.FC<{
   childList: Child[]
   onTagChildren: (ids: string[]) => void
   onRemove: () => void
-}> = ({ item, index, childList, onTagChildren, onRemove }) => {
+  disabled?: boolean
+}> = ({ item, index, childList, onTagChildren, onRemove, disabled }) => {
   const [expanded, setExpanded] = useState(false)
 
   const handleToggleChild = (childId: string) => {
@@ -62,7 +63,8 @@ const PhotoPreviewCard: React.FC<{
         {/* 削除ボタン */}
         <button
           onClick={onRemove}
-          className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80"
+          disabled={disabled}
+          className="absolute top-1 right-1 w-6 h-6 bg-black/60 text-white rounded-full flex items-center justify-center hover:bg-black/80 disabled:opacity-40 disabled:cursor-not-allowed"
         >
           <X size={12} />
         </button>
@@ -317,12 +319,12 @@ export const PhotoUpload: React.FC = () => {
       <div>
         <p className="text-sm font-bold text-gray-800 mb-2">② 写真を選択</p>
         <div
-          onDragOver={(e) => { e.preventDefault(); setDragging(true) }}
+          onDragOver={(e) => { if (!uploading) { e.preventDefault(); setDragging(true) } }}
           onDragLeave={() => setDragging(false)}
-          onDrop={handleDrop}
-          onClick={() => inputRef.current?.click()}
-          className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 py-10 cursor-pointer transition-colors
-            ${dragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 hover:bg-blue-50'}`}
+          onDrop={uploading ? undefined : handleDrop}
+          onClick={() => { if (!uploading) inputRef.current?.click() }}
+          className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 py-10 transition-colors
+            ${uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' : 'cursor-pointer ' + (dragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 hover:bg-blue-50')}`}
         >
           <Upload size={32} className="text-blue-400" />
           <p className="text-sm font-medium text-blue-600">タップまたはドラッグ＆ドロップで写真を追加</p>
@@ -360,8 +362,9 @@ export const PhotoUpload: React.FC = () => {
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-bold text-gray-800">③ 確認（{previews.length}枚）</p>
             <button
-              onClick={() => { previews.forEach((p) => URL.revokeObjectURL(p.objectUrl)); setPreviews([]) }}
-              className="text-xs text-gray-400 hover:text-red-500"
+              disabled={uploading}
+              onClick={() => { if (!uploading) { previews.forEach((p) => URL.revokeObjectURL(p.objectUrl)); setPreviews([]) } }}
+              className="text-xs text-gray-400 hover:text-red-500 disabled:opacity-40 disabled:cursor-not-allowed"
             >
               全て削除
             </button>
@@ -375,12 +378,14 @@ export const PhotoUpload: React.FC = () => {
                 childList={children}
                 onTagChildren={(ids) => handleTagChildren(i, ids)}
                 onRemove={() => handleRemove(i)}
+                disabled={uploading}
               />
             ))}
             {/* 追加ボタン */}
             <button
-              onClick={() => inputRef.current?.click()}
-              className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors"
+              disabled={uploading}
+              onClick={() => { if (!uploading) inputRef.current?.click() }}
+              className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus size={20} />
               <span className="text-xs">追加</span>

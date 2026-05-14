@@ -11,6 +11,7 @@ export const NapCheck: React.FC = () => {
   const { facility } = useFacilityStore()
   const { records, addRecord, clearToday } = useNapCheckStore()
   const [checkerName, setCheckerName] = useState(facility?.director_name ?? '')
+  const [submitting, setSubmitting] = useState(false)
 
   // 設定画面で施設長名が変更されたとき確認者名に反映する
   useEffect(() => {
@@ -36,9 +37,12 @@ export const NapCheck: React.FC = () => {
     : null
 
   const handleCheck = () => {
+    if (submitting) return
+    setSubmitting(true)
     const name = checkerName.trim() || '未記入'
     addRecord({ date: todayKey, checked_at: new Date().toISOString(), checked_by: name })
     toast.success(`${format(new Date(), 'HH:mm')} 確認を記録しました`)
+    setTimeout(() => setSubmitting(false), 1500)
   }
 
   const handleClear = () => {
@@ -100,7 +104,8 @@ export const NapCheck: React.FC = () => {
       {/* 確認ボタン */}
       <button
         onClick={handleCheck}
-        className="w-full flex flex-col items-center justify-center gap-1 py-8 bg-blue-600 text-white rounded-2xl shadow-md active:bg-blue-700 transition-colors min-h-[120px]"
+        disabled={submitting}
+        className="w-full flex flex-col items-center justify-center gap-1 py-8 bg-blue-600 text-white rounded-2xl shadow-md active:bg-blue-700 transition-colors min-h-[120px] disabled:opacity-70 disabled:cursor-not-allowed"
       >
         <Moon size={32} />
         <span className="text-lg font-bold mt-1">午睡確認しました</span>

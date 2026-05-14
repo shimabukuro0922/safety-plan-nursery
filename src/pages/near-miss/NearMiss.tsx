@@ -267,7 +267,9 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
 // メインページ
 export const NearMiss: React.FC = () => {
   const { nearMisses } = useNearMissStore()
-  const [selected, setSelected] = useState<NearMissRecord | null>(null)
+  // IDのみ保持し、モーダルに渡す nm は常にストアの最新データから導出
+  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const selected = selectedId ? (nearMisses.find((nm) => nm.id === selectedId) ?? null) : null
   const [showNew, setShowNew] = useState(false)
 
   const stepOrder: Record<NearMissStep, number> = {
@@ -312,7 +314,7 @@ export const NearMiss: React.FC = () => {
             {inProgress.map((nm) => {
               const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step]
               return (
-                <Card key={nm.id} className="p-4" onClick={() => setSelected(nm)}>
+                <Card key={nm.id} className="p-4" onClick={() => setSelectedId(nm.id)}>
                   <div className="flex items-start gap-2 justify-between mb-2">
                     <p className="text-sm font-medium text-gray-900 flex-1 break-anywhere line-clamp-2">{nm.what_happened}</p>
                     <span className={`shrink-0 text-xs px-2 py-0.5 rounded-full font-medium ${stepCfg.color}`}>{stepCfg.label}</span>
@@ -338,7 +340,7 @@ export const NearMiss: React.FC = () => {
           <p className="text-sm font-semibold text-gray-500 mb-2">改善完了 {completed.length}件</p>
           <div className="space-y-2">
             {completed.map((nm) => (
-              <Card key={nm.id} className="p-4 opacity-70" onClick={() => setSelected(nm)}>
+              <Card key={nm.id} className="p-4 opacity-70" onClick={() => setSelectedId(nm.id)}>
                 <div className="flex items-start gap-2">
                   <CheckCircle2 size={16} className="text-green-500 mt-0.5 shrink-0" />
                   <p className="text-sm text-gray-700 flex-1 break-anywhere line-clamp-2">{nm.what_happened}</p>
@@ -363,8 +365,8 @@ export const NearMiss: React.FC = () => {
         </div>
       )}
 
-      <Modal open={!!selected} onClose={() => setSelected(null)} title="ヒヤリハット詳細">
-        {selected && <NearMissDetail nm={selected} onClose={() => setSelected(null)} />}
+      <Modal open={!!selected} onClose={() => setSelectedId(null)} title="ヒヤリハット詳細">
+        {selected && <NearMissDetail nm={selected} onClose={() => setSelectedId(null)} />}
       </Modal>
 
       <Modal open={showNew} onClose={() => setShowNew(false)} title="ヒヤリハットを記録する">
