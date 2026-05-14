@@ -1,9 +1,10 @@
 import React, { useState, useRef } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw } from 'lucide-react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { createFacilityInSupabase } from '@/lib/sync'
+import { createFacilityInSupabase, updateFacilityPIN } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
+import { hashPIN, verifyPIN, markPINVerified, clearPINVerified } from '@/lib/pinAuth'
 import toast from 'react-hot-toast'
 
 // ==============================
@@ -70,6 +71,45 @@ function importBackup(
   reader.readAsText(file)
 }
 
+// ==============================
+// PINフィールド（Settings内で再利用）
+// ==============================
+const PINField: React.FC<{
+  label: string
+  value: string
+  onChange: (v: string) => void
+  show: boolean
+  onToggleShow: () => void
+  error: string | null
+  autoFocus?: boolean
+}> = ({ label, value, onChange, show, onToggleShow, error, autoFocus }) => (
+  <div>
+    <label className="text-xs font-medium text-gray-600 block mb-1">{label}</label>
+    <div className="relative">
+      <input
+        type={show ? 'text' : 'password'}
+        inputMode="numeric"
+        value={value}
+        onChange={(e) => onChange(e.target.value.replace(/\D/g, '').slice(0, 8))}
+        maxLength={8}
+        autoFocus={autoFocus}
+        className={`w-full border rounded-xl px-3 py-2.5 text-sm text-center tracking-widest font-mono pr-10
+          focus:outline-none focus:ring-2 focus:ring-blue-400
+          ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
+      />
+      <button
+        type="button"
+        tabIndex={-1}
+        onClick={onToggleShow}
+        className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
+      >
+        {show ? <EyeOff size={15} /> : <Eye size={15} />}
+      </button>
+    </div>
+    {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+  </div>
+)
+
 export const Settings: React.FC = () => {
   const { facility, setFacility } = useFacilityStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
@@ -85,6 +125,100 @@ export const Settings: React.FC = () => {
     capacity: String(facility?.capacity ?? ''),
     staff_count: String(facility?.staff_count ?? ''),
   })
+
+  // ==============================
+  // PIN管理
+  // ==============================
+  // pinAction: null=表示のみ, 'set'=新規設定, 'change-verify'=変更前の現PIN確認,
+  //            'change-new'=新PINの入力, 'remove-verify'=削除前の現PIN確認
+  type PINAction = null | 'set' | 'change-verify' | 'change-new' | 'remove-verify'
+  const [pinAction, setPinAction] = useState<PINAction>(null)
+  const [pinVal, setPinVal]         = useState('')
+  const [pinConfirmVal, setPinConfirmVal] = useState('')
+  const [pinError, setPinError]     = useState<string | null>(null)
+  const [pinWorking, setPinWorking] = useState(false)
+  const [showPin, setShowPin]       = useState(false)
+
+  const facilityKey = facility ? (facility.supabaseId ?? facility.id) : ''
+
+  const resetPINForm = () => {
+    setPinVal('')
+    setPinConfirmVal('')
+    setPinError(null)
+    setShowPin(false)
+    setPinAction(null)
+  }
+
+  /** PIN設定・変更・削除後にローカルストアとSupabaseを更新する共通関数 */
+  const applyPINChange = async (newHash: string | null, successMsg: string) => {
+    if (!facility) return
+    setPinWorking(true)
+    try {
+      // ローカルストア更新
+      setFacility({ ...facility, pinHash: newHash })
+      // Supabase同期（失敗してもローカルには保存済み）
+      if (facility.supabaseId) {
+        await updateFacilityPIN(facility.supabaseId, newHash)
+      }
+      // セッション認証フラグの更新
+      if (newHash) {
+        markPINVerified(facilityKey)  // 設定直後は認証済みとみなす
+      } else {
+        clearPINVerified(facilityKey)
+      }
+      toast.success(successMsg)
+      resetPINForm()
+    } finally {
+      setPinWorking(false)
+    }
+  }
+
+  /** PINを新規設定する */
+  const handleSetPIN = async () => {
+    if (pinVal.length < 4) { setPinError('PINは4桁以上で入力してください'); return }
+    if (pinVal !== pinConfirmVal) { setPinError('確認用PINが一致しません'); return }
+    const hash = await hashPIN(pinVal)
+    await applyPINChange(hash, 'PINコードを設定しました')
+  }
+
+  /** 変更前に現PINを確認する */
+  const handleVerifyCurrentForChange = async () => {
+    if (!facility?.pinHash) return
+    if (pinVal.length < 4) { setPinError('PINを入力してください'); return }
+    setPinWorking(true)
+    setPinError(null)
+    try {
+      const ok = await verifyPIN(pinVal, facility.pinHash)
+      if (!ok) { setPinError('PINが違います'); return }
+      setPinVal('')
+      setPinAction('change-new')
+    } finally {
+      setPinWorking(false)
+    }
+  }
+
+  /** 新PINに変更する */
+  const handleChangePIN = async () => {
+    if (pinVal.length < 4) { setPinError('PINは4桁以上で入力してください'); return }
+    if (pinVal !== pinConfirmVal) { setPinError('確認用PINが一致しません'); return }
+    const hash = await hashPIN(pinVal)
+    await applyPINChange(hash, 'PINコードを変更しました')
+  }
+
+  /** 削除前に現PINを確認する */
+  const handleVerifyCurrentForRemove = async () => {
+    if (!facility?.pinHash) return
+    if (pinVal.length < 4) { setPinError('PINを入力してください'); return }
+    setPinWorking(true)
+    setPinError(null)
+    try {
+      const ok = await verifyPIN(pinVal, facility.pinHash)
+      if (!ok) { setPinError('PINが違います'); return }
+      await applyPINChange(null, 'PINコードを削除しました')
+    } finally {
+      setPinWorking(false)
+    }
+  }
 
   const handleSave = () => {
     if (!facility) return
@@ -252,6 +386,97 @@ export const Settings: React.FC = () => {
               </p>
             </div>
           )}
+        </Card>
+      </div>
+
+      {/* PINコード認証 */}
+      <div>
+        <SectionHeader
+          title="PINコード認証"
+          subtitle="アプリ起動時にPINの入力を求めることで、第三者によるアクセスを防止します"
+        />
+        <Card className="p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Lock size={16} className="text-blue-500" />
+            <p className="text-sm font-semibold text-gray-800">PINコード</p>
+            <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${
+              facility?.pinHash ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
+            }`}>
+              {facility?.pinHash ? '設定済み' : '未設定'}
+            </span>
+          </div>
+
+          {/* フォームなし（表示のみ） */}
+          {pinAction === null && (
+            <>
+              {facility?.pinHash ? (
+                <div className="flex gap-2">
+                  <Button variant="secondary" size="sm" fullWidth onClick={() => { setPinAction('change-verify'); setPinVal(''); setPinError(null) }}>
+                    変更する
+                  </Button>
+                  <Button variant="danger" size="sm" fullWidth onClick={() => { setPinAction('remove-verify'); setPinVal(''); setPinError(null) }}>
+                    削除する
+                  </Button>
+                </div>
+              ) : (
+                <Button variant="secondary" fullWidth onClick={() => { setPinAction('set'); setPinVal(''); setPinConfirmVal(''); setPinError(null) }}>
+                  <Lock size={15} />
+                  PINを設定する
+                </Button>
+              )}
+            </>
+          )}
+
+          {/* PIN新規設定フォーム */}
+          {pinAction === 'set' && (
+            <div className="space-y-3">
+              <PINField label="新しいPIN（4〜8桁）" value={pinVal} onChange={setPinVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={null} />
+              <PINField label="PINの確認" value={pinConfirmVal} onChange={setPinConfirmVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={pinError} />
+              <div className="flex gap-2">
+                <Button variant="primary" size="sm" fullWidth loading={pinWorking} onClick={handleSetPIN}>設定する</Button>
+                <Button variant="secondary" size="sm" onClick={resetPINForm}><X size={14} /></Button>
+              </div>
+            </div>
+          )}
+
+          {/* 変更：現PIN確認フォーム */}
+          {pinAction === 'change-verify' && (
+            <div className="space-y-3">
+              <PINField label="現在のPIN" value={pinVal} onChange={setPinVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={pinError} autoFocus />
+              <div className="flex gap-2">
+                <Button variant="primary" size="sm" fullWidth loading={pinWorking} onClick={handleVerifyCurrentForChange}>確認する</Button>
+                <Button variant="secondary" size="sm" onClick={resetPINForm}><X size={14} /></Button>
+              </div>
+            </div>
+          )}
+
+          {/* 変更：新PIN入力フォーム */}
+          {pinAction === 'change-new' && (
+            <div className="space-y-3">
+              <PINField label="新しいPIN（4〜8桁）" value={pinVal} onChange={setPinVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={null} autoFocus />
+              <PINField label="PINの確認" value={pinConfirmVal} onChange={setPinConfirmVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={pinError} />
+              <div className="flex gap-2">
+                <Button variant="primary" size="sm" fullWidth loading={pinWorking} onClick={handleChangePIN}>変更する</Button>
+                <Button variant="secondary" size="sm" onClick={resetPINForm}><X size={14} /></Button>
+              </div>
+            </div>
+          )}
+
+          {/* 削除：現PIN確認フォーム */}
+          {pinAction === 'remove-verify' && (
+            <div className="space-y-3">
+              <p className="text-xs text-orange-700 bg-orange-50 rounded-lg px-3 py-2">削除するには現在のPINを入力してください</p>
+              <PINField label="現在のPIN" value={pinVal} onChange={setPinVal} show={showPin} onToggleShow={() => setShowPin(v => !v)} error={pinError} autoFocus />
+              <div className="flex gap-2">
+                <Button variant="danger" size="sm" fullWidth loading={pinWorking} onClick={handleVerifyCurrentForRemove}>削除する</Button>
+                <Button variant="secondary" size="sm" onClick={resetPINForm}><X size={14} /></Button>
+              </div>
+            </div>
+          )}
+
+          <p className="text-xs text-gray-400">
+            ※ PINはこの端末のみに保存され、タブを閉じると再度入力が必要です
+          </p>
         </Card>
       </div>
 

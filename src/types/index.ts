@@ -31,6 +31,8 @@ export interface Facility {
   supabaseId?: string | null
   /** 6文字の施設参加コード。スタッフが別端末で参加する際に使用 */
   code?: string | null
+  /** SHA-256 でハッシュされた PIN。設定されている場合、起動時に PIN 認証が必要 */
+  pinHash?: string | null
 }
 
 // ==============================

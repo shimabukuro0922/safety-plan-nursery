@@ -58,14 +58,15 @@ function generateCode(): string {
 export async function createFacilityInSupabase(
   name: string,
   directorName: string | null,
-  phone: string | null
+  phone: string | null,
+  pinHash?: string | null
 ): Promise<{ id: string; code: string } | null> {
   if (!isSupabaseConfigured) return null
   const code = generateCode()
   try {
     const { data, error } = await supabase
       .from('facilities')
-      .insert({ code, name, director_name: directorName, phone })
+      .insert({ code, name, director_name: directorName, phone, pin_hash: pinHash ?? null })
       .select('id, code')
       .single()
     if (error) throw error
@@ -82,18 +83,38 @@ export async function getFacilityByCode(code: string): Promise<{
   name: string
   director_name: string | null
   phone: string | null
+  pin_hash: string | null
 } | null> {
   if (!isSupabaseConfigured) return null
   try {
     const { data, error } = await supabase
       .from('facilities')
-      .select('id, code, name, director_name, phone')
+      .select('id, code, name, director_name, phone, pin_hash')
       .eq('code', code.toUpperCase().trim())
       .single()
     if (error) throw error
-    return data as { id: string; code: string; name: string; director_name: string | null; phone: string | null }
+    return data as { id: string; code: string; name: string; director_name: string | null; phone: string | null; pin_hash: string | null }
   } catch {
     return null
+  }
+}
+
+/** Supabase の施設レコードの pin_hash を更新（または削除）する */
+export async function updateFacilityPIN(
+  supabaseId: string,
+  pinHash: string | null
+): Promise<boolean> {
+  if (!isSupabaseConfigured) return false
+  try {
+    const { error } = await supabase
+      .from('facilities')
+      .update({ pin_hash: pinHash })
+      .eq('id', supabaseId)
+    if (error) throw error
+    return true
+  } catch (err) {
+    console.error('[sync] updateFacilityPIN:', err)
+    return false
   }
 }
 

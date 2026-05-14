@@ -44,6 +44,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import AppLayout from '@/components/layout/AppLayout'
 import { SyncProvider } from '@/components/SyncProvider'
+import { PINGate } from '@/components/PINGate'
 import { LoadingSpinner } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 
@@ -116,11 +117,13 @@ function App() {
       <QueryClientProvider client={queryClient}>
         <BrowserRouter>
           <SyncProvider>
-            <AppLayout>
-              <ErrorBoundary>
-                <AppRoutes />
-              </ErrorBoundary>
-            </AppLayout>
+            <PINGate>
+              <AppLayout>
+                <ErrorBoundary>
+                  <AppRoutes />
+                </ErrorBoundary>
+              </AppLayout>
+            </PINGate>
           </SyncProvider>
         </BrowserRouter>
       </QueryClientProvider>
