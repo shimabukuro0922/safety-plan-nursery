@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useSearchParams } from 'react-router-dom'
 import {
   Camera, CheckCircle2, XCircle, Clock, ShieldAlert, X,
@@ -37,8 +37,15 @@ const PhotoDetailModal: React.FC<{
   const [tagOpen, setTagOpen] = useState(false)
   const [rejectReason, setRejectReason] = useState('')
   const [showRejectInput, setShowRejectInput] = useState(false)
+  // object URL のメモリリーク防止: ref でクリーンアップ時に確実に revoke する
+  const urlRef = useRef<string | null>(null)
 
   useEffect(() => {
+    // 前の写真の URL を解放
+    if (urlRef.current) {
+      URL.revokeObjectURL(urlRef.current)
+      urlRef.current = null
+    }
     setFullUrl(null)
     setTagOpen(false)
     setShowRejectInput(false)
@@ -46,11 +53,17 @@ const PhotoDetailModal: React.FC<{
 
     setLoadingFull(true)
     loadPhotoURL(photo.id).then((url) => {
+      urlRef.current = url
       setFullUrl(url)
       setLoadingFull(false)
     }).catch(() => setLoadingFull(false))
 
-    return () => { if (fullUrl) URL.revokeObjectURL(fullUrl) }
+    return () => {
+      if (urlRef.current) {
+        URL.revokeObjectURL(urlRef.current)
+        urlRef.current = null
+      }
+    }
   }, [photo?.id])
 
   if (!photo) return null

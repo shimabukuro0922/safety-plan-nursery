@@ -23,13 +23,13 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 const MORE_ITEMS = [
-  { label: '写真管理',           path: '/photos',    icon: <Camera size={20} className="text-blue-500" /> },
   { label: '園児管理',           path: '/children',  icon: <Users size={20} className="text-indigo-500" /> },
+  { label: 'ヒヤリハット',       path: '/near-miss', icon: <AlertCircle size={20} className="text-orange-500" /> },
   { label: '緊急対応カード',     path: '/emergency', icon: <Siren size={20} className="text-red-500" /> },
   { label: '職員研修・資格管理', path: '/training',  icon: <GraduationCap size={20} className="text-purple-500" /> },
   { label: '実施記録・証跡',     path: '/records',   icon: <History size={20} className="text-blue-500" /> },
   { label: '報告書',             path: '/reports',   icon: <FileText size={20} className="text-gray-500" /> },
-  { label: '年間安全カレンダー', path: '/plans',     icon: <CalendarDays size={20} className="text-green-500" /> },
+  { label: '年間カレンダー',     path: '/plans',     icon: <CalendarDays size={20} className="text-green-500" /> },
   { label: '季節前チェック',     path: '/checklists/seasonal', icon: <ClipboardCheck size={20} className="text-teal-500" /> },
   { label: '職員共有シート',     path: '/materials/staff',    icon: <Users size={20} className="text-orange-500" /> },
   { label: '保護者周知文',       path: '/materials/guardian', icon: <Bell size={20} className="text-pink-500" /> },

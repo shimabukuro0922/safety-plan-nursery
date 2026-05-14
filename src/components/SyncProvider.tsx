@@ -31,13 +31,14 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
   useEffect(() => {
     if (!facilityId) return
 
-    const today = new Date().toISOString().split('T')[0]
-
     const syncAll = async (force = false) => {
       const now = Date.now()
       // Debounce: don't sync more than once every 30s (unless forced on mount)
       if (!force && now - lastSyncRef.current < 30_000) return
       lastSyncRef.current = now
+
+      // today を毎回動的に計算（日付をまたいでも正しい日付を使用）
+      const today = new Date().toISOString().split('T')[0]
 
       try {
         const [nearMisses, napChecks, trainingRecords, checklistDone, checklistItems, children] =
@@ -77,6 +78,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
     syncAll(true)
 
     // Real-time subscription: nap checks appear on other devices immediately
+    // today は購読時点の日付（アプリを開いている間は固定でOK）
+    const today = new Date().toISOString().split('T')[0]
     const unsubRealtime = subscribeToNapChecks(facilityId, today, (record) => {
       useNapCheckStore.setState((s) => {
         if (s.records.some((r) => r.id === record.id)) return s
