@@ -3,15 +3,155 @@ import { useNavigate } from 'react-router-dom'
 import {
   ClipboardCheck, ChevronRight, CalendarDays,
   AlertCircle, Users, Bell, Building2, CheckCircle2, Circle,
-  Moon, GraduationCap, Siren,
+  Moon, GraduationCap, Siren, Camera, X, Sparkles,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
-import { useNearMissStore, useChecklistStore, useChecklistItemsStore, useNapCheckStore } from '@/stores/appStore'
+import {
+  useNearMissStore, useChecklistStore, useChecklistItemsStore,
+  useNapCheckStore, useStaffTrainingStore, useOnboardingStore,
+} from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { useChildrenStore } from '@/stores/childrenStore'
 import { NEAR_MISS_STEP_CONFIG } from '@/types'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 
+// ==============================
+// はじめにやることガイドカード
+// ==============================
+const ONBOARDING_STEPS = [
+  {
+    id: 'facility',
+    label: '施設情報を登録する',
+    desc: '施設名・園長名を登録します',
+    path: '/settings',
+    alwaysDone: true,
+  },
+  {
+    id: 'checklist',
+    label: '月次チェック項目を設定する',
+    desc: '毎月確認するチェックリストを作りましょう',
+    path: '/checklists/monthly',
+  },
+  {
+    id: 'children',
+    label: '園児情報を登録する',
+    desc: '写真NG設定など写真管理に必要です',
+    path: '/children',
+  },
+  {
+    id: 'emergency',
+    label: '緊急対応カードを確認する',
+    desc: '職員全員に周知しておきましょう',
+    path: '/emergency',
+  },
+]
+
+const GettingStartedCard: React.FC<{
+  checklistItemsDone: boolean
+  childrenDone: boolean
+  emergencyDone: boolean
+  onDismiss: () => void
+}> = ({ checklistItemsDone, childrenDone, emergencyDone, onDismiss }) => {
+  const navigate = useNavigate()
+
+  const stepStates = [true, checklistItemsDone, childrenDone, emergencyDone]
+  const doneCount = stepStates.filter(Boolean).length
+  const allDone = doneCount === ONBOARDING_STEPS.length
+
+  return (
+    <div className="rounded-2xl overflow-hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
+      {/* ヘッダー */}
+      <div className="px-4 pt-4 pb-3 flex items-start justify-between gap-2">
+        <div className="flex items-center gap-2">
+          <div className="w-8 h-8 bg-blue-600 rounded-xl flex items-center justify-center shrink-0">
+            <Sparkles size={16} className="text-white" />
+          </div>
+          <div>
+            <p className="text-sm font-bold text-gray-900">
+              {allDone ? '✅ セットアップ完了！' : 'まず最初にこれだけ設定を'}
+            </p>
+            <p className="text-xs text-gray-500">{doneCount} / {ONBOARDING_STEPS.length} 完了</p>
+          </div>
+        </div>
+        <button
+          onClick={onDismiss}
+          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+          aria-label="ガイドを閉じる"
+        >
+          <X size={16} />
+        </button>
+      </div>
+
+      {/* プログレスバー */}
+      <div className="px-4 pb-3">
+        <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
+          <div
+            className="h-full bg-blue-500 rounded-full transition-all duration-700"
+            style={{ width: `${(doneCount / ONBOARDING_STEPS.length) * 100}%` }}
+          />
+        </div>
+      </div>
+
+      {/* ステップ一覧 */}
+      <div className="px-4 pb-4 space-y-2">
+        {ONBOARDING_STEPS.map((step, i) => {
+          const done = stepStates[i]
+          return (
+            <button
+              key={step.id}
+              onClick={() => !done && navigate(step.path)}
+              disabled={done}
+              className={`w-full flex items-center gap-3 p-3 rounded-xl text-left transition-colors
+                ${done
+                  ? 'bg-white/60 cursor-default'
+                  : 'bg-white border border-blue-200 hover:border-blue-400 hover:bg-blue-50 active:bg-blue-100'
+                }`}
+            >
+              <div className="shrink-0">
+                {done
+                  ? <CheckCircle2 size={20} className="text-green-500" />
+                  : <Circle size={20} className="text-gray-300" />
+                }
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className={`text-sm font-medium break-anywhere ${done ? 'text-gray-400 line-through' : 'text-gray-900'}`}>
+                  {step.label}
+                </p>
+                {!done && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{step.desc}</p>}
+              </div>
+              {!done && <ChevronRight size={14} className="text-blue-400 shrink-0" />}
+            </button>
+          )
+        })}
+      </div>
+
+      {/* 完了メッセージ or 閉じるボタン */}
+      <div className="px-4 pb-4">
+        {allDone ? (
+          <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
+            <p className="text-sm font-bold text-green-800">🎉 準備完了！</p>
+            <p className="text-xs text-green-700 mt-0.5">安全管理をはじめましょう</p>
+            <button onClick={onDismiss} className="mt-2 text-xs text-green-600 font-medium underline">
+              このガイドを閉じる
+            </button>
+          </div>
+        ) : (
+          <button
+            onClick={onDismiss}
+            className="w-full text-xs text-gray-400 py-1 hover:text-gray-600 transition-colors"
+          >
+            あとで設定する · このガイドを閉じる
+          </button>
+        )}
+      </div>
+    </div>
+  )
+}
+
+// ==============================
+// ダッシュボード
+// ==============================
 const MONTHLY_PILLARS = [
   { id: 'facility', label: '施設・設備点検',      path: '/checklists/monthly', icon: <Building2 size={18} className="text-blue-500" /> },
   { id: 'training', label: '訓練・研修',            path: '/records',            icon: <CalendarDays size={18} className="text-purple-500" /> },
@@ -27,6 +167,9 @@ export const Dashboard: React.FC = () => {
   const { doneItems } = useChecklistStore()
   const { items: checklistItems } = useChecklistItemsStore()
   const { records: napRecords } = useNapCheckStore()
+  const { records: trainingRecords } = useStaffTrainingStore()
+  const { children } = useChildrenStore()
+  const { dismissed, dismiss } = useOnboardingStore()
 
   const now = new Date()
   const monthLabel = format(now, 'M月', { locale: ja })
@@ -49,16 +192,24 @@ export const Dashboard: React.FC = () => {
   const donePillars = Object.values(pillarDone).filter(Boolean).length
   const recentNearMisses = nearMisses.slice(0, 2)
 
+  // オンボーディング進捗
+  const checklistDone = checklistItems.length > 0
+  const childrenDone = children.length > 0
+  // 緊急カードは「研修記録が1件以上ある」を確認済みの代わりに使う
+  const emergencyDone = trainingRecords.length > 0
+  const showOnboarding = !dismissed && !(checklistDone && childrenDone && emergencyDone)
+
   // 今日の午睡見守り状況
   const todayKey = format(now, 'yyyy-MM-dd')
   const todayNapRecords = napRecords.filter((r) => r.date === todayKey)
-  const lastNapCheck = todayNapRecords.sort((a, b) => b.checked_at.localeCompare(a.checked_at))[0]
+  const lastNapCheck = [...todayNapRecords].sort((a, b) => b.checked_at.localeCompare(a.checked_at))[0]
   const napMinutesSinceLast = lastNapCheck
     ? Math.floor((Date.now() - new Date(lastNapCheck.checked_at).getTime()) / 60000)
     : null
 
   return (
     <div className="px-4 py-6 space-y-6">
+      {/* 施設名・日付 */}
       <div>
         <p className="text-xs text-gray-500">
           {format(now, 'yyyy年M月d日（E）', { locale: ja })}
@@ -69,6 +220,17 @@ export const Dashboard: React.FC = () => {
         <p className="text-sm text-gray-500 mt-1">今月は、これだけ確認すれば大丈夫です。</p>
       </div>
 
+      {/* はじめにやることガイド */}
+      {showOnboarding && (
+        <GettingStartedCard
+          checklistItemsDone={checklistDone}
+          childrenDone={childrenDone}
+          emergencyDone={emergencyDone}
+          onDismiss={dismiss}
+        />
+      )}
+
+      {/* 今月の安全管理進捗 */}
       <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3">
         <div className="flex items-center justify-between mb-2">
           <p className="text-sm font-semibold text-blue-800">{monthLabel}の安全管理</p>
@@ -82,10 +244,11 @@ export const Dashboard: React.FC = () => {
         ) : remaining > 0 ? (
           <p className="text-xs text-blue-600 mt-2">チェック表：あと{remaining}つ整えると今月の記録がそろいます</p>
         ) : (
-          <p className="text-xs text-blue-600 mt-2">チェック表の記録が完了しています</p>
+          <p className="text-xs text-blue-600 mt-2">チェック表の記録が完了しています ✅</p>
         )}
       </div>
 
+      {/* 今月やること */}
       <div>
         <SectionHeader title="今月やること" />
         <div className="space-y-2">
@@ -105,6 +268,7 @@ export const Dashboard: React.FC = () => {
         </div>
       </div>
 
+      {/* ヒヤリハット進行中アラート */}
       {nearMissPending > 0 && (
         <Card className="p-4 border-orange-200 bg-orange-50" onClick={() => navigate('/near-miss')}>
           <div className="flex items-center gap-3">
@@ -117,6 +281,7 @@ export const Dashboard: React.FC = () => {
         </Card>
       )}
 
+      {/* クイックボタン */}
       <div className="space-y-2.5">
         <Button variant="primary" fullWidth size="lg" onClick={() => navigate('/checklists/monthly')}>
           <ClipboardCheck size={18} />
@@ -128,6 +293,7 @@ export const Dashboard: React.FC = () => {
         </Button>
       </div>
 
+      {/* ヒヤリハット一覧 */}
       {recentNearMisses.length > 0 && (
         <div>
           <SectionHeader
@@ -166,7 +332,7 @@ export const Dashboard: React.FC = () => {
         </Card>
       )}
 
-      {/* 午睡見守り状況 */}
+      {/* 午睡見守り状況（本日記録がある場合のみ） */}
       {todayNapRecords.length > 0 && (
         <Card
           className={`p-4 cursor-pointer ${
@@ -185,9 +351,9 @@ export const Dashboard: React.FC = () => {
               'text-red-600'
             } />
             <div className="flex-1 min-w-0">
-              <p className={`text-sm font-semibold ${
-                napMinutesSinceLast !== null && napMinutesSinceLast >= 10 ? 'text-red-800' : 'text-gray-900'
-              }`}>午睡見守り</p>
+              <p className={`text-sm font-semibold ${napMinutesSinceLast !== null && napMinutesSinceLast >= 10 ? 'text-red-800' : 'text-gray-900'}`}>
+                午睡見守り
+              </p>
               <p className="text-xs text-gray-600 mt-0.5">
                 本日 {todayNapRecords.length}回確認済み ·{' '}
                 {napMinutesSinceLast === null ? '—' :
@@ -220,11 +386,11 @@ export const Dashboard: React.FC = () => {
             <span className="text-xs font-semibold text-blue-700 text-center leading-tight">午睡<br />見守り記録</span>
           </button>
           <button
-            onClick={() => navigate('/training')}
-            className="flex flex-col items-center gap-2 p-4 bg-purple-50 border border-purple-200 rounded-2xl hover:bg-purple-100 transition-colors"
+            onClick={() => navigate('/photos')}
+            className="flex flex-col items-center gap-2 p-4 bg-green-50 border border-green-200 rounded-2xl hover:bg-green-100 transition-colors"
           >
-            <GraduationCap size={24} className="text-purple-500" />
-            <span className="text-xs font-semibold text-purple-700 text-center leading-tight">職員研修<br />資格管理</span>
+            <Camera size={24} className="text-green-500" />
+            <span className="text-xs font-semibold text-green-700 text-center leading-tight">写真<br />管理</span>
           </button>
         </div>
       </div>

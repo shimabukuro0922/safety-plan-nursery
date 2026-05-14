@@ -480,6 +480,24 @@ export const useStaffMaterialTypeStore = create<StaffMaterialTypeState>()(
 )
 
 // ==============================
+// オンボーディング
+// ==============================
+interface OnboardingState {
+  dismissed: boolean
+  dismiss: () => void
+}
+
+export const useOnboardingStore = create<OnboardingState>()(
+  persist(
+    (set) => ({
+      dismissed: false,
+      dismiss: () => set({ dismissed: true }),
+    }),
+    { name: 'onboarding-store-v1' }
+  )
+)
+
+// ==============================
 // 午睡見守り記録
 // ==============================
 export interface NapCheckRecord {
