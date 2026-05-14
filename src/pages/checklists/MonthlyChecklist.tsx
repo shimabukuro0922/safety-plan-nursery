@@ -335,7 +335,10 @@ export const MonthlyChecklist: React.FC = () => {
     return map
   }, [checklistItems])
 
-  const doneCount = checklistItems.filter((item) => item.id in doneItems).length
+  // 過去月・未来月を表示中は実施済みデータを空にして誤表示を防ぐ
+  const effectiveDoneItems = isCurrentMonth ? doneItems : {}
+
+  const doneCount = checklistItems.filter((item) => item.id in effectiveDoneItems).length
   const totalCount = checklistItems.length
   const pendingCount = totalCount - doneCount
 
@@ -425,6 +428,16 @@ export const MonthlyChecklist: React.FC = () => {
             </div>
           )}
 
+          {/* 過去月・未来月を表示中は注記を表示 */}
+          {!isCurrentMonth && (
+            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-2">
+              <AlertTriangle size={16} className="text-blue-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-blue-700">
+                過去・未来の月を表示中です。実施記録は今月分のみ保存されます。
+              </p>
+            </div>
+          )}
+
           {/* モバイル: カード形式 */}
           <div className="md:hidden space-y-5">
             {Object.entries(grouped).map(([catName, catItems]) => (
@@ -432,7 +445,7 @@ export const MonthlyChecklist: React.FC = () => {
                 <p className="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2 px-1">{catName}</p>
                 <div className="space-y-2">
                   {catItems.map((item) => {
-                    const done = doneItems[item.id]
+                    const done = effectiveDoneItems[item.id]
                     return (
                       <ChecklistCard
                         key={item.id}
@@ -470,7 +483,7 @@ export const MonthlyChecklist: React.FC = () => {
                 </thead>
                 <tbody className="divide-y divide-gray-100">
                   {checklistItems.map((item) => {
-                    const done = doneItems[item.id]
+                    const done = effectiveDoneItems[item.id]
                     return (
                       <TableRow
                         key={item.id}

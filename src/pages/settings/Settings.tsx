@@ -44,15 +44,25 @@ function exportBackup() {
   URL.revokeObjectURL(url)
 }
 
-function importBackup(file: File, onSuccess: () => void, onError: () => void) {
+function importBackup(
+  file: File,
+  onSuccess: (failedKeys: string[]) => void,
+  onError: () => void
+) {
   const reader = new FileReader()
   reader.onload = (e) => {
     try {
       const data = JSON.parse(e.target?.result as string) as Record<string, string>
+      const failedKeys: string[] = []
       Object.entries(data).forEach(([key, value]) => {
-        localStorage.setItem(key, value)
+        try {
+          localStorage.setItem(key, value)
+        } catch {
+          // QuotaExceededError などで書き込めなかったキーを記録
+          failedKeys.push(key)
+        }
       })
-      onSuccess()
+      onSuccess(failedKeys)
     } catch {
       onError()
     }
@@ -292,7 +302,14 @@ export const Settings: React.FC = () => {
                   <Button variant="primary" size="sm" fullWidth onClick={() => {
                     importBackup(
                       pendingFile,
-                      () => { toast.success('復元しました。ページを再読み込みします'); setTimeout(() => location.reload(), 1000) },
+                      (failedKeys) => {
+                        if (failedKeys.length > 0) {
+                          toast.error(`一部のデータを復元できませんでした（ストレージ容量不足）。ページを再読み込みします`)
+                        } else {
+                          toast.success('復元しました。ページを再読み込みします')
+                        }
+                        setTimeout(() => location.reload(), 1500)
+                      },
                       () => { toast.error('ファイルの読み込みに失敗しました') }
                     )
                     setRestoreConfirm(false); setPendingFile(null)

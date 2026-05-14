@@ -86,7 +86,8 @@ const PhotoDetailModal: React.FC<{
     }
     approvePhoto(photo.id)
     toast.success('承認しました')
-    onNext()
+    // onNext() ではなく onClose(): フィルター絞り込み時にインデックスがずれるバグを防ぐ
+    onClose()
   }
 
   const handleReject = () => {
@@ -94,7 +95,7 @@ const PhotoDetailModal: React.FC<{
     rejectPhoto(photo.id, rejectReason || undefined)
     setShowRejectInput(false)
     toast.success('却下しました')
-    onNext()
+    onClose()
   }
 
   const handleDelete = () => {

@@ -217,7 +217,7 @@ export const GuardianNotice: React.FC = () => {
             <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}>
               <FileDown size={14} /> PDF出力
             </Button>
-            <Button variant="primary" size="sm" fullWidth onClick={() => toast.success('配布済みとして記録しました')}>
+            <Button variant="secondary" size="sm" fullWidth onClick={() => toast('配布後は「実施記録・証跡」ページから記録してください', { icon: 'ℹ️' })}>
               <Send size={14} /> 配布済みとして記録
             </Button>
           </div>

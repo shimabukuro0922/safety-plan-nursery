@@ -1,4 +1,5 @@
 import React, { useState, useRef } from 'react'
+import { useNavigate } from 'react-router-dom'
 import { Sparkles, FileDown, Users, BookOpen, UserPlus, RotateCcw, Pencil, Plus, Trash2, X, Check, Settings } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useStaffMaterialTypeStore } from '@/stores/appStore'
@@ -188,6 +189,7 @@ const TypeManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
 // メインページ
 // ==============================
 export const StaffMaterial: React.FC = () => {
+  const navigate = useNavigate()
   const { types } = useStaffMaterialTypeStore()
   const [selected, setSelected] = useState<string>(types[0]?.key ?? 'morning')
   const [theme, setTheme] = useState('')
@@ -339,7 +341,7 @@ export const StaffMaterial: React.FC = () => {
               <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}>
                 <FileDown size={14} /> PDFで出力
               </Button>
-              <Button variant="primary" size="sm" fullWidth onClick={() => toast.success('研修記録を登録しました')}>
+              <Button variant="secondary" size="sm" fullWidth onClick={() => { navigate('/training'); toast('研修実績は「職員研修・資格管理」から記録できます', { icon: 'ℹ️' }) }}>
                 研修記録を登録
               </Button>
             </div>

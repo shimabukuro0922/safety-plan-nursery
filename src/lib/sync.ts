@@ -200,6 +200,31 @@ export async function pullNapChecks(facilityId: string, date: string): Promise<S
   }
 }
 
+/** 直近 days 日分の午睡記録を取得（複数端末で過去の記録を同期するため） */
+export async function pullNapChecksRecent(facilityId: string, days = 7): Promise<SyncNapCheckRecord[]> {
+  if (!isSupabaseConfigured) return []
+  try {
+    const since = new Date()
+    since.setDate(since.getDate() - (days - 1))
+    const sinceStr = since.toISOString().split('T')[0]
+    const { data, error } = await supabase
+      .from('nap_checks')
+      .select('*')
+      .eq('facility_id', facilityId)
+      .gte('date', sinceStr)
+      .order('checked_at', { ascending: true })
+    if (error) throw error
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      date: r.date,
+      checked_at: r.checked_at,
+      checked_by: r.checked_by,
+    }))
+  } catch {
+    return []
+  }
+}
+
 export function subscribeToNapChecks(
   facilityId: string,
   date: string,

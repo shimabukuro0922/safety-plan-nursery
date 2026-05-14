@@ -15,7 +15,7 @@ import {
 import { useChildrenStore } from '@/stores/childrenStore'
 import {
   pullNearMisses,
-  pullNapChecks,
+  pullNapChecksRecent,
   pullTrainingRecords,
   pullChecklistDone,
   pullChecklistItems,
@@ -38,13 +38,11 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
       lastSyncRef.current = now
 
       // today を毎回動的に計算（日付をまたいでも正しい日付を使用）
-      const today = new Date().toISOString().split('T')[0]
-
       try {
         const [nearMisses, napChecks, trainingRecords, checklistDone, checklistItems, children] =
           await Promise.all([
             pullNearMisses(facilityId),
-            pullNapChecks(facilityId, today),
+            pullNapChecksRecent(facilityId, 7),  // 直近7日分を取得（他端末の過去記録も同期）
             pullTrainingRecords(facilityId),
             pullChecklistDone(facilityId),
             pullChecklistItems(facilityId),
@@ -53,9 +51,11 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
         // Replace local state with remote (writes have already been pushed on each action)
         useNearMissStore.setState({ nearMisses })
+        // 取得した日付範囲のローカルデータを置き換える
+        const pulledDates = new Set(napChecks.map((r) => r.date))
         useNapCheckStore.setState((s) => ({
           records: [
-            ...s.records.filter((r) => r.date !== today),
+            ...s.records.filter((r) => !pulledDates.has(r.date)),
             ...napChecks,
           ],
         }))

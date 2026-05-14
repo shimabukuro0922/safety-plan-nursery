@@ -180,6 +180,15 @@ export const ReportEditPage: React.FC = () => {
   )
   const [showPDFModal, setShowPDFModal] = useState(false)
 
+  // 別デバイスからの同期でstoreが更新されたとき、ローカルstateに反映する
+  useEffect(() => {
+    if (report) setStatus(report.status)
+  }, [report?.status])
+
+  useEffect(() => {
+    if (report) setContent(report.content)
+  }, [report?.id])
+
   if (!report) return null
 
   const handleSectionChange = (sectionId: string, body: string) => {
