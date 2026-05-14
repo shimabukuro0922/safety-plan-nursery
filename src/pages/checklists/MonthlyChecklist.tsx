@@ -366,7 +366,7 @@ export const MonthlyChecklist: React.FC = () => {
           <div className="flex-1 min-w-0">
             <p className="text-sm font-bold text-amber-800">先月の記録が残っています</p>
             <p className="text-xs text-amber-700 mt-0.5">
-              {lastMarkedMonth?.replace('-', '年')}月の実施済み記録がそのまま表示されています。今月の新しい記録を始めましょう。
+              {lastMarkedMonth?.replace(/^(\d{4})-0?(\d+)$/, '$1年$2')}月の実施済み記録がそのまま表示されています。今月の新しい記録を始めましょう。
             </p>
             <button
               onClick={() => {

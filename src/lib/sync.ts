@@ -207,7 +207,7 @@ export function subscribeToNapChecks(
 ): () => void {
   if (!isSupabaseConfigured) return () => {}
   const channel = supabase
-    .channel(`nap_checks_${facilityId}`)
+    .channel(`nap_checks_${facilityId}_${Date.now()}`)
     .on(
       'postgres_changes',
       {
@@ -339,17 +339,27 @@ export async function pullChecklistDone(facilityId: string): Promise<SyncCheckli
 export async function pushChecklistItems(items: SyncChecklistItemDef[], facilityId: string): Promise<void> {
   if (!isSupabaseConfigured || items.length === 0) return
   try {
-    // Delete all then re-insert (small table, simple approach)
-    await supabase.from('checklist_items').delete().eq('facility_id', facilityId)
-    await supabase.from('checklist_items').insert(
+    // upsert で処理（delete→insert の2ステップを避け、途中クラッシュでデータが消えるのを防ぐ）
+    await supabase.from('checklist_items').upsert(
       items.map((item) => ({
         id: item.id,
         facility_id: facilityId,
         category_name: item.categoryName,
         title: item.title,
         description: item.description,
-      }))
+      })),
+      { onConflict: 'id' }
     )
+    // 削除されたアイテムをリモートからも除去
+    const currentIds = items.map((i) => i.id)
+    const { data: remoteItems } = await supabase
+      .from('checklist_items')
+      .select('id')
+      .eq('facility_id', facilityId)
+    const toDelete = (remoteItems ?? []).map((r: { id: string }) => r.id).filter((id: string) => !currentIds.includes(id))
+    if (toDelete.length > 0) {
+      await supabase.from('checklist_items').delete().in('id', toDelete)
+    }
   } catch (err) {
     console.error('[sync] pushChecklistItems:', err)
   }

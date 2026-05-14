@@ -77,8 +77,9 @@ export const Settings: React.FC = () => {
   })
 
   const handleSave = () => {
+    if (!facility) return
     setFacility({
-      ...facility!,
+      ...facility,
       name: form.name,
       director_name: form.director_name || null,
       address: form.address || null,

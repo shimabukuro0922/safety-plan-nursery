@@ -53,19 +53,16 @@ export const useNearMissStore = create<NearMissState>()(
         if (supabaseId) syncPushNearMiss(newItem, supabaseId).catch(console.error)
       },
       updateNearMiss: (id, updates) => {
+        // set() を呼ぶ前に merged を構築してレースコンディションを回避
+        const existing = useNearMissStore.getState().nearMisses.find((nm) => nm.id === id)
+        const merged = existing ? { ...existing, ...updates, updated_at: new Date().toISOString() } : null
         set((state) => ({
           nearMisses: state.nearMisses.map((nm) =>
-            nm.id === id
-              ? { ...nm, ...updates, updated_at: new Date().toISOString() }
-              : nm
+            nm.id === id ? (merged ?? { ...nm, ...updates, updated_at: new Date().toISOString() }) : nm
           ),
         }))
-        // Push updated record
         const supabaseId = getSupabaseId()
-        if (supabaseId) {
-          const updated = useNearMissStore.getState().nearMisses.find((nm) => nm.id === id)
-          if (updated) syncPushNearMiss({ ...updated, ...updates, updated_at: new Date().toISOString() }, supabaseId).catch(console.error)
-        }
+        if (supabaseId && merged) syncPushNearMiss(merged, supabaseId).catch(console.error)
       },
       advanceStep: (id) => {
         set((state) => ({

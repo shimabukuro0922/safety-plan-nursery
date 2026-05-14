@@ -202,7 +202,7 @@ export const StaffMaterial: React.FC = () => {
 
   const selectedType = types.find((t) => t.key === selected) ?? types[0]
 
-  const doGenerate = async () => {
+  const doGenerate = async (): Promise<boolean> => {
     setIsGenerating(true)
     try {
       const res = await fetch('/api/generate-staff', {
@@ -218,15 +218,17 @@ export const StaffMaterial: React.FC = () => {
       if (!res.ok) throw new Error(data.error ?? '生成に失敗しました')
       setGenerated(data.text)
       setEditedContent(data.text)
+      return true
     } catch (e: unknown) {
       toast.error(e instanceof Error ? e.message : '生成に失敗しました')
+      return false
     } finally {
       setIsGenerating(false)
     }
   }
 
-  const handleGenerate = async () => { await doGenerate(); if (!isGenerating) toast.success('資料を作成しました') }
-  const handleRegenerate = async () => { await doGenerate(); if (!isGenerating) toast.success('作り直しました') }
+  const handleGenerate = async () => { if (await doGenerate()) toast.success('資料を作成しました') }
+  const handleRegenerate = async () => { if (await doGenerate()) toast.success('作り直しました') }
 
   const handleSelectType = (key: string) => {
     setSelected(key)

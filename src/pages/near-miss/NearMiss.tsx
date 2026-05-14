@@ -62,12 +62,14 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
   }
 
   const handleAdvance = () => {
-    if (nm.step === 'cause' && !nm.why_it_happened && !why.trim()) {
+    // stale な nm prop を使わず、ストアの最新データでバリデーション
+    const current = useNearMissStore.getState().nearMisses.find((n) => n.id === nm.id) ?? nm
+    if (current.step === 'cause' && !current.why_it_happened && !why.trim()) {
       toast.error('「なぜ起きたか」を入力してから進めてください')
       setEditing(true)
       return
     }
-    if (nm.step === 'action' && !nm.what_to_change && !what.trim()) {
+    if (current.step === 'action' && !current.what_to_change && !what.trim()) {
       toast.error('「明日から何を変えるか」を入力してから進めてください')
       setEditing(true)
       return

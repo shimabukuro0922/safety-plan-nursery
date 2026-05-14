@@ -1,4 +1,4 @@
-import React, { useState, useRef, useCallback } from 'react'
+import React, { useState, useRef, useCallback, useEffect } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { Upload, X, Plus, Camera, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, SectionHeader, Button } from '@/components/ui'
@@ -134,6 +134,13 @@ export const PhotoUpload: React.FC = () => {
   // ドラッグ&ドロップ
   const [dragging, setDragging] = useState(false)
 
+  // アンマウント時に未解放の object URL をすべて revoke する
+  const previewsRef = useRef<PreviewItem[]>([])
+  previewsRef.current = previews
+  useEffect(() => {
+    return () => { previewsRef.current.forEach((p) => URL.revokeObjectURL(p.objectUrl)) }
+  }, [])
+
   const processFiles = useCallback(async (files: File[]) => {
     const imageFiles = files.filter((f) => f.type.startsWith('image/'))
     if (imageFiles.length === 0) { toast.error('画像ファイルを選択してください'); return }
@@ -194,14 +201,8 @@ export const PhotoUpload: React.FC = () => {
 
     for (const item of previews) {
       try {
-        // IndexedDB に本体を保存
-        const tempId = `ph_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
-        await savePhoto(tempId, item.file)
-
-        // メタデータを store に保存（IDは addPhoto が生成するので tempId は使わない）
-        // 実際には addPhoto が返す ID で IndexedDB に再保存する必要があるが、
-        // 簡略化のため: tempId を使ってこのまま保存
-        addPhoto({
+        // store に先に登録して ID を確定させてから IndexedDB に保存
+        const photoId = addPhoto({
           eventId,
           filename: item.file.name,
           takenAt: newEventDate || format(new Date(), 'yyyy-MM-dd'),
@@ -211,6 +212,7 @@ export const PhotoUpload: React.FC = () => {
           rejectedReason: null,
           thumbnailDataUrl: item.thumbnail,
         })
+        await savePhoto(photoId, item.file)
         succeeded++
       } catch {
         toast.error(`${item.file.name} のアップロードに失敗しました`)
