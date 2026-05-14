@@ -221,9 +221,13 @@ export const StaffMaterial: React.FC = () => {
       setGenerated(data.text)
       setEditedContent(data.text)
       return true
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : '生成に失敗しました')
-      return false
+    } catch {
+      // API失敗時はローカルのテンプレートをフォールバックとして使用
+      const text = buildContent(selected, selectedType?.label ?? '', theme.trim())
+      setGenerated(text)
+      setEditedContent(text)
+      toast('オフラインのため標準テンプレートを表示しています。内容を確認して編集してください', { icon: 'ℹ️' })
+      return true
     } finally {
       setIsGenerating(false)
     }

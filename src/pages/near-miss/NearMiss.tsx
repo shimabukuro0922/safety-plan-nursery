@@ -50,6 +50,15 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
   const [shared, setShared] = useState(nm.shared_with ?? '')
   const [recheck, setRecheck] = useState(nm.recheck_date ?? '')
 
+  // 別デバイスからの同期でnmが更新されたとき、フォームをリセット
+  React.useEffect(() => {
+    setWhy(nm.why_it_happened ?? '')
+    setWhat(nm.what_to_change ?? '')
+    setShared(nm.shared_with ?? '')
+    setRecheck(nm.recheck_date ?? '')
+    setEditing(false)
+  }, [nm.id])
+
   const handleSave = () => {
     updateNearMiss(nm.id, {
       why_it_happened: why.trim() || null,

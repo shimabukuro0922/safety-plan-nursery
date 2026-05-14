@@ -59,7 +59,7 @@ export const useChildrenStore = create<ChildrenState>()(
         const supabaseId = getSupabaseId()
         if (supabaseId) {
           const updated = useChildrenStore.getState().children.find((c) => c.id === id)
-          if (updated) syncPushChild({ ...updated, ...updates }, supabaseId).catch(console.error)
+          if (updated) syncPushChild(updated, supabaseId).catch(console.error)
         }
       },
       deleteChild: (id) => {

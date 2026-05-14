@@ -227,7 +227,7 @@ export async function pullNapChecksRecent(facilityId: string, days = 7): Promise
 
 export function subscribeToNapChecks(
   facilityId: string,
-  date: string,
+  _date: string,  // 後方互換のため残すが内部では使用しない（コールバック側で動的に判定）
   onInsert: (record: SyncNapCheckRecord) => void
 ): () => void {
   if (!isSupabaseConfigured) return () => {}
@@ -243,7 +243,9 @@ export function subscribeToNapChecks(
       },
       (payload) => {
         const r = payload.new as Record<string, string>
-        if (r.date === date) {
+        // 日付フィルターをコールバック受信時に動的に計算（深夜0時越え対応）
+        const currentDay = new Date().toISOString().split('T')[0]
+        if (r.date === currentDay) {
           onInsert({ id: r.id, date: r.date, checked_at: r.checked_at, checked_by: r.checked_by })
         }
       }

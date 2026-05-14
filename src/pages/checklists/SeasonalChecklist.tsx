@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Sun, Wind, Snowflake, Flower2, CheckCircle2, Circle, Plus, Pencil, Trash2, X, Check, RotateCcw } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
 import { useSeasonalChecklistStore, useSeasonalItemsStore } from '@/stores/appStore'
@@ -184,6 +184,11 @@ export const SeasonalChecklist: React.FC = () => {
   const { items, addItem, updateItem, deleteItem, resetToDefault } = useSeasonalItemsStore()
   const { facility } = useFacilityStore()
   const [staffName, setStaffName] = useState(facility?.director_name ?? '')
+
+  // 設定画面で施設長名が変更されたとき担当者名に反映する
+  useEffect(() => {
+    if (facility?.director_name) setStaffName(facility.director_name)
+  }, [facility?.director_name])
 
   const handleToggle = (itemKey: string, itemLabel: string) => {
     if (isDone(itemKey)) {

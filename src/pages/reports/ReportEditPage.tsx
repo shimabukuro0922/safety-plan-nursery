@@ -187,7 +187,7 @@ export const ReportEditPage: React.FC = () => {
 
   useEffect(() => {
     if (report) setContent(report.content)
-  }, [report?.id])
+  }, [report?.id, report?.updated_at])
 
   if (!report) return null
 

@@ -49,6 +49,7 @@ const PhotoDetailModal: React.FC<{
     setFullUrl(null)
     setTagOpen(false)
     setShowRejectInput(false)
+    setRejectReason('')
     if (!photo) return
 
     setLoadingFull(true)
