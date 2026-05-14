@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import {
   Sparkles, ChevronDown, ChevronUp, AlertTriangle,
@@ -179,6 +179,8 @@ export const ReportEditPage: React.FC = () => {
     report?.content ?? { title: '', sections: [], missing_info: [], suggestions: [] }
   )
   const [showPDFModal, setShowPDFModal] = useState(false)
+  // 未保存の編集中は同期でコンテンツを上書きしない
+  const isDirtyRef = useRef(false)
 
   // 別デバイスからの同期でstoreが更新されたとき、ローカルstateに反映する
   useEffect(() => {
@@ -186,12 +188,14 @@ export const ReportEditPage: React.FC = () => {
   }, [report?.status])
 
   useEffect(() => {
-    if (report) setContent(report.content)
+    // isDirty の場合（ユーザーが編集中）は同期で上書きしない
+    if (report && !isDirtyRef.current) setContent(report.content)
   }, [report?.id, report?.updated_at])
 
   if (!report) return null
 
   const handleSectionChange = (sectionId: string, body: string) => {
+    isDirtyRef.current = true  // 編集開始フラグ
     setContent((prev) => ({
       ...prev,
       sections: prev.sections.map((s) =>
@@ -203,11 +207,13 @@ export const ReportEditPage: React.FC = () => {
   }
 
   const handleSave = () => {
+    isDirtyRef.current = false  // 保存完了でフラグをリセット
     updateReportContent(id!, content)
     toast.success('保存しました')
   }
 
   const handleStatusChange = (newStatus: ReportStatus) => {
+    isDirtyRef.current = false
     updateReportContent(id!, content)
     updateReportStatus(id!, newStatus)
     setStatus(newStatus)

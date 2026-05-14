@@ -41,7 +41,7 @@ const StepFlow: React.FC<{ current: NearMissStep }> = ({ current }) => {
 // 詳細・編集モーダル
 const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({ nm, onClose }) => {
   const { updateNearMiss, advanceStep, deleteNearMiss } = useNearMissStore()
-  const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step]
+  const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step] ?? NEAR_MISS_STEP_CONFIG['occurred']
   const nextStep = STEP_FLOW[STEP_FLOW.indexOf(nm.step) + 1]
 
   const [editing, setEditing] = useState(false)

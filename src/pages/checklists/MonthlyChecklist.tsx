@@ -313,6 +313,9 @@ export const MonthlyChecklist: React.FC = () => {
     let y = year
     if (m > 12) { m = 1; y++ }
     if (m < 1) { m = 12; y-- }
+    // 現在年 ±10 年に制限（誤操作で極端な年に飛ぶのを防ぐ）
+    const currentYear = new Date().getFullYear()
+    if (y < currentYear - 10 || y > currentYear + 10) return
     setMonth(m); setYear(y)
   }
 

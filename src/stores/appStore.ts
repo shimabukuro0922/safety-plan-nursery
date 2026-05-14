@@ -322,9 +322,13 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
     {
       name: 'checklist-items-store-v3',
       // 既存ユーザーで items が空配列の場合はデフォルト項目を自動補完
-      onRehydrateStorage: () => (state) => {
-        if (state && state.items.length === 0) {
-          state.items = DEFAULT_CHECKLIST_ITEMS
+      // merge を使うことで正しくストアに反映され再レンダリングもトリガーされる
+      merge: (persisted, current) => {
+        const p = persisted as Partial<ChecklistItemsState> | undefined
+        return {
+          ...current,
+          ...p,
+          items: Array.isArray(p?.items) && p!.items.length > 0 ? p!.items : DEFAULT_CHECKLIST_ITEMS,
         }
       },
     }
@@ -435,9 +439,12 @@ export const useSeasonalItemsStore = create<SeasonalItemsState>()(
     {
       name: 'seasonal-items-store-v3',
       // 既存ユーザーで items が空配列の場合はデフォルト項目を自動補完
-      onRehydrateStorage: () => (state) => {
-        if (state && state.items.length === 0) {
-          state.items = DEFAULT_SEASONAL_ITEMS
+      merge: (persisted, current) => {
+        const p = persisted as Partial<SeasonalItemsState> | undefined
+        return {
+          ...current,
+          ...p,
+          items: Array.isArray(p?.items) && p!.items.length > 0 ? p!.items : DEFAULT_SEASONAL_ITEMS,
         }
       },
     }

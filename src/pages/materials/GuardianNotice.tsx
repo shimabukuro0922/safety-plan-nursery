@@ -34,11 +34,17 @@ export const GuardianNotice: React.FC = () => {
     )
   }
 
+  const buildLocalTemplate = (catNames: string[], styleName: string): string => {
+    const styleLabel = styleName === 'gentle' ? 'やわらかい' : styleName === 'formal' ? '丁寧な' : '標準的な'
+    const facilityName = facility?.name ?? '当園'
+    return `【保護者の皆様へ】\n\n${facilityName}より、安全管理に関するお知らせです。\n\n今月は以下の取り組みを実施しております。\n\n${catNames.map((c) => `▶ ${c}`).join('\n')}\n\n引き続き子どもたちの安全を第一に取り組んでまいります。\nご不明な点はお気軽にお声がけください。\n\n${facilityName}`
+  }
+
   const handleGenerate = async () => {
     if (selectedCats.length === 0) { toast.error('カテゴリを1つ以上選択してください'); return }
     setIsGenerating(true)
+    const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
     try {
-      const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
       const res = await fetch('/api/generate-notice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -48,13 +54,22 @@ export const GuardianNotice: React.FC = () => {
           facilityName: facility?.name ?? '当園',
         }),
       })
-      const data = await res.json()
+      let data: { text?: string; error?: string }
+      try {
+        data = await res.json()
+      } catch {
+        throw new Error('サーバーからの応答を解析できませんでした')
+      }
       if (!res.ok) throw new Error(data.error ?? '生成に失敗しました')
-      setGenerated(data.text)
-      setEditedContent(data.text)
+      setGenerated(data.text ?? '')
+      setEditedContent(data.text ?? '')
       toast.success('保護者周知文を作成しました')
-    } catch (e: unknown) {
-      toast.error(e instanceof Error ? e.message : '生成に失敗しました')
+    } catch {
+      // API失敗時はローカルテンプレートを使用
+      const text = buildLocalTemplate(catNames, style)
+      setGenerated(text)
+      setEditedContent(text)
+      toast('オフラインのため標準テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
     } finally {
       setIsGenerating(false)
     }

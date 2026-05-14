@@ -306,7 +306,7 @@ export const Dashboard: React.FC = () => {
           />
           <div className="space-y-2">
             {recentNearMisses.map((nm) => {
-              const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step]
+              const stepCfg = NEAR_MISS_STEP_CONFIG[nm.step] ?? NEAR_MISS_STEP_CONFIG['occurred']
               return (
                 <Card key={nm.id} className="p-4 cursor-pointer" onClick={() => navigate('/near-miss')}>
                   <div className="flex items-start gap-2 justify-between">
