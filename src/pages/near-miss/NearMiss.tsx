@@ -75,7 +75,7 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
       return
     }
     advanceStep(nm.id)
-    toast.success(`「${NEAR_MISS_STEP_CONFIG[nextStep!].label}」に進みました`)
+    if (nextStep) toast.success(`「${NEAR_MISS_STEP_CONFIG[nextStep].label}」に進みました`)
     onClose()
   }
 

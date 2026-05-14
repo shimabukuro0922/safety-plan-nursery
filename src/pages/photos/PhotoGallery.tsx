@@ -282,7 +282,8 @@ export const PhotoGallery: React.FC = () => {
   const { photos, events } = usePhotoStore()
   const [filterStatus, setFilterStatus] = useState<'all' | 'pending' | 'approved' | 'rejected' | 'ng'>(initialFilter)
   const [filterEventId, setFilterEventId] = useState(initialEventId)
-  const [detailIndex, setDetailIndex] = useState<number | null>(null)
+  // インデックスではなくIDで追跡することでフィルター変化時のズレを防ぐ
+  const [detailPhotoId, setDetailPhotoId] = useState<string | null>(null)
 
   const filtered = photos.filter((p) => {
     if (filterStatus === 'ng') return p.hasNGChild && p.status !== 'rejected'
@@ -299,7 +300,8 @@ export const PhotoGallery: React.FC = () => {
     { key: 'ng',       label: `NG (${photos.filter((p) => p.hasNGChild).length})` },
   ] as const
 
-  const currentPhoto = detailIndex !== null ? filtered[detailIndex] : null
+  const currentPhoto = detailPhotoId !== null ? (filtered.find((p) => p.id === detailPhotoId) ?? null) : null
+  const detailIndex = detailPhotoId !== null ? filtered.findIndex((p) => p.id === detailPhotoId) : -1
 
   return (
     <div className="px-4 py-6 space-y-4">
@@ -354,7 +356,7 @@ export const PhotoGallery: React.FC = () => {
               return (
                 <button
                   key={photo.id}
-                  onClick={() => setDetailIndex(i)}
+                  onClick={() => setDetailPhotoId(photo.id)}
                   className={`relative aspect-square rounded-xl overflow-hidden border-2 transition-opacity hover:opacity-90
                     ${photo.hasNGChild ? 'border-red-500' : photo.status === 'approved' ? 'border-green-400' : 'border-transparent'}`}
                 >
@@ -389,11 +391,17 @@ export const PhotoGallery: React.FC = () => {
       {currentPhoto && (
         <PhotoDetailModal
           photo={currentPhoto}
-          onClose={() => setDetailIndex(null)}
-          onPrev={() => setDetailIndex((i) => (i !== null && i > 0 ? i - 1 : i))}
-          onNext={() => setDetailIndex((i) => (i !== null && i < filtered.length - 1 ? i + 1 : null))}
-          hasPrev={detailIndex !== null && detailIndex > 0}
-          hasNext={detailIndex !== null && detailIndex < filtered.length - 1}
+          onClose={() => setDetailPhotoId(null)}
+          onPrev={() => {
+            if (detailIndex > 0) setDetailPhotoId(filtered[detailIndex - 1].id)
+          }}
+          onNext={() => {
+            if (detailIndex !== -1 && detailIndex < filtered.length - 1)
+              setDetailPhotoId(filtered[detailIndex + 1].id)
+            else setDetailPhotoId(null)
+          }}
+          hasPrev={detailIndex > 0}
+          hasNext={detailIndex !== -1 && detailIndex < filtered.length - 1}
         />
       )}
     </div>

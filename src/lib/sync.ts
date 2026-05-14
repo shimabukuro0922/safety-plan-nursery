@@ -383,7 +383,7 @@ export async function pushChecklistItems(items: SyncChecklistItemDef[], facility
       .eq('facility_id', facilityId)
     const toDelete = (remoteItems ?? []).map((r: { id: string }) => r.id).filter((id: string) => !currentIds.includes(id))
     if (toDelete.length > 0) {
-      await supabase.from('checklist_items').delete().in('id', toDelete)
+      await supabase.from('checklist_items').delete().in('id', toDelete).eq('facility_id', facilityId)
     }
   } catch (err) {
     console.error('[sync] pushChecklistItems:', err)

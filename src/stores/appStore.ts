@@ -8,6 +8,8 @@ import {
   pushNapCheck as syncPushNapCheck,
   pushTrainingRecord as syncPushTrainingRecord,
   deleteTrainingRecordRemote,
+  pushChecklistDone as syncPushChecklistDone,
+  pushChecklistItems as syncPushChecklistItems,
 } from '@/lib/sync'
 
 /** 施設の Supabase ID を取得するヘルパ */
@@ -121,12 +123,22 @@ export const useChecklistStore = create<ChecklistState>()(
           },
           lastMarkedMonth: monthKey,
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const { doneItems, lastMarkedMonth } = useChecklistStore.getState()
+          syncPushChecklistDone(doneItems, supabaseId, lastMarkedMonth).catch(console.error)
+        }
       },
       markUndone: (itemId) => {
         set((state) => {
           const { [itemId]: _, ...rest } = state.doneItems
           return { doneItems: rest }
         })
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const { doneItems, lastMarkedMonth } = useChecklistStore.getState()
+          syncPushChecklistDone(doneItems, supabaseId, lastMarkedMonth).catch(console.error)
+        }
       },
       isDone: (itemId) => {
         return itemId in get().doneItems
@@ -286,16 +298,26 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
       addItem: (item) => {
         const id = `ci_${Date.now()}`
         set((state) => ({ items: [...state.items, { ...item, id }] }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushChecklistItems(useChecklistItemsStore.getState().items, supabaseId).catch(console.error)
       },
       updateItem: (id, updates) => {
         set((state) => ({
           items: state.items.map((item) => item.id === id ? { ...item, ...updates } : item),
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushChecklistItems(useChecklistItemsStore.getState().items, supabaseId).catch(console.error)
       },
       deleteItem: (id) => {
         set((state) => ({ items: state.items.filter((item) => item.id !== id) }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushChecklistItems(useChecklistItemsStore.getState().items, supabaseId).catch(console.error)
       },
-      resetToDefault: () => set({ items: DEFAULT_CHECKLIST_ITEMS }),
+      resetToDefault: () => {
+        set({ items: DEFAULT_CHECKLIST_ITEMS })
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushChecklistItems(DEFAULT_CHECKLIST_ITEMS, supabaseId).catch(console.error)
+      },
     }),
     { name: 'checklist-items-store-v3' }
   )

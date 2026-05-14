@@ -202,10 +202,14 @@ export const PhotoUpload: React.FC = () => {
     for (const item of previews) {
       try {
         // store に先に登録して ID を確定させてから IndexedDB に保存
+        // 既存イベントに追加する場合はそのイベントの日付を使う
+        const eventDate = (useExistingEvent && events.find((e) => e.id === eventId)?.date)
+          || newEventDate
+          || format(new Date(), 'yyyy-MM-dd')
         const photoId = addPhoto({
           eventId,
           filename: item.file.name,
-          takenAt: newEventDate || format(new Date(), 'yyyy-MM-dd'),
+          takenAt: eventDate,
           taggedChildIds: item.taggedChildIds,
           hasNGChild: item.hasNGChild,
           status: 'pending',
