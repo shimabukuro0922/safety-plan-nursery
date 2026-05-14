@@ -1,6 +1,19 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 import type { NearMiss, NearMissStep, NearMissScene, Report, ReportContent, ReportStatus, ReportType, ReportStyle } from '@/types'
+import { useFacilityStore } from '@/stores/facilityStore'
+import {
+  pushNearMiss as syncPushNearMiss,
+  deleteNearMissRemote,
+  pushNapCheck as syncPushNapCheck,
+  pushTrainingRecord as syncPushTrainingRecord,
+  deleteTrainingRecordRemote,
+} from '@/lib/sync'
+
+/** 施設の Supabase ID を取得するヘルパ */
+function getSupabaseId(): string | null {
+  return useFacilityStore.getState().facility?.supabaseId ?? null
+}
 
 // ==============================
 // ヒヤリハット
@@ -20,9 +33,10 @@ export const useNearMissStore = create<NearMissState>()(
     (set) => ({
       nearMisses: [],
       addNearMiss: ({ scene, what_happened, created_by }) => {
+        const supabaseId = getSupabaseId()
         const newItem: NearMiss = {
           id: `nm_${Date.now()}`,
-          facility_id: 'local',
+          facility_id: supabaseId ?? 'local',
           occurred_at: new Date().toISOString().split('T')[0],
           scene,
           what_happened,
@@ -36,6 +50,7 @@ export const useNearMissStore = create<NearMissState>()(
           updated_at: new Date().toISOString(),
         }
         set((state) => ({ nearMisses: [newItem, ...state.nearMisses] }))
+        if (supabaseId) syncPushNearMiss(newItem, supabaseId).catch(console.error)
       },
       updateNearMiss: (id, updates) => {
         set((state) => ({
@@ -45,6 +60,12 @@ export const useNearMissStore = create<NearMissState>()(
               : nm
           ),
         }))
+        // Push updated record
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const updated = useNearMissStore.getState().nearMisses.find((nm) => nm.id === id)
+          if (updated) syncPushNearMiss({ ...updated, ...updates, updated_at: new Date().toISOString() }, supabaseId).catch(console.error)
+        }
       },
       advanceStep: (id) => {
         set((state) => ({
@@ -55,11 +76,18 @@ export const useNearMissStore = create<NearMissState>()(
             return { ...nm, step: nextStep, updated_at: new Date().toISOString() }
           }),
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const updated = useNearMissStore.getState().nearMisses.find((nm) => nm.id === id)
+          if (updated) syncPushNearMiss(updated, supabaseId).catch(console.error)
+        }
       },
       deleteNearMiss: (id) => {
+        const supabaseId = getSupabaseId()
         set((state) => ({
           nearMisses: state.nearMisses.filter((nm) => nm.id !== id),
         }))
+        if (supabaseId) deleteNearMissRemote(id, supabaseId).catch(console.error)
       },
     }),
     { name: 'near-miss-store' }
@@ -518,9 +546,12 @@ export const useNapCheckStore = create<NapCheckState>()(
     (set) => ({
       records: [],
       addRecord: (data) => {
+        const record = { ...data, id: `nap_${Date.now()}` }
         set((state) => ({
-          records: [...state.records, { ...data, id: `nap_${Date.now()}` }],
+          records: [...state.records, record],
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushNapCheck(record, supabaseId).catch(console.error)
       },
       clearToday: (date) => {
         set((state) => ({
@@ -555,14 +586,19 @@ export const useStaffTrainingStore = create<StaffTrainingState>()(
     (set) => ({
       records: [],
       addRecord: (data) => {
+        const record = { ...data, id: `tr_${Date.now()}` }
         set((state) => ({
-          records: [...state.records, { ...data, id: `tr_${Date.now()}` }],
+          records: [...state.records, record],
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushTrainingRecord(record, supabaseId).catch(console.error)
       },
       deleteRecord: (id) => {
+        const supabaseId = getSupabaseId()
         set((state) => ({
           records: state.records.filter((r) => r.id !== id),
         }))
+        if (supabaseId) deleteTrainingRecordRemote(id, supabaseId).catch(console.error)
       },
     }),
     { name: 'staff-training-store-v1' }

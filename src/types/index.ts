@@ -27,6 +27,10 @@ export interface Facility {
   director_name: string | null
   address: string | null
   phone: string | null
+  /** Supabase の facilities.id (UUID)。マルチデバイス同期に使用 */
+  supabaseId?: string | null
+  /** 6文字の施設参加コード。スタッフが別端末で参加する際に使用 */
+  code?: string | null
 }
 
 // ==============================

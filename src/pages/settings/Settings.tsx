@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle } from 'lucide-react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { createFacilityInSupabase } from '@/lib/sync'
+import { isSupabaseConfigured } from '@/lib/supabase'
 import toast from 'react-hot-toast'
 
 // ==============================
@@ -63,6 +65,8 @@ export const Settings: React.FC = () => {
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
+  const [codeCopied, setCodeCopied] = useState(false)
+  const [publishingCode, setPublishingCode] = useState(false)
   const [form, setForm] = useState({
     name: facility?.name ?? '',
     director_name: facility?.director_name ?? '',
@@ -83,6 +87,39 @@ export const Settings: React.FC = () => {
       staff_count: Number(form.staff_count) || null,
     })
     toast.success('設定を保存しました')
+  }
+
+  const handleCopyCode = () => {
+    if (!facility?.code) return
+    navigator.clipboard.writeText(facility.code).then(() => {
+      setCodeCopied(true)
+      setTimeout(() => setCodeCopied(false), 2000)
+    })
+  }
+
+  const handlePublishCode = async () => {
+    if (!facility || !isSupabaseConfigured) return
+    setPublishingCode(true)
+    try {
+      const result = await createFacilityInSupabase(
+        facility.name,
+        facility.director_name,
+        facility.phone,
+      )
+      if (result) {
+        setFacility({
+          ...facility,
+          id: result.id,
+          supabaseId: result.id,
+          code: result.code,
+        })
+        toast.success(`施設コード「${result.code}」を発行しました`)
+      } else {
+        toast.error('コードの発行に失敗しました。ネットワークを確認してください')
+      }
+    } finally {
+      setPublishingCode(false)
+    }
   }
 
   const Field: React.FC<{
@@ -130,6 +167,76 @@ export const Settings: React.FC = () => {
             <Save size={16} />
             保存する
           </Button>
+        </Card>
+      </div>
+
+      {/* マルチデバイス */}
+      <div>
+        <SectionHeader
+          title="複数端末で共有（マルチデバイス）"
+          subtitle="施設コードをスタッフに共有すると、それぞれの端末で同じデータを使えます"
+        />
+        <Card className="p-5 space-y-4">
+          <div className="flex items-center gap-2 mb-1">
+            <Smartphone size={16} className="text-blue-500" />
+            <p className="text-sm font-semibold text-gray-800">施設コード</p>
+          </div>
+
+          {facility?.code ? (
+            <>
+              {/* コード表示 */}
+              <div className="bg-blue-50 rounded-xl p-4 text-center space-y-2">
+                <p className="text-xs text-blue-600 font-medium">この端末の施設コード</p>
+                <p className="text-4xl font-bold tracking-widest text-blue-700 font-mono">
+                  {facility.code}
+                </p>
+                <div className="flex justify-center">
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={handleCopyCode}
+                  >
+                    {codeCopied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+                    {codeCopied ? 'コピーしました' : 'コードをコピー'}
+                  </Button>
+                </div>
+              </div>
+              {/* 使い方 */}
+              <div className="space-y-2">
+                <p className="text-xs font-semibold text-gray-700">スタッフの端末での参加方法</p>
+                <ol className="text-xs text-gray-600 space-y-1 list-decimal list-inside leading-relaxed">
+                  <li>スタッフの端末でアプリを開く</li>
+                  <li>「コードで参加」タブを選ぶ</li>
+                  <li>このコード（<span className="font-mono font-bold">{facility.code}</span>）を入力して参加</li>
+                </ol>
+              </div>
+              <p className="text-xs text-gray-400">
+                ※ 記録した内容はリアルタイムで全端末に同期されます
+              </p>
+            </>
+          ) : isSupabaseConfigured ? (
+            <>
+              <p className="text-sm text-gray-600">
+                施設コードを発行すると、スタッフの端末でもデータを共有できます。
+              </p>
+              <Button
+                variant="primary"
+                fullWidth
+                loading={publishingCode}
+                onClick={handlePublishCode}
+              >
+                <RefreshCw size={16} />
+                施設コードを発行する
+              </Button>
+            </>
+          ) : (
+            <div className="bg-gray-50 rounded-xl p-4 text-center">
+              <p className="text-sm text-gray-500">
+                クラウド接続が設定されていません。<br />
+                環境変数を確認してください。
+              </p>
+            </div>
+          )}
         </Card>
       </div>
 

@@ -1,13 +1,13 @@
 import React, { useState, useRef, useCallback } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { Upload, X, Plus, Camera, ShieldAlert, Check, ChevronDown, ChevronUp } from 'lucide-react'
+import { Upload, X, Plus, Camera, ShieldAlert, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, SectionHeader, Button } from '@/components/ui'
 import { usePhotoStore } from '@/stores/photoStore'
 import { useChildrenStore } from '@/stores/childrenStore'
+import type { Child } from '@/stores/childrenStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { savePhoto, makeThumbnail } from '@/lib/photoDB'
 import { format } from 'date-fns'
-import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
 interface PreviewItem {
@@ -24,10 +24,10 @@ interface PreviewItem {
 const PhotoPreviewCard: React.FC<{
   item: PreviewItem
   index: number
-  children: ReturnType<typeof useChildrenStore>['children']
+  childList: Child[]
   onTagChildren: (ids: string[]) => void
   onRemove: () => void
-}> = ({ item, index, children, onTagChildren, onRemove }) => {
+}> = ({ item, index, childList, onTagChildren, onRemove }) => {
   const [expanded, setExpanded] = useState(false)
 
   const handleToggleChild = (childId: string) => {
@@ -73,7 +73,7 @@ const PhotoPreviewCard: React.FC<{
         <p className="text-[10px] text-gray-500 truncate">{item.file.name}</p>
 
         {/* 子どもタグ付け */}
-        {children.length > 0 && (
+        {childList.length > 0 && (
           <div className="mt-1.5">
             <button
               onClick={() => setExpanded((v) => !v)}
@@ -86,7 +86,7 @@ const PhotoPreviewCard: React.FC<{
             </button>
             {expanded && (
               <div className="mt-1 max-h-28 overflow-y-auto space-y-0.5">
-                {children.map((child) => (
+                {childList.map((child) => (
                   <label key={child.id} className="flex items-center gap-1.5 cursor-pointer">
                     <input
                       type="checkbox"
@@ -366,7 +366,7 @@ export const PhotoUpload: React.FC = () => {
                 key={`${item.file.name}-${i}`}
                 item={item}
                 index={i}
-                children={children}
+                childList={children}
                 onTagChildren={(ids) => handleTagChildren(i, ids)}
                 onRemove={() => handleRemove(i)}
               />

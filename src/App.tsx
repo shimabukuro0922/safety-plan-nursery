@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
 import AppLayout from '@/components/layout/AppLayout'
+import { SyncProvider } from '@/components/SyncProvider'
 import { LoadingSpinner } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 
@@ -73,10 +74,13 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <BrowserRouter>
-        <AppLayout>
-          <AppRoutes />
-        </AppLayout>
+        <SyncProvider>
+          <AppLayout>
+            <AppRoutes />
+          </AppLayout>
+        </SyncProvider>
       </BrowserRouter>
+
       <Toaster
         position="top-center"
         toastOptions={{

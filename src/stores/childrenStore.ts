@@ -1,5 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { useFacilityStore } from '@/stores/facilityStore'
+import { pushChild as syncPushChild, deleteChildRemote } from '@/lib/sync'
+
+function getSupabaseId(): string | null {
+  return useFacilityStore.getState().facility?.supabaseId ?? null
+}
 
 export const DEFAULT_CLASSES = [
   '0歳児クラス',
@@ -40,25 +46,41 @@ export const useChildrenStore = create<ChildrenState>()(
         })),
       addChild: (data) => {
         const id = `child_${Date.now()}`
-        set((state) => ({
-          children: [...state.children, { ...data, id, createdAt: new Date().toISOString() }],
-        }))
+        const child = { ...data, id, createdAt: new Date().toISOString() }
+        set((state) => ({ children: [...state.children, child] }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) syncPushChild(child, supabaseId).catch(console.error)
         return id
       },
-      updateChild: (id, updates) =>
+      updateChild: (id, updates) => {
         set((state) => ({
           children: state.children.map((c) => (c.id === id ? { ...c, ...updates } : c)),
-        })),
-      deleteChild: (id) =>
-        set((state) => ({ children: state.children.filter((c) => c.id !== id) })),
-      setPhotoNG: (id, isNG, reason) =>
+        }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const updated = useChildrenStore.getState().children.find((c) => c.id === id)
+          if (updated) syncPushChild({ ...updated, ...updates }, supabaseId).catch(console.error)
+        }
+      },
+      deleteChild: (id) => {
+        const supabaseId = getSupabaseId()
+        set((state) => ({ children: state.children.filter((c) => c.id !== id) }))
+        if (supabaseId) deleteChildRemote(id, supabaseId).catch(console.error)
+      },
+      setPhotoNG: (id, isNG, reason) => {
         set((state) => ({
           children: state.children.map((c) =>
             c.id === id
               ? { ...c, isPhotoNG: isNG, ngReason: isNG ? (reason ?? '保護者申請') : null }
               : c
           ),
-        })),
+        }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) {
+          const updated = useChildrenStore.getState().children.find((c) => c.id === id)
+          if (updated) syncPushChild(updated, supabaseId).catch(console.error)
+        }
+      },
     }),
     { name: 'children-store-v1' }
   )
