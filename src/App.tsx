@@ -22,6 +22,10 @@ const NearMiss = React.lazy(() => import('@/pages/near-miss/NearMiss'))
 const EmergencyGuide = React.lazy(() => import('@/pages/emergency/EmergencyGuide'))
 const NapCheck = React.lazy(() => import('@/pages/nap/NapCheck'))
 const StaffTraining = React.lazy(() => import('@/pages/training/StaffTraining'))
+const PhotoHub = React.lazy(() => import('@/pages/photos/PhotoHub'))
+const PhotoUpload = React.lazy(() => import('@/pages/photos/PhotoUpload'))
+const PhotoGallery = React.lazy(() => import('@/pages/photos/PhotoGallery'))
+const ChildrenManager = React.lazy(() => import('@/pages/children/ChildrenManager'))
 
 const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
@@ -54,6 +58,10 @@ function AppRoutes() {
         <Route path="/emergency" element={<RequireSetup><EmergencyGuide /></RequireSetup>} />
         <Route path="/nap" element={<RequireSetup><NapCheck /></RequireSetup>} />
         <Route path="/training" element={<RequireSetup><StaffTraining /></RequireSetup>} />
+        <Route path="/photos" element={<RequireSetup><PhotoHub /></RequireSetup>} />
+        <Route path="/photos/upload" element={<RequireSetup><PhotoUpload /></RequireSetup>} />
+        <Route path="/photos/gallery" element={<RequireSetup><PhotoGallery /></RequireSetup>} />
+        <Route path="/children" element={<RequireSetup><ChildrenManager /></RequireSetup>} />
         <Route path="/settings" element={<RequireSetup><Settings /></RequireSetup>} />
         <Route path="*" element={<Navigate to="/dashboard" replace />} />
       </Routes>

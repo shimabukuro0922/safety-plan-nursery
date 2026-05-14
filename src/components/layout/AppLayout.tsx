@@ -4,7 +4,7 @@ import {
   LayoutDashboard, ClipboardCheck, History,
   FileText, Settings, ChevronLeft,
   ShieldCheck, CalendarDays, AlertCircle, Users, Bell, HelpCircle,
-  Moon, GraduationCap, Siren, MoreHorizontal, X,
+  Moon, GraduationCap, Siren, MoreHorizontal, X, Camera,
 } from 'lucide-react'
 import { GuideModal } from '@/components/GuideModal'
 
@@ -15,14 +15,16 @@ interface NavItem {
 }
 
 const NAV_ITEMS: NavItem[] = [
-  { label: 'ホーム',       path: '/dashboard',         icon: <LayoutDashboard size={20} /> },
-  { label: 'チェック',     path: '/checklists/monthly', icon: <ClipboardCheck size={20} /> },
-  { label: 'ヒヤリ',       path: '/near-miss',          icon: <AlertCircle size={20} /> },
-  { label: '午睡',         path: '/nap',                icon: <Moon size={20} /> },
-  { label: 'もっと',       path: '',                    icon: <MoreHorizontal size={20} /> },
+  { label: 'ホーム',   path: '/dashboard',         icon: <LayoutDashboard size={20} /> },
+  { label: 'チェック', path: '/checklists/monthly', icon: <ClipboardCheck size={20} /> },
+  { label: '写真',     path: '/photos',             icon: <Camera size={20} /> },
+  { label: '午睡',     path: '/nap',                icon: <Moon size={20} /> },
+  { label: 'もっと',   path: '',                    icon: <MoreHorizontal size={20} /> },
 ]
 
 const MORE_ITEMS = [
+  { label: '写真管理',           path: '/photos',    icon: <Camera size={20} className="text-blue-500" /> },
+  { label: '園児管理',           path: '/children',  icon: <Users size={20} className="text-indigo-500" /> },
   { label: '緊急対応カード',     path: '/emergency', icon: <Siren size={20} className="text-red-500" /> },
   { label: '職員研修・資格管理', path: '/training',  icon: <GraduationCap size={20} className="text-purple-500" /> },
   { label: '実施記録・証跡',     path: '/records',   icon: <History size={20} className="text-blue-500" /> },
@@ -62,6 +64,13 @@ const PC_NAV_ITEMS = [
     items: [
       { label: '実施記録・証跡', path: '/records',  icon: <History size={16} /> },
       { label: '報告書',         path: '/reports',  icon: <FileText size={16} /> },
+    ],
+  },
+  {
+    section: '写真管理',
+    items: [
+      { label: '写真管理',     path: '/photos',         icon: <Camera size={16} /> },
+      { label: '園児管理',     path: '/children',       icon: <Users size={16} /> },
     ],
   },
   {
@@ -274,6 +283,10 @@ function getPageTitle(pathname: string): string {
     '/emergency':           '緊急対応カード',
     '/nap':                 '午睡見守り記録',
     '/training':            '職員研修・資格管理',
+    '/photos':              '写真管理',
+    '/photos/upload':       '写真をアップロード',
+    '/photos/gallery':      '写真ギャラリー',
+    '/children':            '園児管理',
     '/settings':            '設定',
   }
   if (map[pathname]) return map[pathname]

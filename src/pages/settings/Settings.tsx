@@ -20,6 +20,8 @@ const BACKUP_KEYS = [
   'staff-material-type-store-v1',
   'nap-check-store-v1',
   'staff-training-store-v1',
+  'children-store-v1',
+  'photo-store-v1',
 ]
 
 function exportBackup() {
