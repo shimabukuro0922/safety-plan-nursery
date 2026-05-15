@@ -1,8 +1,9 @@
-import React, { useState } from 'react'
+import React, { useState, useRef } from 'react'
 import { Sparkles, FileDown, Send, Pencil, Plus, Trash2, X, Check, RotateCcw } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { useNoticeCategoryStore } from '@/stores/appStore'
+import { exportToPDF } from '@/lib/exportPDF'
 import toast from 'react-hot-toast'
 
 const STYLES = [
@@ -20,6 +21,8 @@ export const GuardianNotice: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generated, setGenerated] = useState<string | null>(null)
   const [editedContent, setEditedContent] = useState('')
+  const [exportingPDF, setExportingPDF] = useState(false)
+  const noticeRef = useRef<HTMLDivElement>(null)
 
   // 編集モード
   const [editMode, setEditMode] = useState(false)
@@ -217,7 +220,7 @@ export const GuardianNotice: React.FC = () => {
       )}
 
       {generated && !editMode && (
-        <Card className="p-4">
+        <div ref={noticeRef}><Card className="p-4">
           <div className="flex items-center justify-between mb-3">
             <p className="text-sm font-bold text-gray-900">生成された周知文（下書き）</p>
             <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
@@ -229,14 +232,29 @@ export const GuardianNotice: React.FC = () => {
           />
           <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
           <div className="mt-3 flex gap-2">
-            <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}>
+            <Button
+              variant="secondary" size="sm" fullWidth
+              loading={exportingPDF}
+              onClick={async () => {
+                if (!noticeRef.current) return
+                setExportingPDF(true)
+                try {
+                  await exportToPDF(noticeRef.current, { filename: '保護者向け周知文' })
+                  toast.success('PDFを保存しました')
+                } catch {
+                  toast.error('PDF生成に失敗しました')
+                } finally {
+                  setExportingPDF(false)
+                }
+              }}
+            >
               <FileDown size={14} /> PDF出力
             </Button>
             <Button variant="secondary" size="sm" fullWidth onClick={() => toast('配布後は「実施記録・証跡」ページから記録してください', { icon: 'ℹ️' })}>
               <Send size={14} /> 配布済みとして記録
             </Button>
           </div>
-        </Card>
+        </Card></div>
       )}
       <div className="h-4" />
     </div>

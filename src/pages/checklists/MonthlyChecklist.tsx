@@ -1,10 +1,11 @@
-import React, { useState, useMemo } from 'react'
+import React, { useState, useMemo, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { ChevronLeft, ChevronRight, FileText, Check, Settings, Plus, Pencil, Trash2, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react'
+import { ChevronLeft, ChevronRight, FileText, FileDown, Check, Settings, Plus, Pencil, Trash2, RotateCcw, RefreshCw, AlertTriangle } from 'lucide-react'
 import { Button, Card, ProgressBar, Modal } from '@/components/ui'
 import { useChecklistStore, useChecklistItemsStore } from '@/stores/appStore'
 import type { ChecklistItemDef } from '@/stores/appStore'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { exportToPDF } from '@/lib/exportPDF'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
@@ -293,6 +294,8 @@ export const MonthlyChecklist: React.FC = () => {
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth() + 1)
   const [manageOpen, setManageOpen] = useState(false)
+  const [exportingPDF, setExportingPDF] = useState(false)
+  const checklistRef = useRef<HTMLDivElement>(null)
   const { doneItems, markDone, markUndone, lastMarkedMonth, resetForNewMonth } = useChecklistStore()
   const { items: checklistItems, resetToDefault } = useChecklistItemsStore()
   const { facility } = useFacilityStore()
@@ -365,6 +368,33 @@ export const MonthlyChecklist: React.FC = () => {
         </button>
       </div>
 
+      {/* PDFダウンロードボタン */}
+      <Button
+        variant="secondary"
+        size="sm"
+        fullWidth
+        loading={exportingPDF}
+        onClick={async () => {
+          if (!checklistRef.current) return
+          setExportingPDF(true)
+          try {
+            await exportToPDF(checklistRef.current, {
+              filename: `${year}年${month}月_月次チェック表`,
+            })
+            toast.success('PDFを保存しました')
+          } catch {
+            toast.error('PDF生成に失敗しました')
+          } finally {
+            setExportingPDF(false)
+          }
+        }}
+      >
+        <FileDown size={14} />
+        このチェック表をPDFで保存
+      </Button>
+
+      {/* チェック表本文（PDF出力対象） */}
+      <div ref={checklistRef}>
       {/* 月またぎリセットバナー */}
       {showResetBanner && (
         <div className="bg-amber-50 border border-amber-300 rounded-xl p-4 flex items-start gap-3">
@@ -510,6 +540,8 @@ export const MonthlyChecklist: React.FC = () => {
           この結果から報告書を作成する
         </Button>
       </div>
+
+      </div>{/* checklistRef end */}
 
       <ItemManageModal open={manageOpen} onClose={() => setManageOpen(false)} />
 

@@ -8,6 +8,7 @@ import { Card, Button, Modal, SectionHeader } from '@/components/ui'
 import { useReportStore } from '@/stores/appStore'
 import type { ReportStatus, ReportSection, ReportContent } from '@/types'
 import { STATUS_CONFIG } from '@/types'
+import { exportToPDF } from '@/lib/exportPDF'
 import toast from 'react-hot-toast'
 
 // ==============================
@@ -179,6 +180,8 @@ export const ReportEditPage: React.FC = () => {
     report?.content ?? { title: '', sections: [], missing_info: [], suggestions: [] }
   )
   const [showPDFModal, setShowPDFModal] = useState(false)
+  const [exportingPDF, setExportingPDF] = useState(false)
+  const printAreaRef = useRef<HTMLDivElement>(null)
   // 未保存の編集中は同期でコンテンツを上書きしない
   const isDirtyRef = useRef(false)
 
@@ -234,7 +237,20 @@ export const ReportEditPage: React.FC = () => {
         <StatusActionBar
           status={status}
           onStatusChange={handleStatusChange}
-          onExportPDF={() => setShowPDFModal(true)}
+          onExportPDF={async () => {
+        if (!printAreaRef.current) return
+        setExportingPDF(true)
+        try {
+          await exportToPDF(printAreaRef.current, {
+            filename: content.title || '安全管理報告書',
+            onProgress: (p) => { if (p === 100) toast.success('PDFを保存しました') },
+          })
+        } catch {
+          toast.error('PDF生成に失敗しました')
+        } finally {
+          setExportingPDF(false)
+        }
+      }}
           onSave={handleSave}
         />
       </div>
@@ -250,7 +266,7 @@ export const ReportEditPage: React.FC = () => {
       )}
 
       {/* PC: 2カラム / Mobile: 縦積み */}
-      <div className="flex flex-col lg:flex-row gap-5">
+      <div ref={printAreaRef} className="flex flex-col lg:flex-row gap-5">
         {/* 本文エディタ */}
         <div className="flex-1 min-w-0">
           <SectionHeader
