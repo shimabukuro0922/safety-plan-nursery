@@ -1,14 +1,13 @@
 /**
  * PDF直接生成ユーティリティ
- * html2canvas で DOM をキャプチャし、jsPDF で PDF に変換してダウンロードする。
- * 日本語テキストを追加フォントなしで正確に出力できる。
+ * html-to-image で DOM をキャプチャし、jsPDF で PDF に変換してダウンロードする。
+ * html2canvas と異なり Tailwind v4 の oklch カラーに対応している。
  */
-import html2canvas from 'html2canvas'
+import * as htmlToImage from 'html-to-image'
 import jsPDF from 'jspdf'
 
 export interface ExportPDFOptions {
   filename?: string       // ダウンロードファイル名（拡張子なし）
-  scale?: number          // キャプチャ解像度（デフォルト2 = 高品質）
   margin?: number         // ページ余白 mm（デフォルト10）
   onProgress?: (pct: number) => void
 }
@@ -23,37 +22,28 @@ export async function exportToPDF(
 ): Promise<void> {
   const {
     filename = 'document',
-    scale = 2,
     margin = 10,
     onProgress,
   } = options
 
   onProgress?.(10)
 
-  // DOM をキャプチャ
-  const canvas = await html2canvas(element, {
-    scale,
-    useCORS: true,
-    allowTaint: true,
-    logging: false,
+  // DOM をキャプチャ（oklch 対応）
+  const dataUrl = await htmlToImage.toJpeg(element, {
+    quality: 0.92,
     backgroundColor: '#ffffff',
-    // textarea の内容を div に変換して正しくキャプチャする
-    onclone: (_doc, cloned) => {
-      cloned.querySelectorAll('textarea').forEach((ta) => {
-        const div = document.createElement('div')
-        const cs = window.getComputedStyle(ta)
-        div.style.cssText = cs.cssText
-        div.style.whiteSpace = 'pre-wrap'
-        div.style.overflow = 'visible'
-        div.style.height = 'auto'
-        div.style.minHeight = cs.minHeight
-        div.textContent = ta.value
-        ta.parentNode?.replaceChild(div, ta)
-      })
-    },
+    pixelRatio: 2,
   })
 
   onProgress?.(60)
+
+  // 画像サイズを取得
+  const img = new Image()
+  await new Promise<void>((resolve, reject) => {
+    img.onload = () => resolve()
+    img.onerror = reject
+    img.src = dataUrl
+  })
 
   const pdf = new jsPDF({
     orientation: 'portrait',
@@ -67,21 +57,22 @@ export async function exportToPDF(
   const contentH = pageH - margin * 2
 
   // 画像の実際の高さを mm 換算
-  const imgHeightMM = (canvas.height * contentW) / canvas.width
+  const imgHeightMM = (img.height * contentW) / img.width
 
   if (imgHeightMM <= contentH) {
     // 1ページに収まる場合
-    pdf.addImage(
-      canvas.toDataURL('image/jpeg', 0.92),
-      'JPEG',
-      margin, margin,
-      contentW, imgHeightMM
-    )
+    pdf.addImage(dataUrl, 'JPEG', margin, margin, contentW, imgHeightMM)
   } else {
     // 複数ページに分割
-    const pxPerMM = canvas.width / contentW
+    const canvas = document.createElement('canvas')
+    canvas.width = img.width
+    canvas.height = img.height
+    const ctx = canvas.getContext('2d')!
+    ctx.drawImage(img, 0, 0)
+
+    const pxPerMM = img.width / contentW
     const pageHeightPx = Math.round(contentH * pxPerMM)
-    let remainingPx = canvas.height
+    let remainingPx = img.height
     let srcY = 0
     let firstPage = true
 
@@ -91,14 +82,13 @@ export async function exportToPDF(
 
       const sliceH = Math.min(pageHeightPx, remainingPx)
 
-      // ページ分のスライスを別 canvas に描画
       const sliceCanvas = document.createElement('canvas')
       sliceCanvas.width = canvas.width
       sliceCanvas.height = sliceH
-      const ctx = sliceCanvas.getContext('2d')!
-      ctx.fillStyle = '#ffffff'
-      ctx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height)
-      ctx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH)
+      const sCtx = sliceCanvas.getContext('2d')!
+      sCtx.fillStyle = '#ffffff'
+      sCtx.fillRect(0, 0, sliceCanvas.width, sliceCanvas.height)
+      sCtx.drawImage(canvas, 0, srcY, canvas.width, sliceH, 0, 0, canvas.width, sliceH)
 
       const sliceHeightMM = (sliceH * contentW) / canvas.width
       pdf.addImage(
