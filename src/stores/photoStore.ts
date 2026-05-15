@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import { deletePhoto as deletePhotoDB } from '@/lib/photoDB'
 
 export interface PhotoEvent {
   id: string
@@ -42,7 +43,7 @@ interface PhotoState {
 
 export const usePhotoStore = create<PhotoState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       events: [],
       photos: [],
 
@@ -57,11 +58,14 @@ export const usePhotoStore = create<PhotoState>()(
         set((state) => ({
           events: state.events.map((e) => (e.id === id ? { ...e, ...updates } : e)),
         })),
-      deleteEvent: (id) =>
+      deleteEvent: (id) => {
+        // イベント削除時：紐づく写真のIndexedDB blobも全件削除
+        get().photos.filter((p) => p.eventId === id).forEach((p) => deletePhotoDB(p.id).catch(console.error))
         set((state) => ({
           events: state.events.filter((e) => e.id !== id),
           photos: state.photos.filter((p) => p.eventId !== id),
-        })),
+        }))
+      },
 
       addPhoto: (data) => {
         const id = `ph_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`
@@ -74,8 +78,11 @@ export const usePhotoStore = create<PhotoState>()(
         set((state) => ({
           photos: state.photos.map((p) => (p.id === id ? { ...p, ...updates } : p)),
         })),
-      deletePhoto: (id) =>
-        set((state) => ({ photos: state.photos.filter((p) => p.id !== id) })),
+      deletePhoto: (id) => {
+        // メタデータ削除と同時にIndexedDB blobも削除
+        deletePhotoDB(id).catch(console.error)
+        set((state) => ({ photos: state.photos.filter((p) => p.id !== id) }))
+      },
 
       approvePhoto: (id) =>
         set((state) => ({

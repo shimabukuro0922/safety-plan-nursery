@@ -3,6 +3,7 @@ import { Users, Plus, Pencil, Trash2, ShieldAlert, ShieldCheck, X, Check } from 
 import { Card, SectionHeader, Button, Modal, EmptyState } from '@/components/ui'
 import { useChildrenStore, DEFAULT_CLASSES } from '@/stores/childrenStore'
 import type { Child } from '@/stores/childrenStore'
+import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'
 
 // ==============================
@@ -139,6 +140,8 @@ const ChildCard: React.FC<{
 // ==============================
 export const ChildrenManager: React.FC = () => {
   const { children, addChild, updateChild, deleteChild } = useChildrenStore()
+  const { facility } = useFacilityStore()
+  const isSynced = !!facility?.supabaseId
   const [addOpen, setAddOpen] = useState(false)
   const [editId, setEditId] = useState<string | null>(null)
   const [filterClass, setFilterClass] = useState('')
@@ -241,7 +244,10 @@ export const ChildrenManager: React.FC = () => {
         <div className="flex items-start gap-2">
           <ShieldCheck size={16} className="text-blue-500 shrink-0 mt-0.5" />
           <p className="text-xs text-blue-700 leading-relaxed">
-            園児情報はこのデバイスのみに保存されます。<br />
+            {isSynced
+              ? '園児情報は施設コードで参加した端末間で自動的に同期されます。'
+              : '施設コードを発行すると、複数端末で園児情報を共有できます。'}
+            <br />
             写真掲載NG設定は写真管理・保護者共有のすべての場面で自動的に適用されます。
           </p>
         </div>

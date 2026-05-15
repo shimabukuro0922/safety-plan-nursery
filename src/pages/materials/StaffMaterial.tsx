@@ -4,6 +4,7 @@ import { Sparkles, FileDown, Users, BookOpen, UserPlus, RotateCcw, Pencil, Plus,
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useStaffMaterialTypeStore } from '@/stores/appStore'
 import type { StaffMaterialTypeDef } from '@/stores/appStore'
+import { exportToPDF } from '@/lib/exportPDF'
 import toast from 'react-hot-toast'
 
 const DEFAULT_ICONS: Record<string, React.ReactNode> = {
@@ -196,7 +197,9 @@ export const StaffMaterial: React.FC = () => {
   const [isGenerating, setIsGenerating] = useState(false)
   const [generated, setGenerated] = useState<string | null>(null)
   const [editedContent, setEditedContent] = useState('')
+  const [exportingPDF, setExportingPDF] = useState(false)
   const [manageOpen, setManageOpen] = useState(false)
+  const contentRef = useRef<HTMLDivElement>(null)
 
   const placeholder = useRef(
     THEME_PLACEHOLDERS[Math.floor(Math.random() * THEME_PLACEHOLDERS.length)]
@@ -329,29 +332,52 @@ export const StaffMaterial: React.FC = () => {
 
       {/* 生成結果（編集可能） */}
       {generated !== null && (
-        <Card className="p-4">
-          <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
-            <div className="flex items-center gap-1.5 min-w-0">
-              <Pencil size={14} className="text-gray-400 shrink-0" />
-              <p className="text-sm font-bold text-gray-900">作成された資料</p>
-              <span className="text-xs text-gray-400 hidden sm:inline">（自由に編集できます）</span>
-            </div>
-            <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full shrink-0">AI生成</span>
+        <>
+          {/* PDF出力対象エリア（ボタン類を除いた本文のみ） */}
+          <div ref={contentRef}>
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+                <div className="flex items-center gap-1.5 min-w-0">
+                  <Pencil size={14} className="text-gray-400 shrink-0" />
+                  <p className="text-sm font-bold text-gray-900">作成された資料</p>
+                  <span className="text-xs text-gray-400 hidden sm:inline">（自由に編集できます）</span>
+                </div>
+                <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full shrink-0">AI生成</span>
+              </div>
+              {theme.trim() && (
+                <p className="text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-3 break-anywhere">
+                  テーマ：{theme.trim()}
+                </p>
+              )}
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-y min-h-[200px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <p className="text-xs text-gray-400 mt-1">※ 内容を自由に書き直せます</p>
+            </Card>
           </div>
-          {theme.trim() && (
-            <p className="text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-3 break-anywhere">
-              テーマ：{theme.trim()}
-            </p>
-          )}
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-y min-h-[200px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-          <p className="text-xs text-gray-400 mt-1">※ 内容を自由に書き直せます</p>
-          <div className="mt-3 space-y-2">
+          {/* ボタン類はPDF対象外 */}
+          <div className="space-y-2">
             <div className="flex gap-2">
-              <Button variant="secondary" size="sm" fullWidth onClick={() => toast.success('印刷・PDF出力はブラウザの印刷機能をご利用ください')}>
+              <Button
+                variant="secondary" size="sm" fullWidth
+                loading={exportingPDF}
+                onClick={async () => {
+                  if (!contentRef.current) return
+                  setExportingPDF(true)
+                  try {
+                    await exportToPDF(contentRef.current, {
+                      filename: `職員資料_${selectedType?.label ?? ''}`,
+                    })
+                    toast.success('PDFを保存しました')
+                  } catch {
+                    toast.error('PDF生成に失敗しました')
+                  } finally {
+                    setExportingPDF(false)
+                  }
+                }}
+              >
                 <FileDown size={14} /> PDFで出力
               </Button>
               <Button variant="secondary" size="sm" fullWidth onClick={() => { navigate('/training'); toast('研修実績は「職員研修・資格管理」から記録できます', { icon: 'ℹ️' }) }}>
@@ -362,7 +388,7 @@ export const StaffMaterial: React.FC = () => {
               <RotateCcw size={14} /> もう一度作り直す
             </Button>
           </div>
-        </Card>
+        </>
       )}
 
       <div className="h-4" />
