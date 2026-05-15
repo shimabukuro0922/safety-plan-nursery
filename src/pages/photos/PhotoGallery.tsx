@@ -9,6 +9,8 @@ import { usePhotoStore } from '@/stores/photoStore'
 import type { PhotoMeta, PhotoStatus } from '@/stores/photoStore'
 import { useChildrenStore } from '@/stores/childrenStore'
 import { loadPhotoURL, deletePhoto as deletePhotoFromDB } from '@/lib/photoDB'
+import { deletePhotoFromSupabase } from '@/lib/photoStorage'
+import { useFacilityStore } from '@/stores/facilityStore'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
@@ -32,6 +34,7 @@ const PhotoDetailModal: React.FC<{
 }> = ({ photo, onClose, onPrev, onNext, hasPrev, hasNext }) => {
   const { events, approvePhoto, rejectPhoto, resetToPending, updatePhoto, deletePhoto } = usePhotoStore()
   const { children } = useChildrenStore()
+  const { facility } = useFacilityStore()
   const [fullUrl, setFullUrl] = useState<string | null>(null)
   const [loadingFull, setLoadingFull] = useState(false)
   const [tagOpen, setTagOpen] = useState(false)
@@ -53,7 +56,7 @@ const PhotoDetailModal: React.FC<{
     if (!photo) return
 
     setLoadingFull(true)
-    loadPhotoURL(photo.id).then((url) => {
+    loadPhotoURL(photo.id, photo.storageUrl).then((url) => {
       urlRef.current = url
       setFullUrl(url)
       setLoadingFull(false)
@@ -101,7 +104,12 @@ const PhotoDetailModal: React.FC<{
 
   const handleDelete = () => {
     if (!window.confirm('この写真を削除しますか？元に戻せません。')) return
+    // IndexedDB から削除
     deletePhotoFromDB(photo.id)
+    // Supabase Storage からも削除（クラウドに保存されている場合）
+    if (photo.storageUrl && facility?.supabaseId) {
+      deletePhotoFromSupabase(photo.id, facility.supabaseId)
+    }
     deletePhoto(photo.id)
     toast.success('削除しました')
     onClose()

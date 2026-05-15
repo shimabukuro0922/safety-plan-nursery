@@ -7,6 +7,7 @@ import { useChildrenStore } from '@/stores/childrenStore'
 import type { Child } from '@/stores/childrenStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { savePhoto, makeThumbnail } from '@/lib/photoDB'
+import { uploadPhotoToSupabase } from '@/lib/photoStorage'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -117,7 +118,7 @@ const PhotoPreviewCard: React.FC<{
 export const PhotoUpload: React.FC = () => {
   const navigate = useNavigate()
   const { facility } = useFacilityStore()
-  const { events, addEvent, addPhoto } = usePhotoStore()
+  const { events, addEvent, addPhoto, updatePhoto } = usePhotoStore()
   const { children, classes } = useChildrenStore()
 
   // イベント選択
@@ -218,7 +219,13 @@ export const PhotoUpload: React.FC = () => {
           rejectedReason: null,
           thumbnailDataUrl: item.thumbnail,
         })
+        // IndexedDB に保存（オフライン用フォールバック）
         await savePhoto(photoId, item.file)
+        // Supabase Storage にもアップロード（クラウド共有用）
+        if (facility?.supabaseId) {
+          const storageUrl = await uploadPhotoToSupabase(photoId, facility.supabaseId, item.file)
+          if (storageUrl) updatePhoto(photoId, { storageUrl })
+        }
         succeeded++
       } catch {
         toast.error(`${item.file.name} のアップロードに失敗しました`)

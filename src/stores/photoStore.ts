@@ -23,6 +23,7 @@ export interface PhotoMeta {
   rejectedReason: string | null
   thumbnailDataUrl: string    // base64 300px thumbnail — fast preview without IndexedDB
   uploadedAt: string
+  storageUrl?: string | null  // Supabase Storage の公開URL（設定済みの場合）
 }
 
 interface PhotoState {

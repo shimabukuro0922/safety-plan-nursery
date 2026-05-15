@@ -37,7 +37,10 @@ export async function savePhoto(id: string, blob: Blob): Promise<void> {
   })
 }
 
-export async function loadPhotoURL(id: string): Promise<string | null> {
+export async function loadPhotoURL(id: string, storageUrl?: string | null): Promise<string | null> {
+  // クラウドURLがある場合はそちらを優先（マルチデバイス対応）
+  if (storageUrl) return storageUrl
+  // IndexedDB フォールバック（オフライン時 / クラウド未設定時）
   const db = await openDB()
   return new Promise((resolve, reject) => {
     const req = db.transaction(STORE_NAME, 'readonly').objectStore(STORE_NAME).get(id)
