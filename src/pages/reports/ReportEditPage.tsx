@@ -245,8 +245,10 @@ export const ReportEditPage: React.FC = () => {
             filename: content.title || '安全管理報告書',
             onProgress: (p) => { if (p === 100) toast.success('PDFを保存しました') },
           })
-        } catch {
-          toast.error('PDF生成に失敗しました')
+        } catch (e) {
+          console.error('PDF生成エラー:', e)
+          const msg = e instanceof Error ? e.message : String(e)
+          toast.error(`PDF生成に失敗しました: ${msg}`)
         } finally {
           setExportingPDF(false)
         }
