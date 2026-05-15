@@ -15,6 +15,7 @@ import {
   useAnnualPlanStore,
 } from '@/stores/appStore'
 import { useChildrenStore } from '@/stores/childrenStore'
+import { usePhotoStore } from '@/stores/photoStore'
 import {
   pullNearMisses,
   pullNapChecksRecent,
@@ -24,6 +25,8 @@ import {
   pullChildren,
   pullSeasonalDone,
   pullAnnualPlans,
+  pullPhotoEvents,
+  pullPhotoMeta,
   subscribeToNapChecks,
 } from '@/lib/sync'
 
@@ -46,6 +49,7 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
         const [
           nearMisses, napChecks, trainingRecords, checklistDone,
           checklistItems, children, seasonalDone, annualPlans,
+          photoEvents, photoMeta,
         ] = await Promise.all([
           pullNearMisses(facilityId),
           pullNapChecksRecent(facilityId, 7),  // 直近7日分を取得（他端末の過去記録も同期）
@@ -55,6 +59,8 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
           pullChildren(facilityId),
           pullSeasonalDone(facilityId),
           pullAnnualPlans(facilityId),
+          pullPhotoEvents(facilityId),
+          pullPhotoMeta(facilityId),
         ])
 
         // Replace local state with remote (writes have already been pushed on each action)
@@ -89,6 +95,29 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
               return remote ?? local
             }),
           }))
+        }
+        // 写真：リモートデータで上書き（ローカルのthumbnailDataUrlはリモート優先で補完）
+        if (photoEvents.length > 0 || photoMeta.length > 0) {
+          usePhotoStore.setState((s) => {
+            // リモートにないローカルイベント・写真は保持（オフライン作成分）
+            const remoteEventIds = new Set(photoEvents.map((e) => e.id))
+            const remotePhotoIds = new Set(photoMeta.map((p) => p.id))
+            const localOnlyEvents = s.events.filter((e) => !remoteEventIds.has(e.id))
+            const localOnlyPhotos = s.photos.filter((p) => !remotePhotoIds.has(p.id))
+            // リモートの写真にサムネがない場合はローカルのものを補完
+            const mergedPhotos = photoMeta.map((remote) => {
+              const local = s.photos.find((p) => p.id === remote.id)
+              return {
+                ...remote,
+                status: remote.status as import('@/stores/photoStore').PhotoStatus,
+                thumbnailDataUrl: remote.thumbnailDataUrl || local?.thumbnailDataUrl || '',
+              }
+            })
+            return {
+              events: [...photoEvents, ...localOnlyEvents],
+              photos: [...mergedPhotos, ...localOnlyPhotos],
+            }
+          })
         }
       } catch (err) {
         console.warn('[SyncProvider] sync failed:', err)

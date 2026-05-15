@@ -647,3 +647,150 @@ export async function pullChildren(facilityId: string): Promise<SyncChild[]> {
     return []
   }
 }
+
+// ==========================================
+// Photo Events
+// ==========================================
+
+export interface SyncPhotoEvent {
+  id: string
+  name: string
+  date: string
+  className: string
+  notes: string
+  createdAt: string
+}
+
+export async function pushPhotoEvent(event: SyncPhotoEvent, facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('photo_events').upsert({
+      id: event.id,
+      facility_id: facilityId,
+      name: event.name,
+      date: event.date,
+      class_name: event.className,
+      notes: event.notes,
+      created_at: event.createdAt,
+    }, { onConflict: 'id' })
+  } catch (err) {
+    console.error('[sync] pushPhotoEvent:', err)
+  }
+}
+
+export async function deletePhotoEventRemote(id: string, facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('photo_events').delete().eq('id', id).eq('facility_id', facilityId)
+  } catch (err) {
+    console.error('[sync] deletePhotoEvent:', err)
+  }
+}
+
+export async function pullPhotoEvents(facilityId: string): Promise<SyncPhotoEvent[]> {
+  if (!isSupabaseConfigured) return []
+  try {
+    const { data, error } = await supabase
+      .from('photo_events')
+      .select('*')
+      .eq('facility_id', facilityId)
+      .order('date', { ascending: false })
+    if (error) throw error
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      name: r.name,
+      date: r.date,
+      className: r.class_name,
+      notes: r.notes ?? '',
+      createdAt: r.created_at ?? new Date().toISOString(),
+    }))
+  } catch {
+    return []
+  }
+}
+
+// ==========================================
+// Photo Meta
+// ==========================================
+
+export interface SyncPhotoMeta {
+  id: string
+  eventId: string
+  filename: string
+  takenAt: string
+  taggedChildIds: string[]
+  hasNGChild: boolean
+  status: string
+  rejectedReason: string | null
+  thumbnailDataUrl: string
+  storageUrl: string | null
+  uploadedAt: string
+}
+
+export async function pushPhotoMeta(photo: SyncPhotoMeta, facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('photo_meta').upsert({
+      id: photo.id,
+      facility_id: facilityId,
+      event_id: photo.eventId,
+      filename: photo.filename,
+      taken_at: photo.takenAt,
+      tagged_child_ids: photo.taggedChildIds,
+      has_ng_child: photo.hasNGChild,
+      status: photo.status,
+      rejected_reason: photo.rejectedReason,
+      thumbnail_data_url: photo.thumbnailDataUrl,
+      storage_url: photo.storageUrl,
+      uploaded_at: photo.uploadedAt,
+    }, { onConflict: 'id' })
+  } catch (err) {
+    console.error('[sync] pushPhotoMeta:', err)
+  }
+}
+
+export async function deletePhotoMetaRemote(id: string, facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('photo_meta').delete().eq('id', id).eq('facility_id', facilityId)
+  } catch (err) {
+    console.error('[sync] deletePhotoMeta:', err)
+  }
+}
+
+/** イベント削除時：紐づく写真メタをリモートから全件削除 */
+export async function deletePhotoMetaByEventRemote(eventId: string, facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('photo_meta').delete().eq('event_id', eventId).eq('facility_id', facilityId)
+  } catch (err) {
+    console.error('[sync] deletePhotoMetaByEvent:', err)
+  }
+}
+
+export async function pullPhotoMeta(facilityId: string): Promise<SyncPhotoMeta[]> {
+  if (!isSupabaseConfigured) return []
+  try {
+    const { data, error } = await supabase
+      .from('photo_meta')
+      .select('*')
+      .eq('facility_id', facilityId)
+      .order('uploaded_at', { ascending: false })
+    if (error) throw error
+    return (data ?? []).map((r) => ({
+      id: r.id,
+      eventId: r.event_id,
+      filename: r.filename,
+      takenAt: r.taken_at,
+      taggedChildIds: (r.tagged_child_ids as string[]) ?? [],
+      hasNGChild: r.has_ng_child ?? false,
+      status: r.status,
+      rejectedReason: r.rejected_reason ?? null,
+      thumbnailDataUrl: r.thumbnail_data_url ?? '',
+      storageUrl: r.storage_url ?? null,
+      uploadedAt: r.uploaded_at,
+    }))
+  } catch {
+    return []
+  }
+}
