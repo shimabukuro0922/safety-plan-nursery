@@ -356,6 +356,40 @@ export async function pushChecklistDone(
   }
 }
 
+/** 特定の実施済み項目をSupabaseから削除（チェック取り消し時） */
+export async function deleteChecklistDoneItem(facilityId: string, itemId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('checklist_done').delete()
+      .eq('facility_id', facilityId)
+      .eq('item_id', itemId)
+  } catch (err) {
+    console.error('[sync] deleteChecklistDoneItem:', err)
+  }
+}
+
+/** 施設の実施済み項目を全件削除（月次リセット時） */
+export async function clearChecklistDoneRemote(facilityId: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('checklist_done').delete().eq('facility_id', facilityId)
+  } catch (err) {
+    console.error('[sync] clearChecklistDone:', err)
+  }
+}
+
+/** 指定日の午睡記録を全件削除（日次クリア時） */
+export async function clearNapChecksForDateRemote(facilityId: string, date: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('nap_checks').delete()
+      .eq('facility_id', facilityId)
+      .eq('date', date)
+  } catch (err) {
+    console.error('[sync] clearNapChecksForDate:', err)
+  }
+}
+
 export async function pullChecklistDone(facilityId: string): Promise<SyncChecklistDone> {
   if (!isSupabaseConfigured) return { doneItems: {}, lastMarkedMonth: null }
   try {
@@ -426,6 +460,137 @@ export async function pullChecklistItems(facilityId: string): Promise<SyncCheckl
       categoryName: r.category_name,
       title: r.title,
       description: r.description,
+    }))
+  } catch {
+    return []
+  }
+}
+
+// ==========================================
+// Seasonal Checklist Done
+// ==========================================
+
+export interface SyncSeasonalDoneItem {
+  item_key: string
+  done_at: string
+  done_by: string
+}
+
+/** 季節チェック：完了済みをすべてupsert */
+export async function pushSeasonalDone(
+  doneItems: Record<string, { done_at: string; done_by: string }>,
+  facilityId: string
+): Promise<void> {
+  if (!isSupabaseConfigured) return
+  const rows = Object.entries(doneItems).map(([item_key, val]) => ({
+    facility_id: facilityId,
+    item_key,
+    done_at: val.done_at,
+    done_by: val.done_by,
+  }))
+  if (rows.length === 0) return
+  try {
+    await supabase
+      .from('seasonal_checklist_done')
+      .upsert(rows, { onConflict: 'facility_id,item_key' })
+  } catch (err) {
+    console.error('[sync] pushSeasonalDone:', err)
+  }
+}
+
+/** 季節チェック：1件削除（チェック取り消し時） */
+export async function deleteSeasonalDoneItem(facilityId: string, itemKey: string): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase.from('seasonal_checklist_done').delete()
+      .eq('facility_id', facilityId)
+      .eq('item_key', itemKey)
+  } catch (err) {
+    console.error('[sync] deleteSeasonalDoneItem:', err)
+  }
+}
+
+/** 季節チェック：全件取得 */
+export async function pullSeasonalDone(
+  facilityId: string
+): Promise<Record<string, { done_at: string; done_by: string }>> {
+  if (!isSupabaseConfigured) return {}
+  try {
+    const { data, error } = await supabase
+      .from('seasonal_checklist_done')
+      .select('item_key, done_at, done_by')
+      .eq('facility_id', facilityId)
+    if (error) throw error
+    const result: Record<string, { done_at: string; done_by: string }> = {}
+    for (const r of data ?? []) {
+      result[r.item_key] = { done_at: r.done_at, done_by: r.done_by }
+    }
+    return result
+  } catch {
+    return {}
+  }
+}
+
+// ==========================================
+// Annual Plans
+// ==========================================
+
+export interface SyncAnnualPlanMonth {
+  month: number
+  themes: string[]
+  highRisk: string[]
+}
+
+/** 年間計画：1ヶ月分をupsert（月の編集時） */
+export async function pushAnnualPlanMonth(
+  plan: SyncAnnualPlanMonth,
+  facilityId: string
+): Promise<void> {
+  if (!isSupabaseConfigured) return
+  try {
+    await supabase
+      .from('annual_plans')
+      .upsert(
+        { facility_id: facilityId, month: plan.month, themes: plan.themes, high_risk: plan.highRisk },
+        { onConflict: 'facility_id,month' }
+      )
+  } catch (err) {
+    console.error('[sync] pushAnnualPlanMonth:', err)
+  }
+}
+
+/** 年間計画：全12ヶ月をまとめてupsert（リセット時） */
+export async function pushAnnualPlans(
+  plans: SyncAnnualPlanMonth[],
+  facilityId: string
+): Promise<void> {
+  if (!isSupabaseConfigured || plans.length === 0) return
+  try {
+    await supabase
+      .from('annual_plans')
+      .upsert(
+        plans.map((p) => ({ facility_id: facilityId, month: p.month, themes: p.themes, high_risk: p.highRisk })),
+        { onConflict: 'facility_id,month' }
+      )
+  } catch (err) {
+    console.error('[sync] pushAnnualPlans:', err)
+  }
+}
+
+/** 年間計画：全件取得 */
+export async function pullAnnualPlans(facilityId: string): Promise<SyncAnnualPlanMonth[]> {
+  if (!isSupabaseConfigured) return []
+  try {
+    const { data, error } = await supabase
+      .from('annual_plans')
+      .select('month, themes, high_risk')
+      .eq('facility_id', facilityId)
+      .order('month', { ascending: true })
+    if (error) throw error
+    return (data ?? []).map((r) => ({
+      month: r.month,
+      themes: (r.themes as string[]) ?? [],
+      highRisk: (r.high_risk as string[]) ?? [],
     }))
   } catch {
     return []

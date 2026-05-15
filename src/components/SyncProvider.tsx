@@ -11,6 +11,8 @@ import {
   useStaffTrainingStore,
   useChecklistStore,
   useChecklistItemsStore,
+  useSeasonalChecklistStore,
+  useAnnualPlanStore,
 } from '@/stores/appStore'
 import { useChildrenStore } from '@/stores/childrenStore'
 import {
@@ -20,6 +22,8 @@ import {
   pullChecklistDone,
   pullChecklistItems,
   pullChildren,
+  pullSeasonalDone,
+  pullAnnualPlans,
   subscribeToNapChecks,
 } from '@/lib/sync'
 
@@ -39,15 +43,19 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // today を毎回動的に計算（日付をまたいでも正しい日付を使用）
       try {
-        const [nearMisses, napChecks, trainingRecords, checklistDone, checklistItems, children] =
-          await Promise.all([
-            pullNearMisses(facilityId),
-            pullNapChecksRecent(facilityId, 7),  // 直近7日分を取得（他端末の過去記録も同期）
-            pullTrainingRecords(facilityId),
-            pullChecklistDone(facilityId),
-            pullChecklistItems(facilityId),
-            pullChildren(facilityId),
-          ])
+        const [
+          nearMisses, napChecks, trainingRecords, checklistDone,
+          checklistItems, children, seasonalDone, annualPlans,
+        ] = await Promise.all([
+          pullNearMisses(facilityId),
+          pullNapChecksRecent(facilityId, 7),  // 直近7日分を取得（他端末の過去記録も同期）
+          pullTrainingRecords(facilityId),
+          pullChecklistDone(facilityId),
+          pullChecklistItems(facilityId),
+          pullChildren(facilityId),
+          pullSeasonalDone(facilityId),
+          pullAnnualPlans(facilityId),
+        ])
 
         // Replace local state with remote (writes have already been pushed on each action)
         useNearMissStore.setState({ nearMisses })
@@ -69,6 +77,19 @@ export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children
           useChecklistItemsStore.setState({ items: checklistItems })
         }
         useChildrenStore.setState((s) => ({ ...s, children }))
+        // 季節前チェックリスト：リモートデータがあれば上書き
+        if (Object.keys(seasonalDone).length > 0) {
+          useSeasonalChecklistStore.setState({ doneItems: seasonalDone })
+        }
+        // 年間計画：リモートデータがあれば上書き（ローカルのデフォルトを消さない）
+        if (annualPlans.length > 0) {
+          useAnnualPlanStore.setState((s) => ({
+            plans: s.plans.map((local) => {
+              const remote = annualPlans.find((r) => r.month === local.month)
+              return remote ?? local
+            }),
+          }))
+        }
       } catch (err) {
         console.warn('[SyncProvider] sync failed:', err)
       }

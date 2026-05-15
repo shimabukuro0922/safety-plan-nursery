@@ -72,6 +72,25 @@ create table if not exists public.checklist_items (
   primary key (facility_id, id)
 );
 
+-- 季節前チェックリスト 実施済み
+create table if not exists public.seasonal_checklist_done (
+  facility_id uuid not null references public.facilities(id) on delete cascade,
+  item_key text not null,
+  done_at text not null,
+  done_by text not null,
+  primary key (facility_id, item_key)
+);
+
+-- 年間安全カレンダー（月別）
+create table if not exists public.annual_plans (
+  facility_id uuid not null references public.facilities(id) on delete cascade,
+  month integer not null check (month between 1 and 12),
+  themes jsonb not null default '[]',
+  high_risk jsonb not null default '[]',
+  updated_at timestamptz default now(),
+  primary key (facility_id, month)
+);
+
 -- 園児
 create table if not exists public.children (
   id text primary key,
@@ -93,6 +112,8 @@ alter table public.staff_training enable row level security;
 alter table public.checklist_done enable row level security;
 alter table public.checklist_items enable row level security;
 alter table public.children enable row level security;
+alter table public.seasonal_checklist_done enable row level security;
+alter table public.annual_plans enable row level security;
 
 -- anon キーで全操作を許可（施設コード = アプリレベルのアクセス制御）
 create policy "allow_all" on public.facilities for all using (true) with check (true);
@@ -102,6 +123,8 @@ create policy "allow_all" on public.staff_training for all using (true) with che
 create policy "allow_all" on public.checklist_done for all using (true) with check (true);
 create policy "allow_all" on public.checklist_items for all using (true) with check (true);
 create policy "allow_all" on public.children for all using (true) with check (true);
+create policy "allow_all" on public.seasonal_checklist_done for all using (true) with check (true);
+create policy "allow_all" on public.annual_plans for all using (true) with check (true);
 
 -- リアルタイム配信を有効化
 alter publication supabase_realtime add table public.nap_checks;

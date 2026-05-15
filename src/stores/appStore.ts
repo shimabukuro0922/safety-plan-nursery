@@ -10,6 +10,13 @@ import {
   deleteTrainingRecordRemote,
   pushChecklistDone as syncPushChecklistDone,
   pushChecklistItems as syncPushChecklistItems,
+  deleteChecklistDoneItem,
+  clearChecklistDoneRemote,
+  clearNapChecksForDateRemote,
+  pushSeasonalDone,
+  deleteSeasonalDoneItem,
+  pushAnnualPlanMonth,
+  pushAnnualPlans,
 } from '@/lib/sync'
 
 /** 施設の Supabase ID を取得するヘルパ */
@@ -135,16 +142,18 @@ export const useChecklistStore = create<ChecklistState>()(
           return { doneItems: rest }
         })
         const supabaseId = getSupabaseId()
-        if (supabaseId) {
-          const { doneItems, lastMarkedMonth } = useChecklistStore.getState()
-          syncPushChecklistDone(doneItems, supabaseId, lastMarkedMonth).catch(console.error)
-        }
+        // チェックを外した項目をSupabaseから削除（他端末にも反映）
+        if (supabaseId) deleteChecklistDoneItem(supabaseId, itemId).catch(console.error)
       },
       isDone: (itemId) => {
         return itemId in get().doneItems
       },
       resetForNewMonth: () => {
-        set({ doneItems: {}, lastMarkedMonth: new Date().toISOString().slice(0, 7) })
+        const monthKey = new Date().toISOString().slice(0, 7)
+        set({ doneItems: {}, lastMarkedMonth: monthKey })
+        const supabaseId = getSupabaseId()
+        // 月リセット時はSupabaseの実施済みを全件削除（他端末にも反映）
+        if (supabaseId) clearChecklistDoneRemote(supabaseId).catch(console.error)
       },
     }),
     { name: 'checklist-store' }
@@ -166,18 +175,20 @@ export const useSeasonalChecklistStore = create<SeasonalChecklistState>()(
     (set, get) => ({
       doneItems: {},
       markDone: (itemKey, done_by) => {
+        const record = { done_at: new Date().toISOString(), done_by }
         set((state) => ({
-          doneItems: {
-            ...state.doneItems,
-            [itemKey]: { done_at: new Date().toISOString(), done_by },
-          },
+          doneItems: { ...state.doneItems, [itemKey]: record },
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) pushSeasonalDone({ [itemKey]: record }, supabaseId).catch(console.error)
       },
       markUndone: (itemKey) => {
         set((state) => {
           const { [itemKey]: _, ...rest } = state.doneItems
           return { doneItems: rest }
         })
+        const supabaseId = getSupabaseId()
+        if (supabaseId) deleteSeasonalDoneItem(supabaseId, itemKey).catch(console.error)
       },
       isDone: (itemKey) => itemKey in get().doneItems,
     }),
@@ -375,8 +386,14 @@ export const useAnnualPlanStore = create<AnnualPlanState>()(
         set((state) => ({
           plans: state.plans.map((p) => p.month === month ? { ...p, themes, highRisk } : p),
         }))
+        const supabaseId = getSupabaseId()
+        if (supabaseId) pushAnnualPlanMonth({ month, themes, highRisk }, supabaseId).catch(console.error)
       },
-      resetToDefault: () => set({ plans: DEFAULT_ANNUAL_PLANS }),
+      resetToDefault: () => {
+        set({ plans: DEFAULT_ANNUAL_PLANS })
+        const supabaseId = getSupabaseId()
+        if (supabaseId) pushAnnualPlans(DEFAULT_ANNUAL_PLANS, supabaseId).catch(console.error)
+      },
     }),
     { name: 'annual-plan-store-v3' }
   )
@@ -599,6 +616,9 @@ export const useNapCheckStore = create<NapCheckState>()(
         set((state) => ({
           records: state.records.filter((r) => r.date !== date),
         }))
+        const supabaseId = getSupabaseId()
+        // 午睡記録削除をSupabaseにも反映（他端末にも同期）
+        if (supabaseId) clearNapChecksForDateRemote(supabaseId, date).catch(console.error)
       },
     }),
     { name: 'nap-check-store-v1' }
