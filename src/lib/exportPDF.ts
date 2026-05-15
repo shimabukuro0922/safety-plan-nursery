@@ -37,9 +37,20 @@ export async function exportToPDF(
     allowTaint: true,
     logging: false,
     backgroundColor: '#ffffff',
-    // スクロール位置をリセットして全体をキャプチャ
-    windowWidth: element.scrollWidth,
-    windowHeight: element.scrollHeight,
+    // textarea の内容を div に変換して正しくキャプチャする
+    onclone: (_doc, cloned) => {
+      cloned.querySelectorAll('textarea').forEach((ta) => {
+        const div = document.createElement('div')
+        const cs = window.getComputedStyle(ta)
+        div.style.cssText = cs.cssText
+        div.style.whiteSpace = 'pre-wrap'
+        div.style.overflow = 'visible'
+        div.style.height = 'auto'
+        div.style.minHeight = cs.minHeight
+        div.textContent = ta.value
+        ta.parentNode?.replaceChild(div, ta)
+      })
+    },
   })
 
   onProgress?.(60)
