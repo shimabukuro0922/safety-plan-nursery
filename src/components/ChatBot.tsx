@@ -4,6 +4,7 @@ import { MessageCircle, X, Send, Loader2, ChevronDown } from 'lucide-react'
 interface Message {
   role: 'user' | 'assistant'
   content: string
+  isSystem?: boolean
 }
 
 const QUICK_QUESTIONS = [
@@ -16,6 +17,7 @@ const QUICK_QUESTIONS = [
 const GREETING: Message = {
   role: 'assistant',
   content: 'こんにちは！まもりすとサポートBotです🛡️\n\n使い方でわからないことがあれば、なんでも聞いてください！\nよくある質問はボタンからも選べます。',
+  isSystem: true,
 }
 
 export const ChatBot: React.FC = () => {
@@ -52,7 +54,7 @@ export const ChatBot: React.FC = () => {
 
     try {
       // GREETING はAPIに送らない（システムプロンプト側で対応済み）
-      const history = newMessages.filter((_, i) => i > 0)
+      const history = newMessages.filter((m) => !m.isSystem)
       const res = await fetch('/api/chatbot', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useRef, useEffect } from 'react'
 import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw, ChevronDown, Pencil } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
@@ -299,6 +299,19 @@ export const Settings: React.FC = () => {
     capacity: String(facility?.capacity ?? ''),
     staff_count: String(facility?.staff_count ?? ''),
   })
+
+  useEffect(() => {
+    if (facility) {
+      setForm({
+        name: facility.name ?? '',
+        director_name: facility.director_name ?? '',
+        address: facility.address ?? '',
+        phone: facility.phone ?? '',
+        capacity: String(facility.capacity ?? ''),
+        staff_count: String(facility.staff_count ?? ''),
+      })
+    }
+  }, [facility])
 
   // ==============================
   // PIN管理

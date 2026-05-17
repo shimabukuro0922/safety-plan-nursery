@@ -195,6 +195,7 @@ export const StaffTraining: React.FC = () => {
           <GraduationCap size={32} className="mx-auto mb-2 text-gray-300" />
           <p className="text-sm text-gray-500">研修記録がありません</p>
           <p className="text-xs text-gray-400 mt-1">「研修記録を追加する」から登録してください</p>
+          <p className="text-xs text-blue-600 mt-3">有効期限を設定すると、期限が近づいたときにアラートで知らせます</p>
         </Card>
       ) : (
         <div className="space-y-2">

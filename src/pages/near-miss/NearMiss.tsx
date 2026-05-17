@@ -426,17 +426,15 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
       return
     }
     setSaving(true)
-    setTimeout(() => {
-      addNearMiss({
-        scene,
-        location,
-        what_happened: what.trim(),
-        created_by: facility?.director_name ?? '担当者',
-      })
-      toast.success('ヒヤリハットを記録しました')
-      setSaving(false)
-      onClose()
-    }, 400)
+    addNearMiss({
+      scene,
+      location,
+      what_happened: what.trim(),
+      created_by: facility?.director_name ?? '担当者',
+    })
+    toast.success('ヒヤリハットを記録しました')
+    setSaving(false)
+    onClose()
   }
 
   return (

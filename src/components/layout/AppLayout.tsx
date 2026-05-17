@@ -231,8 +231,17 @@ const BottomNav: React.FC = () => {
 
 const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
   const location = useLocation()
+  const navigate = useNavigate()
   const isTop = location.pathname === '/dashboard'
   const [guideOpen, setGuideOpen] = useState(false)
+
+  const handleBack = () => {
+    if (window.history.length <= 1) {
+      navigate('/dashboard')
+    } else {
+      navigate(-1)
+    }
+  }
 
   return (
     <>
@@ -243,7 +252,7 @@ const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
         <div className="h-14 flex items-center px-4 gap-2">
           {!isTop && (
             <button
-              onClick={() => window.history.back()}
+              onClick={handleBack}
               className="p-2 -ml-2 text-gray-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
             >
               <ChevronLeft size={20} />

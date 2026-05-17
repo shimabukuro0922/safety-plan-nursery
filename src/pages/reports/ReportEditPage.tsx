@@ -4,7 +4,7 @@ import {
   Sparkles, ChevronDown, ChevronUp, AlertTriangle,
   Lightbulb, CheckCircle, RotateCcw, FileDown, Save,
 } from 'lucide-react'
-import { Card, Button, Modal, SectionHeader } from '@/components/ui'
+import { Card, Button, SectionHeader } from '@/components/ui'
 import { useReportStore } from '@/stores/appStore'
 import type { ReportStatus, ReportSection, ReportContent } from '@/types'
 import { STATUS_CONFIG } from '@/types'
@@ -180,7 +180,6 @@ export const ReportEditPage: React.FC = () => {
   const [content, setContent] = useState<ReportContent>(
     report?.content ?? { title: '', sections: [], missing_info: [], suggestions: [] }
   )
-  const [showPDFModal, setShowPDFModal] = useState(false)
   const [exportingPDF, setExportingPDF] = useState(false)
   const printAreaRef = useRef<HTMLDivElement>(null)
   // 未保存の編集中は同期でコンテンツを上書きしない
@@ -211,8 +210,9 @@ export const ReportEditPage: React.FC = () => {
   }
 
   const handleSave = () => {
+    if (!id) return
     isDirtyRef.current = false  // 保存完了でフラグをリセット
-    updateReportContent(id!, content)
+    updateReportContent(id, content)
     toast.success('保存しました')
   }
 
@@ -298,29 +298,6 @@ export const ReportEditPage: React.FC = () => {
           <AIPanel suggestions={content.suggestions} />
         </div>
       </div>
-
-      {/* PDF出力モーダル */}
-      <Modal open={showPDFModal} onClose={() => setShowPDFModal(false)} title="PDF出力">
-        <p className="text-sm text-gray-700 mb-4 break-anywhere">
-          「{content.title}」をPDFとして出力します。
-        </p>
-        <div className="bg-gray-50 border border-gray-200 rounded-xl p-4 mb-4">
-          <p className="text-xs text-gray-600 leading-relaxed">
-            ブラウザの印刷機能（Ctrl+P / Cmd+P）を使って、「PDFとして保存」を選択してください。
-          </p>
-        </div>
-        <Button
-          variant="primary"
-          fullWidth
-          onClick={() => {
-            setShowPDFModal(false)
-            window.print()
-          }}
-        >
-          <FileDown size={16} />
-          印刷・PDF出力へ
-        </Button>
-      </Modal>
 
       <div className="h-6" />
     </div>

@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useNavigate, Navigate } from 'react-router-dom'
 import {
   ShieldCheck, ChevronRight, ClipboardCheck, Users,
   Siren, Camera, Link2, Plus, Eye, EyeOff, PlayCircle, KeyRound,
@@ -25,7 +25,12 @@ type Mode = 'new' | 'join'
 
 export const Setup: React.FC = () => {
   const navigate = useNavigate()
-  const { setFacility, setTrialExpiresAt } = useFacilityStore()
+  const { facility, isDemo, setFacility, setTrialExpiresAt } = useFacilityStore()
+
+  // 施設が登録済み（非デモ）の場合はダッシュボードへリダイレクト
+  if (facility !== null && isDemo === false) {
+    return <Navigate to="/dashboard" replace />
+  }
 
   // ==================== デモモード ====================
   const handleDemo = () => {
@@ -145,6 +150,7 @@ export const Setup: React.FC = () => {
           return
         }
         console.warn('Supabase 接続失敗。ローカルモードで続行します。')
+        toast.error('クラウド保存に失敗しました。ローカルモードで登録します')
       }
       // ローカルのみ（オフライン or Supabase 未設定）
       const localId = `fac_${Date.now()}`

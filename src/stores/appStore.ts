@@ -322,6 +322,8 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
       },
       deleteItem: (id) => {
         set((state) => ({ items: state.items.filter((item) => item.id !== id) }))
+        // 削除した項目に対応する完了記録も連動削除
+        useChecklistStore.getState().markUndone(id)
         const supabaseId = getSupabaseId()
         if (supabaseId) syncPushChecklistItems(useChecklistItemsStore.getState().items, supabaseId).catch(console.error)
       },
