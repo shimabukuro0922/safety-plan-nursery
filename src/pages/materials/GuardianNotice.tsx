@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react'
-import { Sparkles, FileDown, Send, Pencil, Plus, Trash2, X, Check, RotateCcw } from 'lucide-react'
+import { Sparkles, FileDown, Send, Pencil, Plus, Trash2, X, Check, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { useNoticeCategoryStore } from '@/stores/appStore'
@@ -17,6 +17,8 @@ export const GuardianNotice: React.FC = () => {
   const { categories, addCategory, updateCategory, deleteCategory, resetToDefault } = useNoticeCategoryStore()
 
   const [selectedCats, setSelectedCats] = useState<string[]>([])
+  // カテゴリごとのテーマ・補足メモ
+  const [catThemes, setCatThemes] = useState<Record<string, string>>({})
   const [style, setStyle] = useState('gentle')
   const [isGenerating, setIsGenerating] = useState(false)
   const [generated, setGenerated] = useState<string | null>(null)
@@ -30,6 +32,9 @@ export const GuardianNotice: React.FC = () => {
   const [editName, setEditName] = useState('')
   const [newName, setNewName] = useState('')
 
+  // テーマ欄の開閉
+  const [themeOpen, setThemeOpen] = useState(false)
+
   const toggleCat = (id: string) => {
     if (editMode) return
     setSelectedCats((prev) =>
@@ -38,21 +43,27 @@ export const GuardianNotice: React.FC = () => {
   }
 
   const buildLocalTemplate = (catNames: string[], styleName: string): string => {
-    const styleLabel = styleName === 'gentle' ? 'やわらかい' : styleName === 'formal' ? '丁寧な' : '標準的な'
     const facilityName = facility?.name ?? '当園'
-    return `【保護者の皆様へ】\n\n${facilityName}より、安全管理に関するお知らせです。\n\n今月は以下の取り組みを実施しております。\n\n${catNames.map((c) => `▶ ${c}`).join('\n')}\n\n引き続き子どもたちの安全を第一に取り組んでまいります。\nご不明な点はお気軽にお声がけください。\n\n${facilityName}`
+    return `保護者の皆様へ\n\n${facilityName}より、安全管理に関するお知らせです。\n\n今月は以下の取り組みを実施しております。\n\n${catNames.map((c) => `■ ${c}\n　園では、${c}に関する取り組みを積極的に行っております。ご家庭でも引き続きご協力をお願いいたします。`).join('\n\n')}\n\n子どもたちの安全を最優先に、職員一同取り組んでまいります。\nご不明な点やご心配なことがございましたら、いつでもお声がけください。\n\n${new Date().getFullYear()}年${new Date().getMonth() + 1}月\n${facilityName}`
   }
 
   const handleGenerate = async () => {
     if (selectedCats.length === 0) { toast.error('カテゴリを1つ以上選択してください'); return }
     setIsGenerating(true)
     const catNames = categories.filter((c) => selectedCats.includes(c.id)).map((c) => c.name)
+    // 選択カテゴリとテーマを組み合わせ
+    const catWithThemes = categories
+      .filter((c) => selectedCats.includes(c.id))
+      .map((c) => ({
+        name: c.name,
+        theme: catThemes[c.id]?.trim() ?? '',
+      }))
     try {
       const res = await fetch('/api/generate-notice', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          categories: catNames,
+          categories: catWithThemes,
           style,
           facilityName: facility?.name ?? '当園',
         }),
@@ -72,7 +83,7 @@ export const GuardianNotice: React.FC = () => {
       const text = buildLocalTemplate(catNames, style)
       setGenerated(text)
       setEditedContent(text)
-      toast('AI生成に失敗したため、標準テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
+      toast('テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
     } finally {
       setIsGenerating(false)
     }
@@ -113,7 +124,7 @@ export const GuardianNotice: React.FC = () => {
       {/* カテゴリ選択 */}
       <div>
         <div className="flex items-center justify-between mb-2">
-          <p className="text-xs font-semibold text-gray-600">周知したいカテゴリ（複数選択可）</p>
+          <p className="text-xs font-semibold text-gray-600">① 周知したいカテゴリを選ぶ（複数可）</p>
           <button
             onClick={() => { setEditMode((v) => !v); setEditingId(null) }}
             className={`flex items-center gap-1 text-xs px-2.5 py-1.5 rounded-lg transition-colors min-h-[32px] ${
@@ -189,27 +200,66 @@ export const GuardianNotice: React.FC = () => {
         )}
       </div>
 
+      {/* テーマ・補足メモ入力（カテゴリ選択後に表示） */}
+      {selectedCats.length > 0 && !editMode && (
+        <Card className="overflow-hidden">
+          <button
+            className="w-full px-4 py-3 flex items-center justify-between text-left"
+            onClick={() => setThemeOpen((v) => !v)}
+          >
+            <div>
+              <p className="text-sm font-semibold text-gray-800">② 書きたい内容・テーマを入力（任意）</p>
+              <p className="text-xs text-gray-400 mt-0.5">入力するとAIがより具体的な文章を作成します</p>
+            </div>
+            {themeOpen
+              ? <ChevronUp size={16} className="text-gray-400 shrink-0" />
+              : <ChevronDown size={16} className="text-gray-400 shrink-0" />
+            }
+          </button>
+          {themeOpen && (
+            <div className="px-4 pb-4 space-y-3 border-t border-gray-100 pt-3">
+              {categories
+                .filter((c) => selectedCats.includes(c.id))
+                .map((cat) => (
+                  <div key={cat.id}>
+                    <label className="text-xs font-medium text-blue-700 block mb-1">
+                      {cat.name} のテーマ・伝えたいこと
+                    </label>
+                    <textarea
+                      value={catThemes[cat.id] ?? ''}
+                      onChange={(e) => setCatThemes((prev) => ({ ...prev, [cat.id]: e.target.value }))}
+                      placeholder={`例：今月はプール開きがあります。水の事故防止のため、ご家庭でも水の危険性について話し合ってください。`}
+                      rows={2}
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none leading-relaxed"
+                    />
+                  </div>
+                ))}
+            </div>
+          )}
+        </Card>
+      )}
+
       {/* 文体選択 */}
       <div>
-          <p className="text-xs font-semibold text-gray-600 mb-2">文体</p>
-          <div className="space-y-2">
-            {STYLES.map((s) => (
-              <Card
-                key={s.value}
-                className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
-                onClick={() => setStyle(s.value)}
-              >
-                <div className="flex items-center gap-2">
-                  <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${style === s.value ? 'border-blue-500 bg-blue-500' : 'border-gray-400'}`} />
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">{s.label}</p>
-                    <p className="text-xs text-gray-500">{s.sub}</p>
-                  </div>
+        <p className="text-xs font-semibold text-gray-600 mb-2">③ 文体を選ぶ</p>
+        <div className="space-y-2">
+          {STYLES.map((s) => (
+            <Card
+              key={s.value}
+              className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+              onClick={() => setStyle(s.value)}
+            >
+              <div className="flex items-center gap-2">
+                <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${style === s.value ? 'border-blue-500 bg-blue-500' : 'border-gray-400'}`} />
+                <div>
+                  <p className="text-sm font-medium text-gray-900">{s.label}</p>
+                  <p className="text-xs text-gray-500">{s.sub}</p>
                 </div>
-              </Card>
-            ))}
-          </div>
+              </div>
+            </Card>
+          ))}
         </div>
+      </div>
 
       <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
         <Sparkles size={18} /> 文章を自動で作る
@@ -227,7 +277,7 @@ export const GuardianNotice: React.FC = () => {
               <textarea
                 value={editedContent}
                 onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[240px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[280px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
               />
               <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
             </Card>
