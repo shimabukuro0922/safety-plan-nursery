@@ -13,7 +13,7 @@ export async function validateInviteCode(code: string): Promise<InviteCodeResult
     .from('invite_codes')
     .select('code, expires_at, facility_id')
     .ilike('code', code.trim())
-    .single()
+    .maybeSingle()
 
   if (error || !data) return { valid: false, error: '招待コードが見つかりません' }
   if (data.facility_id) return { valid: false, error: 'このコードはすでに使用済みです' }

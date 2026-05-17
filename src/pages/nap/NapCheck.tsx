@@ -10,13 +10,8 @@ import toast from 'react-hot-toast'
 export const NapCheck: React.FC = () => {
   const { facility } = useFacilityStore()
   const { records, addRecord, clearToday } = useNapCheckStore()
-  const [checkerName, setCheckerName] = useState(facility?.director_name ?? '')
+  const [checkerName, setCheckerName] = useState('')
   const [submitting, setSubmitting] = useState(false)
-
-  // 設定画面で施設長名が変更されたとき確認者名に反映する
-  useEffect(() => {
-    if (facility?.director_name) setCheckerName(facility.director_name)
-  }, [facility?.director_name])
 
   // 30秒ごとに再レンダリングして経過時間を最新に保つ
   const [, setTick] = useState(0)
