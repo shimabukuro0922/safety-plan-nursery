@@ -1,8 +1,8 @@
 import React, { useState, useRef } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw } from 'lucide-react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw, ChevronDown, Pencil } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { useNearMissZoneStore } from '@/stores/appStore'
+import { useNearMissZoneStore, useStaffManagementStore, type StaffRole } from '@/stores/appStore'
 import { NEAR_MISS_LOCATION_GRID } from '@/types'
 import { createFacilityInSupabase, updateFacilityPIN } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
@@ -260,11 +260,37 @@ const ZoneManager: React.FC = () => {
 
 export const Settings: React.FC = () => {
   const { facility, setFacility } = useFacilityStore()
+  const { members, addMember, updateMember, deleteMember } = useStaffManagementStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [codeCopied, setCodeCopied] = useState(false)
   const [publishingCode, setPublishingCode] = useState(false)
+
+  // その他設定の開閉
+  const [notifOpen, setNotifOpen] = useState(false)
+  const [staffOpen, setStaffOpen] = useState(false)
+
+  // 職員管理フォーム
+  const [staffForm, setStaffForm] = useState({ name: '', role: '保育士' as StaffRole, note: '' })
+  const [editingStaffId, setEditingStaffId] = useState<string | null>(null)
+  const [editStaffForm, setEditStaffForm] = useState({ name: '', role: '保育士' as StaffRole, note: '' })
+
+  const STAFF_ROLES: StaffRole[] = ['園長', '主任', '保育士', '栄養士', '事務', 'その他']
+
+  const handleAddStaff = () => {
+    if (!staffForm.name.trim()) return
+    addMember(staffForm.name.trim(), staffForm.role, staffForm.note.trim())
+    setStaffForm({ name: '', role: '保育士', note: '' })
+    toast.success('職員を追加しました')
+  }
+
+  const handleSaveEditStaff = (id: string) => {
+    if (!editStaffForm.name.trim()) return
+    updateMember(id, { name: editStaffForm.name.trim(), role: editStaffForm.role, note: editStaffForm.note.trim() })
+    setEditingStaffId(null)
+    toast.success('職員情報を更新しました')
+  }
   const [form, setForm] = useState({
     name: facility?.name ?? '',
     director_name: facility?.director_name ?? '',
@@ -726,28 +752,177 @@ export const Settings: React.FC = () => {
         </Card>
       </div>
 
-      {/* その他設定（将来用） */}
+      {/* その他の設定 */}
       <div>
         <SectionHeader title="その他の設定" />
         <div className="space-y-2">
-          {[
-            { icon: <Bell size={16} />, label: '通知設定', sub: '未実施アラートのタイミング' },
-            { icon: <Users size={16} />, label: '職員管理', sub: 'メンバーの追加・役割変更' },
-            { icon: <Shield size={16} />, label: 'ヒヤリハット連携', sub: '準備中 - 別システムとの連携' },
-          ].map((item) => (
-            <Card key={item.label} className="p-4">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 shrink-0">
-                  {item.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="text-sm font-medium text-gray-900">{item.label}</p>
-                  <p className="text-xs text-gray-500 break-anywhere">{item.sub}</p>
-                </div>
-                <ChevronRight size={16} className="text-gray-400 shrink-0" />
+
+          {/* 通知設定 */}
+          <Card className="overflow-hidden">
+            <button
+              className="w-full p-4 flex items-center gap-3 text-left"
+              onClick={() => setNotifOpen((v) => !v)}
+            >
+              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 shrink-0">
+                <Bell size={16} />
               </div>
-            </Card>
-          ))}
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">通知設定</p>
+                <p className="text-xs text-gray-500">未実施アラートのタイミング</p>
+              </div>
+              {notifOpen ? <ChevronDown size={16} className="text-gray-400 shrink-0" /> : <ChevronRight size={16} className="text-gray-400 shrink-0" />}
+            </button>
+            {notifOpen && (
+              <div className="px-4 pb-4 border-t border-gray-100 pt-4 bg-blue-50">
+                <div className="flex items-start gap-3 mb-3">
+                  <span className="text-2xl">🔔</span>
+                  <div>
+                    <p className="text-sm font-semibold text-blue-800 mb-1">通知機能（開発中）</p>
+                    <p className="text-xs text-blue-700 leading-relaxed">
+                      チェックリストの未実施アラート・再確認日のリマインドなど、
+                      通知機能を現在開発中です。<br />
+                      リリース次第、このアプリ上でお知らせします。
+                    </p>
+                  </div>
+                </div>
+                <div className="space-y-2 opacity-50 pointer-events-none">
+                  {[
+                    '月次チェック未実施アラート（月末前）',
+                    'ヒヤリハット再確認日のリマインド',
+                    '研修資格の期限アラート',
+                  ].map((label) => (
+                    <div key={label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2">
+                      <span className="text-xs text-gray-700">{label}</span>
+                      <div className="w-9 h-5 bg-gray-200 rounded-full" />
+                    </div>
+                  ))}
+                </div>
+                <p className="text-xs text-gray-400 mt-2 text-center">※ 現在は設定できません</p>
+              </div>
+            )}
+          </Card>
+
+          {/* 職員管理 */}
+          <Card className="overflow-hidden">
+            <button
+              className="w-full p-4 flex items-center gap-3 text-left"
+              onClick={() => setStaffOpen((v) => !v)}
+            >
+              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-500 shrink-0">
+                <Users size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-900">職員管理</p>
+                <p className="text-xs text-gray-500">{members.length > 0 ? `${members.length}名登録済み` : 'メンバーの追加・役割変更'}</p>
+              </div>
+              {staffOpen ? <ChevronDown size={16} className="text-gray-400 shrink-0" /> : <ChevronRight size={16} className="text-gray-400 shrink-0" />}
+            </button>
+            {staffOpen && (
+              <div className="px-4 pb-4 border-t border-gray-100 pt-4 space-y-3">
+                {/* 職員一覧 */}
+                {members.length === 0 && (
+                  <p className="text-xs text-gray-400 text-center py-2">まだ職員が登録されていません</p>
+                )}
+                {members.map((m) => (
+                  <div key={m.id} className="bg-gray-50 rounded-xl p-3">
+                    {editingStaffId === m.id ? (
+                      <div className="space-y-2">
+                        <input
+                          value={editStaffForm.name}
+                          onChange={(e) => setEditStaffForm((f) => ({ ...f, name: e.target.value }))}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                          placeholder="氏名"
+                        />
+                        <select
+                          value={editStaffForm.role}
+                          onChange={(e) => setEditStaffForm((f) => ({ ...f, role: e.target.value as StaffRole }))}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                        >
+                          {STAFF_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                        </select>
+                        <input
+                          value={editStaffForm.note}
+                          onChange={(e) => setEditStaffForm((f) => ({ ...f, note: e.target.value }))}
+                          className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                          placeholder="メモ（任意）"
+                        />
+                        <div className="flex gap-2">
+                          <Button size="sm" variant="primary" fullWidth onClick={() => handleSaveEditStaff(m.id)}>保存</Button>
+                          <Button size="sm" variant="secondary" onClick={() => setEditingStaffId(null)}><X size={14} /></Button>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center gap-2">
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm font-medium text-gray-900">{m.name}</span>
+                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{m.role}</span>
+                          </div>
+                          {m.note && <p className="text-xs text-gray-400 mt-0.5">{m.note}</p>}
+                        </div>
+                        <button onClick={() => { setEditingStaffId(m.id); setEditStaffForm({ name: m.name, role: m.role, note: m.note }) }}
+                                className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors">
+                          <Pencil size={14} />
+                        </button>
+                        <button onClick={() => { if (window.confirm(`「${m.name}」を削除しますか？`)) deleteMember(m.id) }}
+                                className="p-1.5 text-gray-400 hover:text-red-500 transition-colors">
+                          <Trash2 size={14} />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+
+                {/* 追加フォーム */}
+                <div className="border border-dashed border-gray-200 rounded-xl p-3 space-y-2">
+                  <p className="text-xs font-semibold text-gray-500">職員を追加</p>
+                  <input
+                    value={staffForm.name}
+                    onChange={(e) => setStaffForm((f) => ({ ...f, name: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                    placeholder="氏名（例：山田 花子）"
+                    maxLength={20}
+                  />
+                  <select
+                    value={staffForm.role}
+                    onChange={(e) => setStaffForm((f) => ({ ...f, role: e.target.value as StaffRole }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                  >
+                    {STAFF_ROLES.map((r) => <option key={r} value={r}>{r}</option>)}
+                  </select>
+                  <input
+                    value={staffForm.note}
+                    onChange={(e) => setStaffForm((f) => ({ ...f, note: e.target.value }))}
+                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm"
+                    placeholder="メモ（任意）"
+                    maxLength={30}
+                  />
+                  <Button
+                    variant="primary" size="sm" fullWidth
+                    onClick={handleAddStaff}
+                    disabled={!staffForm.name.trim()}
+                  >
+                    <Plus size={14} /> 追加する
+                  </Button>
+                </div>
+              </div>
+            )}
+          </Card>
+
+          {/* ヒヤリハット連携（準備中） */}
+          <Card className="p-4">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 bg-gray-100 rounded-lg flex items-center justify-center text-gray-400 shrink-0">
+                <Shield size={16} />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm font-medium text-gray-500">ヒヤリハット連携</p>
+                <p className="text-xs text-gray-400">別システムとの連携</p>
+              </div>
+              <span className="text-xs bg-gray-100 text-gray-400 px-2 py-1 rounded-full font-medium shrink-0">準備中</span>
+            </div>
+          </Card>
+
         </div>
       </div>
 

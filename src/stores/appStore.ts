@@ -306,7 +306,7 @@ interface ChecklistItemsState {
 export const useChecklistItemsStore = create<ChecklistItemsState>()(
   persist(
     (set) => ({
-      items: DEFAULT_CHECKLIST_ITEMS,  // 新規ユーザーはデフォルト項目から開始
+      items: [],  // 新規ユーザーは空の状態からスタート
       addItem: (item) => {
         const id = `ci_${Date.now()}`
         set((state) => ({ items: [...state.items, { ...item, id }] }))
@@ -340,7 +340,7 @@ export const useChecklistItemsStore = create<ChecklistItemsState>()(
         return {
           ...current,
           ...p,
-          items: Array.isArray(p?.items) && p!.items.length > 0 ? p!.items : DEFAULT_CHECKLIST_ITEMS,
+          items: Array.isArray(p?.items) ? p!.items : [],
         }
       },
     }
@@ -716,5 +716,45 @@ export const useNearMissZoneStore = create<NearMissZoneState>()(
       resetToDefault: () => set({ customZones: [], hiddenDefaults: [] }),
     }),
     { name: 'near-miss-zone-store-v1' }
+  )
+)
+
+// ==============================
+// 職員管理ストア
+// ==============================
+export type StaffRole = '園長' | '主任' | '保育士' | '栄養士' | '事務' | 'その他'
+
+export interface StaffMember {
+  id: string
+  name: string
+  role: StaffRole
+  note: string
+}
+
+interface StaffManagementState {
+  members: StaffMember[]
+  addMember: (name: string, role: StaffRole, note: string) => void
+  updateMember: (id: string, updates: Partial<Omit<StaffMember, 'id'>>) => void
+  deleteMember: (id: string) => void
+}
+
+export const useStaffManagementStore = create<StaffManagementState>()(
+  persist(
+    (set) => ({
+      members: [],
+      addMember: (name, role, note) => {
+        const id = `staff_${Date.now()}`
+        set((state) => ({ members: [...state.members, { id, name, role, note }] }))
+      },
+      updateMember: (id, updates) => {
+        set((state) => ({
+          members: state.members.map((m) => m.id === id ? { ...m, ...updates } : m),
+        }))
+      },
+      deleteMember: (id) => {
+        set((state) => ({ members: state.members.filter((m) => m.id !== id) }))
+      },
+    }),
+    { name: 'staff-management-store-v1' }
   )
 )
