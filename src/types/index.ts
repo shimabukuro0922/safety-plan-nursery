@@ -187,11 +187,18 @@ export type NearMissScene =
 
 export type NearMissStep = 'occurred' | 'cause' | 'action' | 'shared' | 'recheck'
 
+export type NearMissLocation =
+  | 'garden' | 'sandbox' | 'playground'
+  | 'water_area' | 'dining' | 'nap_room'
+  | 'entrance' | 'hallway' | 'toilet'
+  | 'bus_stop' | 'stairs' | 'other_location'
+
 export interface NearMiss {
   id: string
   facility_id: string
   occurred_at: string
   scene: NearMissScene
+  location: string | null   // NearMissLocation キーまたはカスタムゾーンキー
   what_happened: string
   why_it_happened: string | null
   what_to_change: string | null
@@ -202,6 +209,43 @@ export interface NearMiss {
   created_at: string
   updated_at: string
 }
+
+export const NEAR_MISS_LOCATION_LABELS: Record<NearMissLocation, string> = {
+  garden:         '園庭',
+  sandbox:        '砂場',
+  playground:     '遊具エリア',
+  water_area:     '水遊び場',
+  dining:         '食事室',
+  nap_room:       '午睡室',
+  entrance:       '玄関',
+  hallway:        '廊下',
+  toilet:         'トイレ',
+  bus_stop:       'バス乗降場',
+  stairs:         '階段',
+  other_location: 'その他',
+}
+
+// ゾーングリッド定義（3列 × 4行）
+export const NEAR_MISS_LOCATION_GRID: Array<{
+  key: NearMissLocation
+  emoji: string
+  label: string
+  row: number
+  col: number
+}> = [
+  { key: 'garden',         emoji: '🌳', label: '園庭',       row: 0, col: 0 },
+  { key: 'sandbox',        emoji: '🏖', label: '砂場',       row: 0, col: 1 },
+  { key: 'playground',     emoji: '🎠', label: '遊具エリア', row: 0, col: 2 },
+  { key: 'water_area',     emoji: '💧', label: '水遊び場',   row: 1, col: 0 },
+  { key: 'dining',         emoji: '🍽', label: '食事室',     row: 1, col: 1 },
+  { key: 'nap_room',       emoji: '😴', label: '午睡室',     row: 1, col: 2 },
+  { key: 'entrance',       emoji: '🚪', label: '玄関',       row: 2, col: 0 },
+  { key: 'hallway',        emoji: '🚶', label: '廊下',       row: 2, col: 1 },
+  { key: 'toilet',         emoji: '🚽', label: 'トイレ',     row: 2, col: 2 },
+  { key: 'bus_stop',       emoji: '🚌', label: 'バス乗降場', row: 3, col: 0 },
+  { key: 'stairs',         emoji: '🪜', label: '階段',       row: 3, col: 1 },
+  { key: 'other_location', emoji: '📍', label: 'その他',     row: 3, col: 2 },
+]
 
 export const NEAR_MISS_SCENE_LABELS: Record<NearMissScene, string> = {
   nap: '午睡',

@@ -534,14 +534,14 @@ export const MonthlyChecklist: React.FC = () => {
         </>
       )}
 
+      </div>{/* checklistRef end */}
+
       <div className="pt-2 space-y-2">
         <Button variant="secondary" fullWidth onClick={() => navigate('/reports/new')}>
           <FileText size={16} />
           この結果から報告書を作成する
         </Button>
       </div>
-
-      </div>{/* checklistRef end */}
 
       <ItemManageModal open={manageOpen} onClose={() => setManageOpen(false)} />
 

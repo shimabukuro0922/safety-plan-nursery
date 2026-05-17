@@ -51,7 +51,8 @@ const StatusActionBar: React.FC<{
   onStatusChange: (s: ReportStatus) => void
   onExportPDF: () => void
   onSave: () => void
-}> = ({ status, onStatusChange, onExportPDF, onSave }) => {
+  exporting?: boolean
+}> = ({ status, onStatusChange, onExportPDF, onSave, exporting }) => {
   const { label, color } = STATUS_CONFIG[status]
 
   return (
@@ -86,9 +87,9 @@ const StatusActionBar: React.FC<{
         </Button>
       )}
       {status === 'approved' && (
-        <Button size="sm" variant="secondary" onClick={onExportPDF}>
+        <Button size="sm" variant="secondary" loading={exporting} onClick={onExportPDF}>
           <FileDown size={14} />
-          PDFで出力する
+          {exporting ? 'PDF生成中...' : 'PDFで出力する'}
         </Button>
       )}
     </div>
@@ -254,6 +255,7 @@ export const ReportEditPage: React.FC = () => {
         }
       }}
           onSave={handleSave}
+          exporting={exportingPDF}
         />
       </div>
 
@@ -268,20 +270,23 @@ export const ReportEditPage: React.FC = () => {
       )}
 
       {/* PC: 2カラム / Mobile: 縦積み */}
-      <div ref={printAreaRef} className="flex flex-col lg:flex-row gap-5">
+      <div className="flex flex-col lg:flex-row gap-5">
         {/* 本文エディタ */}
         <div className="flex-1 min-w-0">
           <SectionHeader
             title="報告書の内容"
             subtitle="各セクションに内容を入力してください"
           />
-          {content.sections.map((section) => (
-            <SectionEditor
-              key={section.id}
-              section={section}
-              onChange={handleSectionChange}
-            />
-          ))}
+          {/* PDF出力対象エリア（セクション本文のみ） */}
+          <div ref={printAreaRef}>
+            {content.sections.map((section) => (
+              <SectionEditor
+                key={section.id}
+                section={section}
+                onChange={handleSectionChange}
+              />
+            ))}
+          </div>
           <Button variant="primary" fullWidth onClick={handleSave}>
             <Save size={16} />
             変更を保存する

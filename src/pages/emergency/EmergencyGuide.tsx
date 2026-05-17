@@ -1,6 +1,7 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { AlertTriangle, ChevronDown, ChevronUp, Phone } from 'lucide-react'
 import { SectionHeader } from '@/components/ui'
+import { useOnboardingStore } from '@/stores/appStore'
 
 interface Step { text: string; emphasis?: boolean }
 interface EmergencyCard {
@@ -121,6 +122,11 @@ const EMERGENCY_CARDS: EmergencyCard[] = [
 
 export const EmergencyGuide: React.FC = () => {
   const [openId, setOpenId] = useState<string | null>(null)
+  const { setEmergencyViewed } = useOnboardingStore()
+
+  useEffect(() => {
+    setEmergencyViewed()
+  }, [setEmergencyViewed])
 
   return (
     <div className="px-4 py-6 space-y-4">

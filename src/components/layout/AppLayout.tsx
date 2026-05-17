@@ -4,9 +4,11 @@ import {
   LayoutDashboard, ClipboardCheck, History,
   FileText, Settings, ChevronLeft,
   ShieldCheck, CalendarDays, AlertCircle, Users, Bell, HelpCircle,
-  Moon, GraduationCap, Siren, MoreHorizontal, X, Camera,
+  Moon, GraduationCap, Siren, MoreHorizontal, X, Camera, LogOut,
 } from 'lucide-react'
 import { GuideModal } from '@/components/GuideModal'
+import { useFacilityStore } from '@/stores/facilityStore'
+import { clearDemoData } from '@/lib/demo'
 
 interface NavItem {
   label: string
@@ -294,17 +296,41 @@ function getPageTitle(pathname: string): string {
   return '安全計画 使える化'
 }
 
+const DemoBanner: React.FC = () => {
+  const navigate = useNavigate()
+
+  const handleExit = () => {
+    clearDemoData()
+    navigate('/setup')
+  }
+
+  return (
+    <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-400 text-amber-900 flex items-center justify-between px-4 py-1.5 text-xs font-semibold shadow-sm">
+      <span>🎮 デモモード中 — 入力データは保存されません</span>
+      <button
+        onClick={handleExit}
+        className="flex items-center gap-1 px-2.5 py-1 rounded-full bg-amber-600 text-white hover:bg-amber-700 transition-colors text-xs font-semibold"
+      >
+        <LogOut size={12} />
+        終了
+      </button>
+    </div>
+  )
+}
+
 export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation()
   const title = getPageTitle(location.pathname)
   const isSetup = location.pathname === '/setup'
+  const isDemo = useFacilityStore((s) => s.isDemo)
 
   if (isSetup) {
     return <>{children}</>
   }
 
   return (
-    <div className="min-h-dvh w-full overflow-x-hidden bg-gray-50">
+    <div className={`min-h-dvh w-full overflow-x-hidden bg-gray-50 ${isDemo ? 'pt-8' : ''}`}>
+      {isDemo && <DemoBanner />}
       <Sidebar />
       <MobileHeader title={title} />
       <main className="main-content">

@@ -2,13 +2,16 @@ import React, { useState, useRef } from 'react'
 import { useNavigate } from 'react-router-dom'
 import {
   ShieldCheck, ChevronRight, ClipboardCheck, Users,
-  Siren, Camera, Link2, Plus, Eye, EyeOff,
+  Siren, Camera, Link2, Plus, Eye, EyeOff, PlayCircle, KeyRound,
 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { createFacilityInSupabase, getFacilityByCode } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { hashPIN, verifyPIN, markPINVerified } from '@/lib/pinAuth'
+import { loadDemoData } from '@/lib/demo'
+import { validateInviteCode, consumeInviteCode } from '@/lib/inviteCode'
+import { useOnboardingStore } from '@/stores/appStore'
 import toast from 'react-hot-toast'
 
 const FEATURE_PREVIEWS = [
@@ -22,10 +25,46 @@ type Mode = 'new' | 'join'
 
 export const Setup: React.FC = () => {
   const navigate = useNavigate()
-  const { setFacility } = useFacilityStore()
+  const { setFacility, setTrialExpiresAt } = useFacilityStore()
+
+  // ==================== デモモード ====================
+  const handleDemo = () => {
+    loadDemoData()
+    toast.success('デモモードで起動しました（さくら保育園）')
+    navigate('/dashboard')
+  }
+
+  const { setShowWelcome } = useOnboardingStore()
 
   const [mode, setMode] = useState<Mode>('new')
   const [saving, setSaving] = useState(false)
+
+  // ==================== 招待コード ====================
+  // 'invite' = 招待コード入力, 'setup' = 施設情報入力
+  const [newStep, setNewStep] = useState<'invite' | 'setup'>('invite')
+  const [inviteCode, setInviteCode] = useState('')
+  const [pendingExpiresAt, setPendingExpiresAt] = useState<string | null>(null)
+
+  const handleValidateInviteCode = async () => {
+    const code = inviteCode.trim().toUpperCase()
+    if (code.length < 6) {
+      toast.error('招待コードを入力してください')
+      return
+    }
+    setSaving(true)
+    try {
+      const result = await validateInviteCode(code)
+      if (!result.valid) {
+        toast.error(result.error)
+        return
+      }
+      setPendingExpiresAt(result.expiresAt)
+      setNewStep('setup')
+      toast.success('コードが確認できました。施設情報を入力してください')
+    } finally {
+      setSaving(false)
+    }
+  }
 
   // 新規登録フォーム
   const [name, setName]               = useState('')
@@ -94,8 +133,13 @@ export const Setup: React.FC = () => {
             code: result.code,
             pinHash,
           })
-          // PINを設定した場合は、この端末はすでに認証済みとしてマーク
+          // 招待コードを消費してトライアル期限を保存
+          if (inviteCode && pendingExpiresAt) {
+            await consumeInviteCode(inviteCode, facilityId)
+            setTrialExpiresAt(pendingExpiresAt)
+          }
           if (pinHash) markPINVerified(facilityId)
+          setShowWelcome(true)
           toast.success(`施設コード「${result.code}」を発行しました。設定画面で確認できます`, { duration: 5000 })
           navigate('/dashboard')
           return
@@ -116,7 +160,9 @@ export const Setup: React.FC = () => {
         phone: phone.trim() || null,
         pinHash,
       })
+      if (pendingExpiresAt) setTrialExpiresAt(pendingExpiresAt)
       if (pinHash) markPINVerified(localId)
+      setShowWelcome(true)
       navigate('/dashboard')
     } finally {
       setSaving(false)
@@ -230,8 +276,8 @@ export const Setup: React.FC = () => {
 
         {/* モード切り替えタブ */}
         <div className="bg-white rounded-2xl border border-gray-200 shadow-sm overflow-hidden">
-          {/* タブヘッダ（PINステップ中は非表示） */}
-          {joinStep === 'code' && (
+          {/* タブヘッダ（PIN入力中 or 招待コード入力中は非表示） */}
+          {joinStep === 'code' && newStep === 'invite' && (
             <div className="flex border-b border-gray-100">
               <button
                 onClick={() => setMode('new')}
@@ -258,8 +304,51 @@ export const Setup: React.FC = () => {
             </div>
           )}
 
-          {/* 新規登録フォーム */}
-          {mode === 'new' && (
+          {/* 新規登録 — ステップ1: 招待コード入力 */}
+          {mode === 'new' && newStep === 'invite' && (
+            <div className="p-6 space-y-5">
+              <div className="text-center">
+                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <KeyRound size={24} className="text-blue-500" />
+                </div>
+                <h2 className="text-base font-bold text-gray-900 mb-1">招待コードを入力してください</h2>
+                <p className="text-xs text-gray-500 leading-relaxed">
+                  お申し込み後にメールでお送りした<br />
+                  招待コードを入力してください。
+                </p>
+              </div>
+
+              <div>
+                <label className="text-xs font-semibold text-gray-700 block mb-1.5">
+                  招待コード <span className="text-red-500 ml-1">必須</span>
+                </label>
+                <input
+                  type="text"
+                  value={inviteCode}
+                  onChange={(e) => setInviteCode(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
+                  onKeyDown={(e) => e.key === 'Enter' && handleValidateInviteCode()}
+                  placeholder="例：ABC12345"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-center tracking-widest font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  autoFocus
+                />
+              </div>
+
+              <Button variant="primary" fullWidth size="lg" loading={saving} onClick={handleValidateInviteCode}>
+                確認する
+                <ChevronRight size={18} />
+              </Button>
+
+              <div className="bg-blue-50 rounded-xl p-3">
+                <p className="text-xs text-blue-800 leading-relaxed">
+                  📩 招待コードはお申し込みいただいた方にメールでお送りしています。<br />
+                  お持ちでない方は<a href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform" target="_blank" rel="noopener noreferrer" className="underline font-semibold">こちらからお申し込みください</a>。
+                </p>
+              </div>
+            </div>
+          )}
+
+          {/* 新規登録 — ステップ2: 施設情報入力 */}
+          {mode === 'new' && newStep === 'setup' && (
             <div className="p-6 space-y-5">
               <div>
                 <h2 className="text-base font-bold text-gray-900 mb-1">施設情報を登録してください</h2>
@@ -502,6 +591,22 @@ export const Setup: React.FC = () => {
               </button>
             </div>
           )}
+        </div>
+
+        {/* デモボタン */}
+        <div className="text-center">
+          <button
+            onClick={handleDemo}
+            className="inline-flex items-center gap-2 px-5 py-2.5 rounded-full text-sm font-semibold
+              bg-amber-50 text-amber-700 border border-amber-200 hover:bg-amber-100
+              transition-colors shadow-sm"
+          >
+            <PlayCircle size={17} />
+            デモで試す（さくら保育園）
+          </button>
+          <p className="text-xs text-gray-400 mt-1.5">
+            登録不要・データは保存されません
+          </p>
         </div>
 
         {/* 安心コメント */}

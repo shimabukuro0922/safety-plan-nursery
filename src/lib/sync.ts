@@ -166,6 +166,7 @@ export async function pullNearMisses(facilityId: string): Promise<NearMiss[]> {
       facility_id: r.facility_id,
       occurred_at: r.occurred_at,
       scene: r.scene,
+      location: r.location ?? null,
       what_happened: r.what_happened,
       why_it_happened: r.why_it_happened,
       what_to_change: r.what_to_change,

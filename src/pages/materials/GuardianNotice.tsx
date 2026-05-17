@@ -190,8 +190,7 @@ export const GuardianNotice: React.FC = () => {
       </div>
 
       {/* 文体選択 */}
-      {!editMode && (
-        <div>
+      <div>
           <p className="text-xs font-semibold text-gray-600 mb-2">文体</p>
           <div className="space-y-2">
             {STYLES.map((s) => (
@@ -211,27 +210,30 @@ export const GuardianNotice: React.FC = () => {
             ))}
           </div>
         </div>
-      )}
 
-      {!editMode && (
-        <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
-          <Sparkles size={18} /> 文章を自動で作る
-        </Button>
-      )}
+      <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
+        <Sparkles size={18} /> 文章を自動で作る
+      </Button>
 
-      {generated && !editMode && (
-        <div ref={noticeRef}><Card className="p-4">
-          <div className="flex items-center justify-between mb-3">
-            <p className="text-sm font-bold text-gray-900">生成された周知文（下書き）</p>
-            <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
+      {generated && (
+        <>
+          {/* PDF出力対象エリア（ボタン類を除いた本文のみ） */}
+          <div ref={noticeRef}>
+            <Card className="p-4">
+              <div className="flex items-center justify-between mb-3">
+                <p className="text-sm font-bold text-gray-900">生成された周知文（下書き）</p>
+                <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
+              </div>
+              <textarea
+                value={editedContent}
+                onChange={(e) => setEditedContent(e.target.value)}
+                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[240px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              />
+              <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
+            </Card>
           </div>
-          <textarea
-            value={editedContent}
-            onChange={(e) => setEditedContent(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[240px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
-          />
-          <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
-          <div className="mt-3 flex gap-2">
+          {/* ボタン類はPDF対象外 */}
+          <div className="flex gap-2">
             <Button
               variant="secondary" size="sm" fullWidth
               loading={exportingPDF}
@@ -254,7 +256,7 @@ export const GuardianNotice: React.FC = () => {
               <Send size={14} /> 配布済みとして記録
             </Button>
           </div>
-        </Card></div>
+        </>
       )}
       <div className="h-4" />
     </div>

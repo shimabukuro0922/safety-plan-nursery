@@ -29,7 +29,7 @@ function getSupabaseId(): string | null {
 // ==============================
 interface NearMissState {
   nearMisses: NearMiss[]
-  addNearMiss: (data: { scene: NearMissScene; what_happened: string; created_by: string }) => void
+  addNearMiss: (data: { scene: NearMissScene; location?: string | null; what_happened: string; created_by: string }) => void
   updateNearMiss: (id: string, updates: Partial<NearMiss>) => void
   advanceStep: (id: string) => void
   deleteNearMiss: (id: string) => void
@@ -41,13 +41,14 @@ export const useNearMissStore = create<NearMissState>()(
   persist(
     (set) => ({
       nearMisses: [],
-      addNearMiss: ({ scene, what_happened, created_by }) => {
+      addNearMiss: ({ scene, location = null, what_happened, created_by }: { scene: NearMissScene; location?: string | null; what_happened: string; created_by: string }) => {
         const supabaseId = getSupabaseId()
         const newItem: NearMiss = {
           id: `nm_${Date.now()}`,
           facility_id: supabaseId ?? 'local',
           occurred_at: new Date().toISOString().split('T')[0],
           scene,
+          location,
           what_happened,
           why_it_happened: null,
           what_to_change: null,
@@ -571,14 +572,22 @@ export const useStaffMaterialTypeStore = create<StaffMaterialTypeState>()(
 // ==============================
 interface OnboardingState {
   dismissed: boolean
+  showWelcome: boolean
+  emergencyViewed: boolean
   dismiss: () => void
+  setShowWelcome: (v: boolean) => void
+  setEmergencyViewed: () => void
 }
 
 export const useOnboardingStore = create<OnboardingState>()(
   persist(
     (set) => ({
       dismissed: false,
+      showWelcome: false,
+      emergencyViewed: false,
       dismiss: () => set({ dismissed: true }),
+      setShowWelcome: (v) => set({ showWelcome: v }),
+      setEmergencyViewed: () => set({ emergencyViewed: true }),
     }),
     { name: 'onboarding-store-v1' }
   )
@@ -664,5 +673,48 @@ export const useStaffTrainingStore = create<StaffTrainingState>()(
       },
     }),
     { name: 'staff-training-store-v1' }
+  )
+)
+
+// ==============================
+// ヒヤリハットマップ ゾーン管理
+// ==============================
+export interface CustomZone {
+  key: string
+  emoji: string
+  label: string
+}
+
+interface NearMissZoneState {
+  customZones: CustomZone[]
+  hiddenDefaults: string[]
+  addZone: (emoji: string, label: string) => void
+  deleteCustomZone: (key: string) => void
+  toggleDefaultVisibility: (key: string) => void
+  resetToDefault: () => void
+}
+
+export const useNearMissZoneStore = create<NearMissZoneState>()(
+  persist(
+    (set) => ({
+      customZones: [],
+      hiddenDefaults: [],
+      addZone: (emoji, label) => {
+        const key = `custom_${Date.now()}`
+        set((state) => ({ customZones: [...state.customZones, { key, emoji, label }] }))
+      },
+      deleteCustomZone: (key) => {
+        set((state) => ({ customZones: state.customZones.filter((z) => z.key !== key) }))
+      },
+      toggleDefaultVisibility: (key) => {
+        set((state) => ({
+          hiddenDefaults: state.hiddenDefaults.includes(key)
+            ? state.hiddenDefaults.filter((k) => k !== key)
+            : [...state.hiddenDefaults, key],
+        }))
+      },
+      resetToDefault: () => set({ customZones: [], hiddenDefaults: [] }),
+    }),
+    { name: 'near-miss-zone-store-v1' }
   )
 )

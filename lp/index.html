@@ -1,0 +1,740 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>まもりすと | 保育施設向け安全管理アプリ</title>
+  <meta name="description" content="義務化された安全計画の確実な運用・ヒヤリハット記録・監査対策まで、すべてひとつのアプリで完結。先生たちを書類から解放し、子どもと向き合う時間を創ります。" />
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: { 50:'#eff6ff', 100:'#dbeafe', 400:'#60a5fa', 500:'#3b82f6', 600:'#2563eb', 700:'#1d4ed8', 800:'#1e40af' },
+            warm:  { 50:'#fff7ed', 100:'#ffedd5', 400:'#fb923c', 500:'#f97316', 600:'#ea580c' },
+          },
+          fontFamily: {
+            sans: ['"Hiragino Sans"', '"Hiragino Kaku Gothic ProN"', '"Noto Sans JP"', 'Meiryo', 'sans-serif'],
+          },
+        }
+      }
+    }
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+
+    .hero-bg {
+      background: linear-gradient(150deg, #0f172a 0%, #1e3a8a 45%, #0c4a6e 100%);
+    }
+    .section-alt { background: #f8faff; }
+
+    /* カード */
+    .lift { transition: transform .2s ease, box-shadow .2s ease; }
+    .lift:hover { transform: translateY(-5px); box-shadow: 0 24px 48px rgba(0,0,0,.1); }
+
+    /* アニメーション */
+    @keyframes fadeUp {
+      from { opacity:0; transform:translateY(24px); }
+      to   { opacity:1; transform:translateY(0); }
+    }
+    .anim { animation: fadeUp .7s ease both; }
+    .d1 { animation-delay:.1s; } .d2 { animation-delay:.2s; } .d3 { animation-delay:.3s; } .d4 { animation-delay:.4s; }
+
+    /* タグ */
+    .tag {
+      display:inline-block; padding:5px 14px; border-radius:9999px;
+      font-size:12px; font-weight:700; letter-spacing:.08em; text-transform:uppercase;
+    }
+
+    /* グラデーションテキスト */
+    .grad-text {
+      background: linear-gradient(90deg,#60a5fa,#34d399);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
+
+    /* チェックマーク */
+    .chk::before { content:"✓ "; color:#10b981; font-weight:700; }
+
+    /* アコーディオン */
+    details summary { list-style:none; }
+    details summary::-webkit-details-marker { display:none; }
+    details[open] .arrow { transform: rotate(45deg); }
+
+    /* ステップライン */
+    .step-line { position:absolute; top:36px; left:calc(50% + 40px); right:calc(-50% + 40px); height:2px; background: linear-gradient(90deg,#3b82f6,#93c5fd); }
+
+    /* モニター強調 */
+    .monitor-card {
+      background: linear-gradient(135deg, #1e3a8a 0%, #1e40af 50%, #0369a1 100%);
+    }
+  </style>
+</head>
+<body class="font-sans text-gray-800 bg-white antialiased">
+
+<!-- ============================
+     STICKY HEADER
+============================= -->
+<header class="fixed top-0 inset-x-0 z-50 bg-white/95 backdrop-blur border-b border-gray-100 shadow-sm">
+  <div class="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
+    <div class="flex items-center gap-2 select-none">
+      <span class="text-2xl leading-none">🛡️</span>
+      <span class="font-extrabold text-xl text-blue-700 tracking-tight">まもりすと</span>
+    </div>
+    <nav class="hidden md:flex items-center gap-7 text-sm text-gray-500 font-medium">
+      <a href="#pain"     class="hover:text-blue-600 transition-colors">お悩み</a>
+      <a href="#benefits" class="hover:text-blue-600 transition-colors">導入メリット</a>
+      <a href="#flow"     class="hover:text-blue-600 transition-colors">導入フロー</a>
+      <a href="#pricing"  class="hover:text-blue-600 transition-colors">料金</a>
+      <a href="#faq"      class="hover:text-blue-600 transition-colors">FAQ</a>
+    </nav>
+    <a href="#cta"
+       class="bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-sm font-bold px-5 py-2.5 rounded-xl shadow-md transition-all">
+      まず無料で試してみる →
+    </a>
+  </div>
+</header>
+
+
+<!-- ============================
+     1. ファーストビュー
+============================= -->
+<section class="hero-bg min-h-screen flex flex-col justify-center px-4 pt-24 pb-20 relative overflow-hidden">
+  <!-- 背景装飾 -->
+  <div class="absolute inset-0 pointer-events-none" aria-hidden="true">
+    <div class="absolute top-20 right-10 w-96 h-96 rounded-full bg-blue-500 opacity-10 blur-3xl"></div>
+    <div class="absolute bottom-0 left-0 w-80 h-80 rounded-full bg-cyan-400 opacity-10 blur-3xl"></div>
+  </div>
+
+  <div class="max-w-6xl mx-auto w-full relative">
+    <div class="max-w-2xl">
+      <p class="tag bg-blue-500/20 text-blue-200 mb-5 anim">保育施設向け 安全管理アプリ</p>
+
+      <h1 class="text-4xl md:text-5xl lg:text-6xl font-extrabold text-white leading-tight mb-6 anim d1">
+        先生たちの<br>
+        <span class="grad-text">「もう一仕事」</span>を、<br>
+        なくす。
+      </h1>
+
+      <p class="text-lg md:text-xl text-blue-100 leading-relaxed mb-3 anim d2">
+        義務化された安全計画の確実な運用、ヒヤリハット記録、監査対策——<br class="hidden md:block">
+        これまで紙とバインダーに費やしていた時間を、<br class="hidden md:block">
+        <strong class="text-white">子どもたちのために取り戻しましょう。</strong>
+      </p>
+      <p class="text-base text-blue-200 mb-10 anim d2">
+        命を預かる現場だからこそ、最高水準のリスクマネジメントが必要です。
+      </p>
+
+      <div class="flex flex-col sm:flex-row gap-4 anim d3">
+        <a href="#cta"
+           class="inline-flex items-center justify-center gap-2 bg-white text-blue-700 hover:bg-blue-50 font-extrabold px-8 py-4 rounded-2xl shadow-xl text-lg transition-all hover:scale-105 active:scale-95">
+          🎮 デモ画面を使ってみる
+        </a>
+        <a href="#benefits"
+           class="inline-flex items-center justify-center gap-2 border-2 border-white/30 hover:border-white text-white font-semibold px-8 py-4 rounded-2xl transition-colors text-lg">
+          導入メリットを見る ↓
+        </a>
+      </div>
+
+      <p class="mt-5 text-sm text-blue-300 anim d4">
+        ✓ 初期設定は完全丸投げOK　✓ ITスキル不要　✓ 最短3日で運用スタート
+      </p>
+    </div>
+
+    <!-- 信頼バッジ -->
+    <div class="mt-16 grid grid-cols-2 md:grid-cols-4 gap-3 anim d4">
+      <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center border border-white/20">
+        <div class="text-2xl font-extrabold text-white">全6機能</div>
+        <div class="text-xs text-blue-200 mt-1">安全管理を一元化</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center border border-white/20">
+        <div class="text-2xl font-extrabold text-white">AI搭載</div>
+        <div class="text-xs text-blue-200 mt-1">報告書を自動作成</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center border border-white/20">
+        <div class="text-2xl font-extrabold text-white">¥5,000</div>
+        <div class="text-xs text-blue-200 mt-1">/ 月（税別）</div>
+      </div>
+      <div class="bg-white/10 backdrop-blur rounded-2xl p-4 text-center border border-white/20">
+        <div class="text-2xl font-extrabold text-white">最短3日</div>
+        <div class="text-xs text-blue-200 mt-1">で運用スタート</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     2. 現場のリアルな悩み（共感）
+============================= -->
+<section id="pain" class="py-24 px-4 bg-gray-50">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="tag bg-red-100 text-red-600 mb-3">現場のリアルなお悩み</p>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2 leading-tight">
+        こんな「当たり前」、<br>
+        実はもう<span class="text-red-500">限界</span>ではないですか？
+      </h2>
+      <p class="text-gray-500 mt-4 text-base">多くの保育施設から聞こえてくる、リアルな声です。</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 lg:grid-cols-3 gap-5">
+
+      <div class="bg-white rounded-2xl p-6 border border-red-100 lift shadow-sm">
+        <div class="text-3xl mb-3">📋</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">記録用紙の山と、格闘する月末</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          月次点検・ヒヤリハット・研修記録——紙の書類が増え続け、探すだけで時間を消耗。事務処理に追われ、<strong class="text-gray-700">気づけば定時を2時間オーバー。</strong>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-red-100 lift shadow-sm">
+        <div class="text-3xl mb-3">😨</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">「点検漏れ」が不安でたまらない</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          担当者の記憶と手作業に頼るチェック体制。「あの項目、やったっけ？」という<strong class="text-gray-700">ヒューマンエラーを、紙は防いでくれません。</strong>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-red-100 lift shadow-sm">
+        <div class="text-3xl mb-3">🔍</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">監査前夜の「あの書類どこ？」パニック</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          指摘された書類をすぐに出せない。ファイルを漁る時間、差し替えの手間……<strong class="text-gray-700">監査のたびに繰り返す、あの焦り。</strong>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-red-100 lift shadow-sm">
+        <div class="text-3xl mb-3">👤</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">担当者が変わるたびにリセット</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          安全管理のやり方が「あの先生だけ知っている」状態。<strong class="text-gray-700">異動・退職のたびにゼロからやり直す、属人化の恐怖。</strong>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-red-100 lift shadow-sm">
+        <div class="text-3xl mb-3">🏠</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">月次報告書を家に持ち帰る夜</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          「書類仕事は残業か持ち帰り」が当たり前に。<strong class="text-gray-700">子どものそばで働きたいのに、机の前で過ごす時間が増えていく。</strong>
+        </p>
+      </div>
+
+      <div class="bg-white rounded-2xl p-6 border border-orange-100 lift shadow-sm">
+        <div class="text-3xl mb-3">⚠️</div>
+        <h3 class="font-bold text-base mb-2 text-gray-900">安全計画が「形式だけ」になっていく</h3>
+        <p class="text-gray-500 text-sm leading-relaxed">
+          義務化の対応で作成したものの、実際の現場運用に活かせていない。<strong class="text-gray-700">「形骸化」への漠然とした危機感が消えない。</strong>
+        </p>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     3. 解決策の提示
+============================= -->
+<section class="py-24 px-4 bg-white">
+  <div class="max-w-4xl mx-auto text-center">
+    <p class="tag bg-blue-100 text-blue-700 mb-4">解決策</p>
+    <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mb-6 leading-tight">
+      保育現場の安全管理に、<br>
+      <span class="text-blue-600">新しいスタンダード</span>が来ました。
+    </h2>
+    <p class="text-gray-500 text-lg leading-relaxed mb-12 max-w-2xl mx-auto">
+      <strong class="text-gray-700">まもりすと</strong>は、保育施設の安全管理業務をまるごとデジタル化するアプリです。<br>
+      点検表・ヒヤリハット・報告書・研修記録——すべてがスマホひとつに集約され、
+      <strong class="text-gray-700">システムが「忘れ」と「漏れ」を自動で防いでくれます。</strong>
+    </p>
+
+    <!-- 機能サマリー -->
+    <div class="grid grid-cols-2 md:grid-cols-3 gap-4 text-left">
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">⚠️</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">ヒヤリハット記録 & マップ</div>
+          <div class="text-xs text-gray-500 mt-1">写真で一瞬可視化・共有。5ステップで確実に対策まで完結</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">📅</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">月次・季節チェックリスト</div>
+          <div class="text-xs text-gray-500 mt-1">安全計画に連動して自動生成。進捗を一目で把握</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">🤖</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">AI報告書自動生成</div>
+          <div class="text-xs text-gray-500 mt-1">蓄積データからAIが下書き作成。保護者向け・行政向け・監査向けに文体切り替え</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">😴</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">午睡チェック記録</div>
+          <div class="text-xs text-gray-500 mt-1">SIDS予防の体位・時刻記録をデジタル化</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">🎓</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">職員研修・資格管理</div>
+          <div class="text-xs text-gray-500 mt-1">研修実施記録・資格証を一元管理</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-3 bg-blue-50 rounded-2xl p-5">
+        <span class="text-2xl mt-0.5">🚨</span>
+        <div>
+          <div class="font-bold text-sm text-gray-800">緊急対応ガイド</div>
+          <div class="text-xs text-gray-500 mt-1">誤飲・アレルギー・地震などの対応手順をオフラインで即確認</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     4. 導入メリット（園長 & 保育士）
+============================= -->
+<section id="benefits" class="py-24 px-4 section-alt">
+  <div class="max-w-6xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="tag bg-emerald-100 text-emerald-700 mb-3">導入メリット</p>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2 leading-tight">
+        園長も、先生も、うれしい。<br>それが<span class="text-blue-600">まもりすと</span>です。
+      </h2>
+    </div>
+
+    <div class="grid lg:grid-cols-2 gap-8">
+
+      <!-- 園長向け -->
+      <div class="bg-gradient-to-br from-blue-700 to-blue-900 rounded-3xl p-8 text-white shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">👔</div>
+          <div>
+            <div class="text-xs font-bold text-blue-200 uppercase tracking-wider">For 園長・施設長</div>
+            <h3 class="text-xl font-extrabold">"園を守る"確かな手ごたえを</h3>
+          </div>
+        </div>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>義務化された安全計画の確実な運用</strong>
+              <p class="text-blue-200 text-sm mt-0.5">法令対応を「やっているつもり」から「確実に実施できている」へ。チェック漏れをシステムが防止します。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>監査対策のペーパーレス化と即時提示</strong>
+              <p class="text-blue-200 text-sm mt-0.5">必要な書類はいつでもスマホから即提示。監査前夜の「書類探し」が永遠になくなります。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>属人化の完全解消</strong>
+              <p class="text-blue-200 text-sm mt-0.5">担当者が変わってもゼロリセットなし。誰でも同じレベルで安全管理を継続できる体制が整います。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>「最高水準のリスクマネジメント」を保護者へアピール</strong>
+              <p class="text-blue-200 text-sm mt-0.5">デジタルで徹底された安全管理の実績は、保護者説明会・入園案内で強力な信頼の証になります。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-emerald-400 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>園のブランド力と信頼性の向上</strong>
+              <p class="text-blue-200 text-sm mt-0.5">「安全・安心な園」という評判は、園児募集にも直結します。</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+      <!-- 保育士向け -->
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-800 rounded-3xl p-8 text-white shadow-2xl">
+        <div class="flex items-center gap-3 mb-6">
+          <div class="w-12 h-12 bg-white/20 rounded-2xl flex items-center justify-center text-2xl">👩‍🏫</div>
+          <div>
+            <div class="text-xs font-bold text-emerald-200 uppercase tracking-wider">For 現場の保育士・主任</div>
+            <h3 class="text-xl font-extrabold">先生たちを、事務から解放する</h3>
+          </div>
+        </div>
+        <ul class="space-y-4">
+          <li class="flex items-start gap-3">
+            <span class="text-yellow-300 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>紙とバインダーからの完全解放</strong>
+              <p class="text-emerald-200 text-sm mt-0.5">記録はすべてスマホで完結。重い書類ファイルを持ち歩く必要がなくなります。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-yellow-300 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>二度手間・持ち帰り残業がなくなる</strong>
+              <p class="text-emerald-200 text-sm mt-0.5">スマホで記録→自動で共有。「家で書き直す」「転記する」という二重手間が消えます。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-yellow-300 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>写真1枚で危険箇所を一瞬で可視化・共有</strong>
+              <p class="text-emerald-200 text-sm mt-0.5">「あそこの段差が危ない」を文字でなく写真付きでマップに登録。職員全員が同じ情報を共有できます。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-yellow-300 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>「うっかり忘れ」をシステムが防止</strong>
+              <p class="text-emerald-200 text-sm mt-0.5">チェック期限・再確認日のリマインド通知を自動送信。記憶に頼らなくていい安心感が生まれます。</p>
+            </div>
+          </li>
+          <li class="flex items-start gap-3">
+            <span class="text-yellow-300 text-lg font-bold mt-0.5 shrink-0">✓</span>
+            <div>
+              <strong>事務作業が減り、保育の質が上がる</strong>
+              <p class="text-emerald-200 text-sm mt-0.5">浮いた時間は、子どもと向き合うための時間に。「保育士になった理由」を取り戻せます。</p>
+            </div>
+          </li>
+        </ul>
+      </div>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     5. 圧倒的に楽な導入フロー
+============================= -->
+<section id="flow" class="py-24 px-4 bg-white">
+  <div class="max-w-5xl mx-auto">
+    <div class="text-center mb-16">
+      <p class="tag bg-orange-100 text-orange-600 mb-3">導入フロー</p>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2 leading-tight">
+        面倒な初期設定は、<br>
+        <span class="text-orange-500">私たちが全部やります。</span>
+      </h2>
+      <p class="text-gray-500 mt-5 text-lg max-w-2xl mx-auto leading-relaxed">
+        今お使いの<strong class="text-gray-700">紙の点検表の写真を送るだけ</strong>で、あとはすべてお任せください。<br>
+        ITスキルは一切不要。現場の先生がすぐに使えるように、私たちが丸ごとセットアップします。
+      </p>
+    </div>
+
+    <!-- ステップ -->
+    <div class="grid md:grid-cols-3 gap-6 relative">
+      <!-- ライン（デスクトップ） -->
+      <div class="hidden md:block absolute top-10 left-1/3 right-1/3" style="height:2px; background: linear-gradient(90deg,#fb923c,#fbbf24);"></div>
+
+      <div class="text-center relative">
+        <div class="w-20 h-20 bg-orange-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-5 shadow-xl relative z-10 ring-4 ring-orange-100">
+          📸
+        </div>
+        <div class="bg-orange-50 rounded-2xl p-6 border border-orange-100">
+          <div class="text-orange-600 font-extrabold text-xs uppercase tracking-widest mb-2">STEP 1</div>
+          <h3 class="font-extrabold text-lg mb-2 text-gray-900">今の点検表を写真で送るだけ</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            現在お使いの紙の点検表・安全計画をスマホで撮影して送るだけ。それだけで初期設定が始まります。
+          </p>
+          <div class="mt-3 text-xs bg-orange-100 text-orange-700 rounded-full px-3 py-1 inline-block font-semibold">所要時間：約5分</div>
+        </div>
+      </div>
+
+      <div class="text-center relative">
+        <div class="w-20 h-20 bg-blue-600 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-5 shadow-xl relative z-10 ring-4 ring-blue-100">
+          ⚙️
+        </div>
+        <div class="bg-blue-50 rounded-2xl p-6 border border-blue-100">
+          <div class="text-blue-600 font-extrabold text-xs uppercase tracking-widest mb-2">STEP 2</div>
+          <h3 class="font-extrabold text-lg mb-2 text-gray-900">初期設定を完全代行</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            届いた情報をもとに、チェックリスト・安全計画をアプリに丸ごと設定。「超・伴走型サポート」で現場に合わせた環境を構築します。
+          </p>
+          <div class="mt-3 text-xs bg-blue-100 text-blue-700 rounded-full px-3 py-1 inline-block font-semibold">所要時間：1〜3営業日</div>
+        </div>
+      </div>
+
+      <div class="text-center relative">
+        <div class="w-20 h-20 bg-emerald-500 text-white rounded-full flex items-center justify-center text-3xl mx-auto mb-5 shadow-xl relative z-10 ring-4 ring-emerald-100">
+          🚀
+        </div>
+        <div class="bg-emerald-50 rounded-2xl p-6 border border-emerald-100">
+          <div class="text-emerald-600 font-extrabold text-xs uppercase tracking-widest mb-2">STEP 3</div>
+          <h3 class="font-extrabold text-lg mb-2 text-gray-900">その日からチームで運用開始</h3>
+          <p class="text-gray-500 text-sm leading-relaxed">
+            6桁の参加コードをスタッフに共有するだけ。全員のスマホで同じ情報をリアルタイム共有できます。
+          </p>
+          <div class="mt-3 text-xs bg-emerald-100 text-emerald-700 rounded-full px-3 py-1 inline-block font-semibold">導入完了！</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- サポートバナー -->
+    <div class="mt-12 bg-gradient-to-r from-orange-500 to-amber-500 rounded-2xl p-6 text-white text-center shadow-lg">
+      <h4 class="font-extrabold text-xl mb-2">🤝 「超・伴走型サポート」で、現場の声を爆速で反映</h4>
+      <p class="text-orange-100 text-sm leading-relaxed">
+        「この機能を追加してほしい」「うちの施設に合った使い方を教えてほしい」——そんな声に、私たちは本気で応えます。<br>
+        導入後も専任スタッフが定期的にフォローアップ。現場に寄り添い続ける、それが私たちのスタンスです。
+      </p>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     料金
+============================= -->
+<section id="pricing" class="py-24 px-4 section-alt">
+  <div class="max-w-4xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="tag bg-blue-100 text-blue-700 mb-3">料金プラン</p>
+      <h2 class="text-3xl md:text-4xl font-extrabold text-gray-900 mt-2">シンプルな料金体系</h2>
+      <p class="text-gray-500 mt-4">隠れた費用はありません。すべて込みの月額料金です。</p>
+    </div>
+
+    <div class="grid md:grid-cols-2 gap-6 max-w-3xl mx-auto">
+
+      <!-- スタンダード -->
+      <div class="bg-blue-700 rounded-3xl p-8 text-white shadow-2xl relative">
+        <div class="absolute -top-3 left-1/2 -translate-x-1/2">
+          <span class="bg-emerald-400 text-white text-xs font-extrabold px-5 py-1.5 rounded-full shadow-md">ほとんどの施設はこちら</span>
+        </div>
+        <div class="text-blue-200 text-sm font-bold uppercase tracking-wide mb-2 mt-2">スタンダード</div>
+        <div class="flex items-end gap-2 mb-1">
+          <span class="text-5xl font-extrabold">¥5,000</span>
+          <span class="text-blue-200 pb-1">/ 月（税別）</span>
+        </div>
+        <p class="text-blue-200 text-sm mb-6">1施設あたり・スタッフ人数無制限</p>
+        <ul class="space-y-3 text-sm mb-8">
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> ヒヤリハット記録・マップ（無制限）</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 月次・季節チェックリスト</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> <strong>AI報告書自動作成（7種）</strong></li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 複数デバイス同期・リアルタイム共有</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 職員研修・資格管理</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 午睡チェック記録</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 緊急対応ガイド（オフライン対応）</li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> <strong>初期設定完全代行</strong></li>
+          <li class="flex items-center gap-2"><span class="text-emerald-300 font-bold">✓</span> 専任サポート担当つき</li>
+        </ul>
+        <a href="#cta"
+           class="block text-center bg-white text-blue-700 hover:bg-blue-50 font-extrabold py-3.5 rounded-xl transition-colors shadow text-base">
+          デモ画面を使ってみる →
+        </a>
+      </div>
+
+      <!-- 法人 -->
+      <div class="bg-white rounded-3xl p-8 border-2 border-gray-200 shadow-sm">
+        <div class="text-gray-500 text-sm font-bold uppercase tracking-wide mb-2">法人・複数園</div>
+        <div class="text-4xl font-extrabold text-gray-900 mb-1">要相談</div>
+        <p class="text-gray-400 text-sm mb-6">2園以上の法人・グループ向け</p>
+        <ul class="space-y-3 text-sm text-gray-700 mb-8">
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> スタンダードの全機能</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> 複数園の一括管理ダッシュボード</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> 法人単位の報告書・集計</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> 導入研修・現場レクチャー</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> カスタマイズ対応</li>
+          <li class="flex items-center gap-2"><span class="text-green-500 font-bold">✓</span> 専任カスタマーサクセス担当</li>
+        </ul>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform"
+           class="block text-center border-2 border-gray-300 hover:border-blue-500 text-gray-700 hover:text-blue-600 font-bold py-3.5 rounded-xl transition-colors text-base">
+          お問い合わせ
+        </a>
+      </div>
+
+    </div>
+    <p class="text-center text-gray-400 text-sm mt-6">年払いの場合、2ヶ月分お得になります。</p>
+  </div>
+</section>
+
+
+<!-- ============================
+     FAQ
+============================= -->
+<section id="faq" class="py-24 px-4 bg-white">
+  <div class="max-w-3xl mx-auto">
+    <div class="text-center mb-14">
+      <p class="tag bg-gray-100 text-gray-600 mb-3">よくある質問</p>
+      <h2 class="text-3xl font-extrabold text-gray-900 mt-2">FAQ</h2>
+    </div>
+    <div class="space-y-3">
+
+      <details class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group">
+        <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+          <span>ITが苦手な職員でも使えますか？</span>
+          <span class="arrow text-gray-400 text-xl transition-transform duration-200">+</span>
+        </summary>
+        <div class="px-6 pb-6 text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-4">
+          はい。スマートフォンで直感的に操作できる設計です。初期設定は私たちが完全代行するため、職員の方はアプリを開くだけで使い始められます。「IT苦手な60代の先生でも使えた」という声も届いています。
+        </div>
+      </details>
+
+      <details class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group">
+        <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+          <span>今使っている紙の点検表はどうなりますか？</span>
+          <span class="arrow text-gray-400 text-xl transition-transform duration-200">+</span>
+        </summary>
+        <div class="px-6 pb-6 text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-4">
+          今お使いの紙の点検表をそのままアプリに移行します。写真を送るだけで、内容を忠実にデジタル化。移行期間中は紙との併用も可能ですので、無理なく切り替えられます。
+        </div>
+      </details>
+
+      <details class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group">
+        <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+          <span>園児・職員の個人情報は安全ですか？</span>
+          <span class="arrow text-gray-400 text-xl transition-transform duration-200">+</span>
+        </summary>
+        <div class="px-6 pb-6 text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-4">
+          すべてのデータはSSL暗号化のうえ、セキュリティの高いクラウドサーバーで保管されます。第三者への情報提供は一切行いません。また、バックアップ機能で万が一の際もデータを守ります。
+        </div>
+      </details>
+
+      <details class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group">
+        <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+          <span>インターネットがない環境でも使えますか？</span>
+          <span class="arrow text-gray-400 text-xl transition-transform duration-200">+</span>
+        </summary>
+        <div class="px-6 pb-6 text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-4">
+          緊急対応ガイドなどの閲覧はオフラインでも可能です。記録の入力・共有はインターネット接続が必要ですが、施設内のWi-Fi環境があれば問題なくご利用いただけます。
+        </div>
+      </details>
+
+      <details class="bg-gray-50 rounded-2xl border border-gray-200 overflow-hidden group">
+        <summary class="flex justify-between items-center p-6 cursor-pointer font-bold text-gray-800 hover:bg-gray-100 transition-colors">
+          <span>解約はいつでもできますか？</span>
+          <span class="arrow text-gray-400 text-xl transition-transform duration-200">+</span>
+        </summary>
+        <div class="px-6 pb-6 text-gray-600 text-sm leading-relaxed border-t border-gray-200 pt-4">
+          月払いプランはいつでも解約可能で、解約月末まで引き続きご利用いただけます。解約前にデータのエクスポートが可能ですので、大切な記録を失う心配もありません。
+        </div>
+      </details>
+
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     6. CTA — 無料モニター募集
+============================= -->
+<section id="cta" class="py-24 px-4">
+  <div class="max-w-3xl mx-auto">
+    <div class="monitor-card rounded-3xl p-10 text-white text-center shadow-2xl relative overflow-hidden">
+      <!-- 背景装飾 -->
+      <div class="absolute top-0 right-0 w-64 h-64 bg-white/10 rounded-full -translate-y-1/2 translate-x-1/2 pointer-events-none"></div>
+      <div class="absolute bottom-0 left-0 w-48 h-48 bg-cyan-400/10 rounded-full translate-y-1/2 -translate-x-1/2 pointer-events-none"></div>
+
+      <div class="relative">
+        <p class="tag bg-yellow-400 text-yellow-900 mb-5 text-sm">🎁 期間限定・先着5園のみ</p>
+        <h2 class="text-3xl md:text-4xl font-extrabold mb-4 leading-tight">
+          まず、<span class="text-yellow-300">デモ画面</span>で<br>
+          体験してみませんか？
+        </h2>
+        <p class="text-blue-100 text-lg leading-relaxed mb-2">
+          「本当に使えるか不安」「ITに自信がない」<br>
+          そんな施設こそ、まずはデモ画面で気軽に触ってみてください。
+        </p>
+        <p class="text-blue-200 text-sm mb-8">現場の声を反映し、より良いサービスに育てていく。そのパートナーを探しています。</p>
+
+        <!-- 特典ボックス -->
+        <div class="bg-white/15 backdrop-blur rounded-2xl p-5 mb-8 text-left grid md:grid-cols-2 gap-3">
+          <div class="flex items-start gap-2">
+            <span class="text-yellow-300 text-lg shrink-0">🎁</span>
+            <div>
+              <div class="font-bold text-sm">初期設定費：完全無料</div>
+              <div class="text-blue-200 text-xs">通常 ¥30,000 → ¥0</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-yellow-300 text-lg shrink-0">💸</span>
+            <div>
+              <div class="font-bold text-sm">初年度月額：半額</div>
+              <div class="text-blue-200 text-xs">¥5,000 → <strong class="text-yellow-300 text-base">¥2,500 / 月</strong></div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-yellow-300 text-lg shrink-0">🤝</span>
+            <div>
+              <div class="font-bold text-sm">専任担当が毎週フォロー</div>
+              <div class="text-blue-200 text-xs">導入から定着まで伴走サポート</div>
+            </div>
+          </div>
+          <div class="flex items-start gap-2">
+            <span class="text-yellow-300 text-lg shrink-0">📣</span>
+            <div>
+              <div class="font-bold text-sm">機能追加の優先リクエスト権</div>
+              <div class="text-blue-200 text-xs">現場の声を爆速で反映</div>
+            </div>
+          </div>
+        </div>
+
+        <a href="https://mamorist.vercel.app?demo=true"
+           class="inline-flex items-center justify-center gap-3 bg-white text-blue-700 hover:bg-yellow-50 font-extrabold px-10 py-5 rounded-2xl shadow-2xl text-xl transition-all hover:scale-105 active:scale-95 w-full sm:w-auto">
+          🎮 デモ画面を使ってみる
+        </a>
+        <p class="mt-4 text-blue-300 text-sm">残り <strong class="text-yellow-300 text-lg">5</strong> 席 ／ クレジットカード不要</p>
+        <p class="mt-2 text-blue-300 text-xs">ご不明な点は <a href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform" class="underline hover:text-white">ys.ehon1@gmail.com</a> までお気軽にどうぞ</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+
+<!-- ============================
+     FOOTER
+============================= -->
+<footer class="bg-gray-900 text-gray-400 py-14 px-4">
+  <div class="max-w-5xl mx-auto">
+    <div class="flex flex-col md:flex-row justify-between gap-10 mb-10">
+      <div class="max-w-xs">
+        <div class="flex items-center gap-2 mb-3">
+          <span class="text-2xl">🛡️</span>
+          <span class="text-white font-extrabold text-xl tracking-tight">まもりすと</span>
+        </div>
+        <p class="text-sm leading-relaxed">
+          保育施設の安全管理をデジタル化し、<br>先生が本来の仕事に向き合えるよう支援します。
+        </p>
+      </div>
+      <div class="grid grid-cols-2 md:grid-cols-3 gap-8 text-sm">
+        <div>
+          <div class="text-white font-bold mb-3">機能</div>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">ヒヤリハット記録</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">チェックリスト</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">AI報告書作成</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">午睡チェック</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="text-white font-bold mb-3">サポート</div>
+          <ul class="space-y-2">
+            <li><a href="#faq"  class="hover:text-white transition-colors">よくある質問</a></li>
+            <li><a href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform" class="hover:text-white transition-colors">お問い合わせ</a></li>
+          </ul>
+        </div>
+        <div>
+          <div class="text-white font-bold mb-3">会社情報</div>
+          <ul class="space-y-2">
+            <li><a href="#" class="hover:text-white transition-colors">会社概要</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">プライバシーポリシー</a></li>
+            <li><a href="#" class="hover:text-white transition-colors">利用規約</a></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="border-t border-gray-800 pt-6 text-xs text-center">
+      © 2025 まもりすと. All rights reserved.
+    </div>
+  </div>
+</footer>
+
+</body>
+</html>

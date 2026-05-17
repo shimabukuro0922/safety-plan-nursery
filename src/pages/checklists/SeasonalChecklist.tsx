@@ -75,7 +75,7 @@ const SeasonCard: React.FC<{
             editMode ? 'bg-gray-200 text-gray-700' : 'bg-white border border-gray-200 text-gray-500 hover:border-gray-400'
           }`}
         >
-          {editMode ? <><X size={13} /> 完了</> : <><Pencil size={13} /> 編集</>}
+          {editMode ? <><X size={13} /> 編集を終わる</> : <><Pencil size={13} /> 編集</>}
         </button>
       </div>
 
@@ -114,7 +114,10 @@ const SeasonCard: React.FC<{
                   </button>
                   <button
                     onClick={() => {
-                      if (window.confirm(`「${item.label}」を削除しますか？`)) onDeleteItem(item.key)
+                      if (window.confirm(`「${item.label}」を削除しますか？`)) {
+                        if (editingKey === item.key) setEditingKey(null)
+                        onDeleteItem(item.key)
+                      }
                     }}
                     className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center"
                   >
@@ -135,7 +138,8 @@ const SeasonCard: React.FC<{
               />
               <button
                 onClick={handleAdd}
-                className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                disabled={!newLabel.trim()}
+                className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus size={16} />
               </button>

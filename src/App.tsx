@@ -73,10 +73,38 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 1000 * 60 * 5 } },
 })
 
-// 施設未登録の場合は /setup へリダイレクト
+// トライアル期限切れ画面
+const TrialExpiredScreen: React.FC = () => (
+  <div className="min-h-dvh flex flex-col items-center justify-center px-5 text-center bg-white">
+    <div className="w-16 h-16 bg-orange-100 rounded-2xl flex items-center justify-center mx-auto mb-4">
+      <span className="text-3xl">⏰</span>
+    </div>
+    <h2 className="text-xl font-bold text-gray-900 mb-2">トライアル期間が終了しました</h2>
+    <p className="text-sm text-gray-500 mb-6 leading-relaxed max-w-xs">
+      30日間のトライアルをご利用いただきありがとうございました。<br />
+      引き続きご利用いただくには、お申し込みが必要です。
+    </p>
+    <a
+      href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform"
+      target="_blank"
+      rel="noopener noreferrer"
+      className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
+    >
+      継続利用を申し込む
+    </a>
+    <p className="mt-4 text-xs text-gray-400">
+      お問い合わせ：ys.ehon1@gmail.com
+    </p>
+  </div>
+)
+
+// 施設未登録の場合は /setup へリダイレクト。トライアル期限切れの場合は期限切れ画面を表示
 const RequireSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { facility } = useFacilityStore()
+  const { facility, isDemo, trialExpiresAt } = useFacilityStore()
   if (!facility) return <Navigate to="/setup" replace />
+  if (!isDemo && trialExpiresAt && new Date(trialExpiresAt) < new Date()) {
+    return <TrialExpiredScreen />
+  }
   return <>{children}</>
 }
 

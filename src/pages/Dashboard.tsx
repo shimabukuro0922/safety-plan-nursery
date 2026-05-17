@@ -3,13 +3,14 @@ import { useNavigate } from 'react-router-dom'
 import {
   ClipboardCheck, ChevronRight, CalendarDays,
   AlertCircle, Users, Bell, Building2, CheckCircle2, Circle,
-  Moon, GraduationCap, Siren, Camera, X, Sparkles,
+  Moon, GraduationCap, Siren, Camera, X, Sparkles, Plus,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import {
   useNearMissStore, useChecklistStore, useChecklistItemsStore,
-  useNapCheckStore, useStaffTrainingStore, useOnboardingStore,
+  useNapCheckStore, useOnboardingStore,
 } from '@/stores/appStore'
+import { WelcomeModal } from '@/components/WelcomeModal'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { useChildrenStore } from '@/stores/childrenStore'
 import { NEAR_MISS_STEP_CONFIG } from '@/types'
@@ -58,6 +59,15 @@ const GettingStartedCard: React.FC<{
   const stepStates = [true, checklistItemsDone, childrenDone, emergencyDone]
   const doneCount = stepStates.filter(Boolean).length
   const allDone = doneCount === ONBOARDING_STEPS.length
+  const remaining = ONBOARDING_STEPS.length - doneCount
+
+  const motivationText = allDone
+    ? '✅ セットアップ完了！'
+    : doneCount >= 3
+    ? `あと${remaining}つで完了です！`
+    : doneCount >= 2
+    ? 'いい調子です！続けましょう'
+    : 'まず最初にこれだけ設定を'
 
   return (
     <div className="rounded-2xl overflow-hidden border border-blue-200 bg-gradient-to-br from-blue-50 to-indigo-50">
@@ -68,19 +78,19 @@ const GettingStartedCard: React.FC<{
             <Sparkles size={16} className="text-white" />
           </div>
           <div>
-            <p className="text-sm font-bold text-gray-900">
-              {allDone ? '✅ セットアップ完了！' : 'まず最初にこれだけ設定を'}
-            </p>
+            <p className="text-sm font-bold text-gray-900">{motivationText}</p>
             <p className="text-xs text-gray-500">{doneCount} / {ONBOARDING_STEPS.length} 完了</p>
           </div>
         </div>
-        <button
-          onClick={onDismiss}
-          className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
-          aria-label="ガイドを閉じる"
-        >
-          <X size={16} />
-        </button>
+        {doneCount >= 2 && (
+          <button
+            onClick={onDismiss}
+            className="p-1.5 text-gray-400 hover:text-gray-600 transition-colors shrink-0"
+            aria-label="ガイドを閉じる"
+          >
+            <X size={16} />
+          </button>
+        )}
       </div>
 
       {/* プログレスバー */}
@@ -126,7 +136,7 @@ const GettingStartedCard: React.FC<{
         })}
       </div>
 
-      {/* 完了メッセージ or 閉じるボタン */}
+      {/* 完了メッセージ or スキップボタン */}
       <div className="px-4 pb-4">
         {allDone ? (
           <div className="bg-green-50 border border-green-200 rounded-xl p-3 text-center">
@@ -136,12 +146,19 @@ const GettingStartedCard: React.FC<{
               このガイドを閉じる
             </button>
           </div>
-        ) : (
+        ) : doneCount >= 2 ? (
           <button
             onClick={onDismiss}
             className="w-full text-xs text-gray-400 py-1 hover:text-gray-600 transition-colors"
           >
             あとで設定する · このガイドを閉じる
+          </button>
+        ) : (
+          <button
+            onClick={onDismiss}
+            className="w-full text-xs text-gray-300 py-1 hover:text-gray-400 transition-colors"
+          >
+            今はスキップする
           </button>
         )}
       </div>
@@ -167,9 +184,9 @@ export const Dashboard: React.FC = () => {
   const { doneItems } = useChecklistStore()
   const { items: checklistItems } = useChecklistItemsStore()
   const { records: napRecords } = useNapCheckStore()
-  const { records: trainingRecords } = useStaffTrainingStore()
+
   const { children } = useChildrenStore()
-  const { dismissed, dismiss } = useOnboardingStore()
+  const { dismissed, dismiss, emergencyViewed } = useOnboardingStore()
 
   const now = new Date()
   const monthLabel = format(now, 'M月', { locale: ja })
@@ -195,9 +212,7 @@ export const Dashboard: React.FC = () => {
   // オンボーディング進捗
   const checklistDone = checklistItems.length > 0
   const childrenDone = children.length > 0
-  // 緊急カードは「研修記録が1件以上ある」を確認済みの代わりに使う
-  const emergencyDone = trainingRecords.length > 0
-  const showOnboarding = !dismissed && !(checklistDone && childrenDone && emergencyDone)
+  const showOnboarding = !dismissed && !(checklistDone && childrenDone && emergencyViewed)
 
   // 今日の午睡見守り状況
   const todayKey = format(now, 'yyyy-MM-dd')
@@ -221,11 +236,13 @@ export const Dashboard: React.FC = () => {
       </div>
 
       {/* はじめにやることガイド */}
+      <WelcomeModal />
+
       {showOnboarding && (
         <GettingStartedCard
           checklistItemsDone={checklistDone}
           childrenDone={childrenDone}
-          emergencyDone={emergencyDone}
+          emergencyDone={emergencyViewed}
           onDismiss={dismiss}
         />
       )}
@@ -324,12 +341,20 @@ export const Dashboard: React.FC = () => {
       )}
 
       {nearMisses.length === 0 && (
-        <Card className="p-4 bg-gray-50 border-dashed text-center" onClick={() => navigate('/near-miss')}>
-          <AlertCircle size={24} className="text-gray-300 mx-auto mb-2" />
-          <p className="text-xs text-gray-500 break-anywhere">
-            ヒヤリハット記録はまだありません。<br />気になることを小さくても記録しておきましょう。
+        <div className="rounded-2xl border border-dashed border-orange-200 bg-orange-50 p-5 text-center">
+          <AlertCircle size={28} className="text-orange-300 mx-auto mb-2" />
+          <p className="text-sm font-semibold text-gray-700">ヒヤリハットを記録しましょう</p>
+          <p className="text-xs text-gray-500 mt-1 mb-4 leading-relaxed break-anywhere">
+            「転びそうになった」「気になった」など<br />小さなことを記録することで事故を防げます。
           </p>
-        </Card>
+          <button
+            onClick={() => navigate('/near-miss')}
+            className="inline-flex items-center gap-1.5 px-4 py-2 rounded-full bg-orange-500 text-white text-xs font-semibold hover:bg-orange-600 transition-colors"
+          >
+            <Plus size={13} />
+            最初の1件を記録する
+          </button>
+        </div>
       )}
 
       {/* 午睡見守り状況（本日記録がある場合のみ） */}

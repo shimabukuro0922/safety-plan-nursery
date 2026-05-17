@@ -360,7 +360,7 @@ export const PhotoGallery: React.FC = () => {
         <>
           <p className="text-xs text-gray-500">{filtered.length}枚表示中</p>
           <div className="grid grid-cols-3 gap-1.5">
-            {filtered.map((photo, i) => {
+            {filtered.map((photo) => {
               const statusCfg = STATUS_CONFIG[photo.status]
               return (
                 <button

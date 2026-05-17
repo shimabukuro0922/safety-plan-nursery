@@ -1,7 +1,9 @@
 import React, { useState, useRef } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X } from 'lucide-react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { useNearMissZoneStore } from '@/stores/appStore'
+import { NEAR_MISS_LOCATION_GRID } from '@/types'
 import { createFacilityInSupabase, updateFacilityPIN } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { hashPIN, verifyPIN, markPINVerified, clearPINVerified } from '@/lib/pinAuth'
@@ -25,6 +27,7 @@ const BACKUP_KEYS = [
   'staff-training-store-v1',
   'children-store-v1',
   'photo-store-v1',
+  'near-miss-zone-store-v1',
 ]
 
 function exportBackup() {
@@ -109,6 +112,151 @@ const PINField: React.FC<{
     {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
   </div>
 )
+
+// ==============================
+// ゾーン管理
+// ==============================
+const ZoneManager: React.FC = () => {
+  const { customZones, hiddenDefaults, addZone, deleteCustomZone, toggleDefaultVisibility, resetToDefault } = useNearMissZoneStore()
+  const [showForm, setShowForm] = useState(false)
+  const [emoji, setEmoji] = useState('')
+  const [label, setLabel] = useState('')
+  const [confirmReset, setConfirmReset] = useState(false)
+
+  const handleAdd = () => {
+    if (!label.trim()) { toast.error('ゾーン名を入力してください'); return }
+    const e = emoji.trim() || '📍'
+    addZone(e, label.trim())
+    setEmoji(''); setLabel(''); setShowForm(false)
+    toast.success(`ゾーン「${e} ${label.trim()}」を追加しました`)
+  }
+
+  const handleReset = () => {
+    resetToDefault()
+    setConfirmReset(false)
+    toast.success('デフォルト設定に戻しました')
+  }
+
+  return (
+    <div className="space-y-4">
+      {/* デフォルトゾーン */}
+      <div>
+        <p className="text-xs font-semibold text-gray-700 mb-2">
+          デフォルトゾーン
+          <span className="text-gray-400 font-normal ml-1">（目のアイコンで表示/非表示）</span>
+        </p>
+        <div className="grid grid-cols-3 gap-1.5">
+          {NEAR_MISS_LOCATION_GRID.map((zone) => {
+            const hidden = hiddenDefaults.includes(zone.key)
+            return (
+              <button
+                key={zone.key}
+                onClick={() => toggleDefaultVisibility(zone.key)}
+                className={`flex items-center gap-1.5 px-2 py-2 rounded-xl text-xs border transition-colors text-left ${
+                  hidden
+                    ? 'bg-gray-100 border-gray-200 text-gray-400 line-through'
+                    : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'
+                }`}
+              >
+                <span className="text-base shrink-0">{zone.emoji}</span>
+                <span className="flex-1 break-anywhere leading-tight">{zone.label}</span>
+                {hidden
+                  ? <EyeOff size={12} className="shrink-0 text-gray-400" />
+                  : <Eye size={12} className="shrink-0 text-gray-300" />
+                }
+              </button>
+            )
+          })}
+        </div>
+      </div>
+
+      {/* カスタムゾーン */}
+      {customZones.length > 0 && (
+        <div>
+          <p className="text-xs font-semibold text-gray-700 mb-2">カスタムゾーン</p>
+          <div className="space-y-1.5">
+            {customZones.map((zone) => (
+              <div key={zone.key} className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+                <span className="text-base shrink-0">{zone.emoji}</span>
+                <span className="flex-1 text-sm text-gray-800 break-anywhere">{zone.label}</span>
+                <button
+                  onClick={() => { deleteCustomZone(zone.key); toast.success('ゾーンを削除しました') }}
+                  className="p-1 text-red-400 hover:text-red-600 transition-colors shrink-0"
+                >
+                  <Trash2 size={14} />
+                </button>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
+      {/* ゾーン追加フォーム */}
+      {showForm ? (
+        <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50">
+          <p className="text-xs font-semibold text-gray-700">新しいゾーンを追加</p>
+          <div className="flex gap-2">
+            <div className="w-16 shrink-0">
+              <label className="text-xs text-gray-500 block mb-1">絵文字</label>
+              <input
+                type="text"
+                value={emoji}
+                onChange={(e) => setEmoji(e.target.value.slice(0, 2))}
+                placeholder="🏊"
+                className="w-full border border-gray-300 rounded-xl px-2 py-2 text-center text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+            <div className="flex-1">
+              <label className="text-xs text-gray-500 block mb-1">ゾーン名 <span className="text-red-500">必須</span></label>
+              <input
+                type="text"
+                value={label}
+                onChange={(e) => setLabel(e.target.value)}
+                onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
+                placeholder="例：プール室"
+                maxLength={20}
+                autoFocus
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+            </div>
+          </div>
+          <div className="flex gap-2">
+            <Button variant="primary" size="sm" fullWidth onClick={handleAdd}>追加する</Button>
+            <Button variant="secondary" size="sm" onClick={() => { setShowForm(false); setEmoji(''); setLabel('') }}>
+              <X size={14} />
+            </Button>
+          </div>
+        </div>
+      ) : (
+        <Button variant="secondary" fullWidth onClick={() => setShowForm(true)}>
+          <Plus size={15} />
+          ゾーンを追加する
+        </Button>
+      )}
+
+      {/* リセット */}
+      {(customZones.length > 0 || hiddenDefaults.length > 0) && (
+        confirmReset ? (
+          <div className="bg-orange-50 border border-orange-200 rounded-xl p-3 space-y-2">
+            <p className="text-xs text-orange-800">カスタムゾーンを削除し、非表示設定もすべてリセットします。よろしいですか？</p>
+            <div className="flex gap-2">
+              <Button variant="danger" size="sm" fullWidth onClick={handleReset}>リセットする</Button>
+              <Button variant="secondary" size="sm" onClick={() => setConfirmReset(false)}>キャンセル</Button>
+            </div>
+          </div>
+        ) : (
+          <button
+            onClick={() => setConfirmReset(true)}
+            className="w-full flex items-center justify-center gap-1.5 text-xs text-gray-400 hover:text-gray-600 py-1 transition-colors"
+          >
+            <RotateCcw size={12} />
+            デフォルトに戻す
+          </button>
+        )
+      )}
+    </div>
+  )
+}
 
 export const Settings: React.FC = () => {
   const { facility, setFacility } = useFacilityStore()
@@ -254,6 +402,7 @@ export const Settings: React.FC = () => {
         facility.name,
         facility.director_name,
         facility.phone,
+        facility.pinHash ?? null,
       )
       if (result) {
         setFacility({
@@ -262,6 +411,8 @@ export const Settings: React.FC = () => {
           supabaseId: result.id,
           code: result.code,
         })
+        // PINが設定されている場合、新しいIDでもセッション認証済みとしてマーク
+        if (facility.pinHash) markPINVerified(result.id)
         toast.success(`施設コード「${result.code}」を発行しました`)
       } else {
         toast.error('コードの発行に失敗しました。ネットワークを確認してください')
@@ -557,6 +708,21 @@ export const Settings: React.FC = () => {
               </Button>
             )}
           </div>
+        </Card>
+      </div>
+
+      {/* ヒヤリハットマップ ゾーン管理 */}
+      <div>
+        <SectionHeader
+          title="ヒヤリハットマップ ゾーン管理"
+          subtitle="マップに表示するゾーンをカスタマイズできます"
+        />
+        <Card className="p-5">
+          <div className="flex items-center gap-2 mb-4">
+            <Map size={16} className="text-blue-500" />
+            <p className="text-sm font-semibold text-gray-800">ゾーン設定</p>
+          </div>
+          <ZoneManager />
         </Card>
       </div>
 

@@ -172,7 +172,8 @@ const TypeManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
               placeholder="説明文（任意）"
               className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]" />
             <button onClick={handleAdd}
-              className="flex items-center gap-1.5 text-xs bg-blue-600 text-white px-4 py-2 rounded-lg min-h-[36px] hover:bg-blue-700 transition-colors">
+              disabled={!newLabel.trim()}
+              className="flex items-center gap-1.5 text-xs bg-blue-600 text-white px-4 py-2 rounded-lg min-h-[36px] hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               <Plus size={14} /> 追加する
             </button>
           </div>
