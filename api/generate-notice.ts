@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
 
+// Vercel関数のタイムアウトを30秒に延長（デフォルト10秒ではAI生成が間に合わない場合がある）
+export const config = { maxDuration: 30 }
+
 const STYLE_DESC: Record<string, string> = {
   gentle:   'やわらかく親しみやすい文体（保護者に寄り添うトーン）',
   standard: '標準的なおたより文体（保育園・幼稚園らしい丁寧さ）',
@@ -27,7 +30,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
   const apiKey = process.env.ANTHROPIC_API_KEY
   if (!apiKey) {
-    return res.status(500).json({ error: 'APIキーが設定されていません。Vercel管理画面で ANTHROPIC_API_KEY を設定してください。' })
+    return res.status(500).json({ error: 'APIキーが設定されていません' })
   }
 
   const client = new Anthropic({ apiKey })
@@ -47,16 +50,22 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 - 選択された各カテゴリについて、園で実施している安全対策や保護者へのお願いを具体的に記載する
 - 「ご家庭でのお願い」を含める
 - 締めの挨拶を入れる
-- 末尾は「${yearMonth}\\n${facilityName || '当園'}」で終える
+- 末尾は「${yearMonth}\n${facilityName || '当園'}」で終える
 - 全体で400〜600文字程度
 - 周知文の本文のみ出力（前置き・説明は不要）`
 
-  const message = await client.messages.create({
-    model: 'claude-haiku-4-5',
-    max_tokens: 1000,
-    messages: [{ role: 'user', content: prompt }],
-  })
+  try {
+    const message = await client.messages.create({
+      model: 'claude-haiku-4-5',
+      max_tokens: 1000,
+      messages: [{ role: 'user', content: prompt }],
+    })
 
-  const text = message.content[0].type === 'text' ? message.content[0].text : ''
-  return res.status(200).json({ text })
+    const text = message.content[0].type === 'text' ? message.content[0].text : ''
+    return res.status(200).json({ text })
+  } catch (err: unknown) {
+    console.error('[generate-notice] Anthropic API error:', err)
+    const message = err instanceof Error ? err.message : '不明なエラー'
+    return res.status(500).json({ error: `AI生成に失敗しました: ${message}` })
+  }
 }

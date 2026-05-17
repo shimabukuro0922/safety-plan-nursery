@@ -1,6 +1,9 @@
 import type { VercelRequest, VercelResponse } from '@vercel/node'
 import Anthropic from '@anthropic-ai/sdk'
 
+// Vercel関数のタイムアウトを30秒に延長
+export const config = { maxDuration: 30 }
+
 const SYSTEM_PROMPT = `あなたは「まもりすと」という保育施設向け安全管理アプリのサポートアシスタントです。
 保育園・認定こども園の園長・主任・保育士の方々が「まもりすと」を使いこなせるよう、
 やさしく・わかりやすく・親切にサポートしてください。
