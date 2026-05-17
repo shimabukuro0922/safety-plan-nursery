@@ -101,7 +101,7 @@ const Sidebar: React.FC = () => {
           <ShieldCheck size={18} className="text-white" />
         </div>
         <div className="min-w-0">
-          <p className="text-xs font-bold text-gray-900 leading-tight">安全計画 使える化</p>
+          <p className="text-xs font-bold text-gray-900 leading-tight">まもりすと</p>
           <p className="text-xs text-gray-500 leading-tight">園長の安全管理サポート</p>
         </div>
       </div>
@@ -302,7 +302,7 @@ function getPageTitle(pathname: string): string {
   }
   if (map[pathname]) return map[pathname]
   if (pathname.startsWith('/reports/')) return '報告書エディタ'
-  return '安全計画 使える化'
+  return 'まもりすと'
 }
 
 const DemoBanner: React.FC = () => {

@@ -929,7 +929,7 @@ export const Settings: React.FC = () => {
       {/* アプリ情報 */}
       <Card className="p-4">
         <p className="text-xs text-gray-400 text-center">
-          安全計画 使える化サポート<br />
+          まもりすと<br />
           Version 1.0.0（MVP）
         </p>
       </Card>

@@ -263,7 +263,7 @@ export const Setup: React.FC = () => {
           <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <ShieldCheck size={32} className="text-white" />
           </div>
-          <h1 className="text-2xl font-bold text-gray-900">安全計画 使える化サポート</h1>
+          <h1 className="text-2xl font-bold text-gray-900">まもりすと</h1>
           <p className="text-sm text-gray-500 mt-2 leading-relaxed">
             毎月の点検・記録・共有・改善を、<br />
             園長先生が迷わず進められる仕組みに変えます。
