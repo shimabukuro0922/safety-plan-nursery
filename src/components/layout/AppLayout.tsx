@@ -204,6 +204,7 @@ const BottomNav: React.FC = () => {
               <p className="text-sm font-bold text-gray-800">メニュー</p>
               <button
                 onClick={() => setMoreOpen(false)}
+                aria-label="メニューを閉じる"
                 className="p-2 text-gray-400 hover:text-gray-600 transition-colors"
               >
                 <X size={18} />
@@ -229,7 +230,7 @@ const BottomNav: React.FC = () => {
   )
 }
 
-const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
+const MobileHeader: React.FC<{ title: string; hasDemo?: boolean }> = ({ title, hasDemo }) => {
   const location = useLocation()
   const navigate = useNavigate()
   const isTop = location.pathname === '/dashboard'
@@ -246,13 +247,14 @@ const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
   return (
     <>
       <header
-        className="md:hidden sticky top-0 z-50 bg-white border-b border-gray-200"
+        className={`md:hidden sticky z-50 bg-white border-b border-gray-200 ${hasDemo ? 'top-8' : 'top-0'}`}
         style={{ paddingTop: 'env(safe-area-inset-top, 0px)' }}
       >
         <div className="h-14 flex items-center px-4 gap-2">
           {!isTop && (
             <button
               onClick={handleBack}
+              aria-label="戻る"
               className="p-2 -ml-2 text-gray-500 min-w-[40px] min-h-[40px] flex items-center justify-center"
             >
               <ChevronLeft size={20} />
@@ -268,6 +270,7 @@ const MobileHeader: React.FC<{ title: string }> = ({ title }) => {
           </h1>
           <button
             onClick={() => setGuideOpen(true)}
+            aria-label="操作ガイドを開く"
             className="p-2 text-gray-400 hover:text-blue-600 transition-colors min-w-[40px] min-h-[40px] flex items-center justify-center"
           >
             <HelpCircle size={20} />
@@ -341,7 +344,7 @@ export const AppLayout: React.FC<{ children: React.ReactNode }> = ({ children })
     <div className={`min-h-dvh w-full overflow-x-hidden bg-gray-50 ${isDemo ? 'pt-8' : ''}`}>
       {isDemo && <DemoBanner />}
       <Sidebar />
-      <MobileHeader title={title} />
+      <MobileHeader title={title} hasDemo={isDemo} />
       <main className="main-content">
         <div className="max-w-4xl mx-auto">
           {children}

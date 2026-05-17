@@ -59,6 +59,8 @@ function importBackup(
       const data = JSON.parse(e.target?.result as string) as Record<string, string>
       const failedKeys: string[] = []
       Object.entries(data).forEach(([key, value]) => {
+        // ホワイトリスト外のキーは無視（セキュリティ対策）
+        if (!BACKUP_KEYS.includes(key)) return
         try {
           localStorage.setItem(key, value)
         } catch {
@@ -571,8 +573,8 @@ export const Settings: React.FC = () => {
           ) : (
             <div className="bg-gray-50 rounded-xl p-4 text-center">
               <p className="text-sm text-gray-500">
-                クラウド接続が設定されていません。<br />
-                環境変数を確認してください。
+                複数端末の共有機能はご利用いただけません。<br />
+                ご不明な点はサポートまでお問い合わせください。
               </p>
             </div>
           )}

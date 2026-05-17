@@ -90,7 +90,7 @@ export const ChatBot: React.FC = () => {
     <>
       {/* チャットパネル */}
       {open && (
-        <div className="fixed bottom-24 right-4 z-50 w-[340px] sm:w-[380px] flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
+        <div className="fixed bottom-[88px] right-4 z-[55] w-[min(340px,calc(100vw-32px))] sm:w-[380px] flex flex-col bg-white rounded-2xl shadow-2xl border border-gray-200 overflow-hidden"
              style={{ maxHeight: 'calc(100vh - 120px)' }}>
 
           {/* ヘッダー */}
@@ -169,6 +169,7 @@ export const ChatBot: React.FC = () => {
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
+              aria-label="送信"
               className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl p-2 transition-colors shrink-0">
               <Send size={16} />
             </button>
@@ -179,7 +180,7 @@ export const ChatBot: React.FC = () => {
       {/* フローティングボタン */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-6 right-4 z-50 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-full shadow-2xl transition-all flex items-center gap-2 px-4 py-3"
+        className="fixed bottom-[88px] right-4 z-[55] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-full shadow-2xl transition-all flex items-center gap-2 px-4 py-3"
         aria-label="サポートチャットを開く"
       >
         {open ? (
