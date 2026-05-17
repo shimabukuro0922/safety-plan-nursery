@@ -47,6 +47,7 @@ import { SyncProvider } from '@/components/SyncProvider'
 import { PINGate } from '@/components/PINGate'
 import { LoadingSpinner } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
+import { ChatBot } from '@/components/ChatBot'
 
 const Setup = React.lazy(() => import('@/pages/Setup'))
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'))
@@ -151,6 +152,7 @@ function App() {
                   <AppRoutes />
                 </ErrorBoundary>
               </AppLayout>
+              <ChatBot />
             </PINGate>
           </SyncProvider>
         </BrowserRouter>
