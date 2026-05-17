@@ -33,9 +33,12 @@ export const NapCheck: React.FC = () => {
 
   const handleCheck = () => {
     if (submitting) return
+    if (!checkerName.trim()) {
+      toast.error('確認担当者名を入力してください')
+      return
+    }
     setSubmitting(true)
-    const name = checkerName.trim() || '未記入'
-    addRecord({ date: todayKey, checked_at: new Date().toISOString(), checked_by: name })
+    addRecord({ date: todayKey, checked_at: new Date().toISOString(), checked_by: checkerName.trim() })
     toast.success(`${format(new Date(), 'HH:mm')} 確認を記録しました`)
     setTimeout(() => setSubmitting(false), 1500)
   }

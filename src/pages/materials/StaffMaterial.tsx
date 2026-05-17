@@ -239,7 +239,7 @@ export const StaffMaterial: React.FC = () => {
       const text = buildContent(selected, selectedType?.label ?? '', theme.trim())
       setGenerated(text)
       setEditedContent(text)
-      toast('オフラインのため標準テンプレートを表示しています。内容を確認して編集してください', { icon: 'ℹ️' })
+      toast('AI生成に失敗したため、標準テンプレートを表示しています。内容を確認して編集してください', { icon: 'ℹ️' })
       return true
     } finally {
       setIsGenerating(false)

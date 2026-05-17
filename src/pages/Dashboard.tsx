@@ -8,7 +8,7 @@ import {
 import { Card, Button, SectionHeader } from '@/components/ui'
 import {
   useNearMissStore, useChecklistStore, useChecklistItemsStore,
-  useNapCheckStore, useOnboardingStore,
+  useNapCheckStore, useOnboardingStore, useStaffTrainingStore,
 } from '@/stores/appStore'
 import { WelcomeModal } from '@/components/WelcomeModal'
 import { useFacilityStore } from '@/stores/facilityStore'
@@ -185,11 +185,13 @@ export const Dashboard: React.FC = () => {
   const { items: checklistItems } = useChecklistItemsStore()
   const { records: napRecords } = useNapCheckStore()
 
+  const { records: trainingRecords } = useStaffTrainingStore()
   const { children } = useChildrenStore()
   const { dismissed, dismiss, emergencyViewed } = useOnboardingStore()
 
   const now = new Date()
   const monthLabel = format(now, 'M月', { locale: ja })
+  const currentYearMonth = format(now, 'yyyy-MM')
 
   const totalItems = checklistItems.length
   const doneCount = checklistItems.filter((item) => item.id in doneItems).length
@@ -199,12 +201,21 @@ export const Dashboard: React.FC = () => {
     (nm) => nm.step === 'occurred' || nm.step === 'cause' || nm.step === 'action'
   ).length
 
+  // 今月の研修記録があるか
+  const trainingThisMonth = trainingRecords.some(
+    (r) => r.completed_date.startsWith(currentYearMonth)
+  )
+  // 今月のヒヤリハットがあるか（対策済みも含む）
+  const nearMissThisMonth = nearMisses.some(
+    (nm) => nm.occurred_at.startsWith(currentYearMonth)
+  )
+
   const pillarDone: Record<string, boolean> = {
     facility: totalItems > 0 && doneCount >= Math.ceil(totalItems / 2),
-    training: false,
-    staff: false,
-    nearmiss: nearMisses.length > 0 && nearMissPending === 0,
-    guardian: false,
+    training: trainingThisMonth,
+    staff:    nearMisses.length > 0,   // ヒヤリハットを共有資料として活用
+    nearmiss: nearMissThisMonth && nearMissPending === 0,
+    guardian: emergencyViewed,          // 緊急対応確認を保護者周知の代替指標に
   }
   const donePillars = Object.values(pillarDone).filter(Boolean).length
   const recentNearMisses = nearMisses.slice(0, 2)

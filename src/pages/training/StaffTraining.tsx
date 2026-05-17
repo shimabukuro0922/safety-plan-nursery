@@ -217,7 +217,7 @@ export const StaffTraining: React.FC = () => {
                           {status.urgent && <AlertTriangle size={10} className="inline mr-0.5" />}
                           {status.label}
                         </span>
-                        <button onClick={() => { if (window.confirm('削除しますか？')) { deleteRecord(r.id); toast.success('削除しました') } }}
+                        <button onClick={() => { if (window.confirm(`「${r.staff_name}」の「${r.training_type}」を削除しますか？`)) { deleteRecord(r.id); toast.success('削除しました') } }}
                           className="p-1 text-gray-300 hover:text-red-400 transition-colors">
                           <Trash2 size={14} />
                         </button>

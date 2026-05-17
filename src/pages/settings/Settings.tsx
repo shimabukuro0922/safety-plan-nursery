@@ -774,30 +774,17 @@ export const Settings: React.FC = () => {
             </button>
             {notifOpen && (
               <div className="px-4 pb-4 border-t border-gray-100 pt-4 bg-blue-50">
-                <div className="flex items-start gap-3 mb-3">
+                <div className="flex items-start gap-3">
                   <span className="text-2xl">🔔</span>
                   <div>
                     <p className="text-sm font-semibold text-blue-800 mb-1">通知機能（開発中）</p>
                     <p className="text-xs text-blue-700 leading-relaxed">
-                      チェックリストの未実施アラート・再確認日のリマインドなど、
-                      通知機能を現在開発中です。<br />
+                      月次チェックの未実施アラート・ヒヤリハット再確認日のリマインド・
+                      研修資格の期限アラートなど、通知機能を現在開発中です。<br /><br />
                       リリース次第、このアプリ上でお知らせします。
                     </p>
                   </div>
                 </div>
-                <div className="space-y-2 opacity-50 pointer-events-none">
-                  {[
-                    '月次チェック未実施アラート（月末前）',
-                    'ヒヤリハット再確認日のリマインド',
-                    '研修資格の期限アラート',
-                  ].map((label) => (
-                    <div key={label} className="flex items-center justify-between bg-white rounded-lg px-3 py-2">
-                      <span className="text-xs text-gray-700">{label}</span>
-                      <div className="w-9 h-5 bg-gray-200 rounded-full" />
-                    </div>
-                  ))}
-                </div>
-                <p className="text-xs text-gray-400 mt-2 text-center">※ 現在は設定できません</p>
               </div>
             )}
           </Card>

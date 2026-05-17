@@ -72,7 +72,7 @@ export const GuardianNotice: React.FC = () => {
       const text = buildLocalTemplate(catNames, style)
       setGenerated(text)
       setEditedContent(text)
-      toast('オフラインのため標準テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
+      toast('AI生成に失敗したため、標準テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
     } finally {
       setIsGenerating(false)
     }
@@ -252,8 +252,16 @@ export const GuardianNotice: React.FC = () => {
             >
               <FileDown size={14} /> PDF出力
             </Button>
-            <Button variant="secondary" size="sm" fullWidth onClick={() => toast('配布後は「実施記録・証跡」ページから記録してください', { icon: 'ℹ️' })}>
-              <Send size={14} /> 配布済みとして記録
+            <Button variant="secondary" size="sm" fullWidth onClick={() => {
+              const a = document.createElement('a')
+              const blob = new Blob([editedContent || generated || ''], { type: 'text/plain;charset=utf-8' })
+              a.href = URL.createObjectURL(blob)
+              a.download = `保護者向けお知らせ_${new Date().toLocaleDateString('ja-JP').replace(/\//g, '-')}.txt`
+              a.click()
+              URL.revokeObjectURL(a.href)
+              toast.success('テキストファイルとして保存しました')
+            }}>
+              <Send size={14} /> テキストで保存
             </Button>
           </div>
         </>
