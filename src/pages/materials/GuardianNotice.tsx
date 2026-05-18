@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react'
+import React, { useState } from 'react'
 import { Sparkles, FileDown, Send, Pencil, Plus, Trash2, X, Check, RotateCcw, ChevronDown, ChevronUp } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
@@ -24,7 +24,6 @@ export const GuardianNotice: React.FC = () => {
   const [generated, setGenerated] = useState<string | null>(null)
   const [editedContent, setEditedContent] = useState('')
   const [exportingPDF, setExportingPDF] = useState(false)
-  const noticeRef = useRef<HTMLDivElement>(null)
 
   // 編集モード
   const [editMode, setEditMode] = useState(false)
@@ -281,44 +280,49 @@ export const GuardianNotice: React.FC = () => {
             <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
           </Card>
 
-          {/* PDF出力専用エリア（非表示・PDF取得時のみ使用） */}
-          <div
-            ref={noticeRef}
-            style={{
-              position: 'fixed',
-              left: '-9999px',
-              top: 0,
-              width: '210mm',
-              padding: '20mm 18mm',
-              background: '#fff',
-              fontFamily: '"Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif',
-              fontSize: '13px',
-              lineHeight: '2',
-              color: '#111',
-              whiteSpace: 'pre-wrap',
-              wordBreak: 'break-all',
-            }}
-          >
-            <div style={{ fontSize: '11px', textAlign: 'right', color: '#555', marginBottom: '16px' }}>
-              {facility?.name ?? ''}
-            </div>
-            <div>{editedContent || generated || ''}</div>
-          </div>
-
           {/* ボタン類 */}
           <div className="flex gap-2">
             <Button
               variant="secondary" size="sm" fullWidth
               loading={exportingPDF}
               onClick={async () => {
-                if (!noticeRef.current) return
                 setExportingPDF(true)
+                // PDF出力専用の一時要素をbodyに追加してキャプチャ
+                const printEl = document.createElement('div')
+                printEl.setAttribute('data-pdf-temp', '1')
+                Object.assign(printEl.style, {
+                  position: 'absolute',
+                  top: '0',
+                  left: '0',
+                  width: '740px',
+                  padding: '60px 72px',
+                  background: '#ffffff',
+                  fontFamily: '"Hiragino Kaku Gothic ProN","Meiryo","Noto Sans JP",sans-serif',
+                  fontSize: '14px',
+                  lineHeight: '2.0',
+                  color: '#111111',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-all',
+                  zIndex: '-1',
+                  pointerEvents: 'none',
+                })
+                if (facility?.name) {
+                  const hdr = document.createElement('div')
+                  Object.assign(hdr.style, { fontSize: '11px', textAlign: 'right', color: '#555', marginBottom: '20px' })
+                  hdr.textContent = facility.name
+                  printEl.appendChild(hdr)
+                }
+                const body = document.createElement('div')
+                body.textContent = editedContent || generated || ''
+                printEl.appendChild(body)
+                document.body.appendChild(printEl)
                 try {
-                  await exportToPDF(noticeRef.current, { filename: '保護者向け周知文' })
+                  await exportToPDF(printEl, { filename: '保護者向け周知文' })
                   toast.success('PDFを保存しました')
                 } catch {
                   toast.error('PDF生成に失敗しました')
                 } finally {
+                  document.querySelectorAll('[data-pdf-temp]').forEach((el) => el.remove())
                   setExportingPDF(false)
                 }
               }}
