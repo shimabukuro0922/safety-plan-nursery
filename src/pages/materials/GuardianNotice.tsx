@@ -263,6 +263,13 @@ export const GuardianNotice: React.FC = () => {
       <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
         <Sparkles size={18} /> 文章を自動で作る
       </Button>
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+        <p className="text-xs text-amber-800 leading-relaxed">
+          ⚠️ <strong>AI文書作成に関するご注意</strong><br />
+          入力した内容は外部AIサービス（Anthropic Claude）に送信されます。<strong>園児名・職員名・事故の詳細など個人情報は入力しないでください。</strong><br />
+          生成された文章はあくまで下書きです。配布・提出前に必ず職員が内容を確認・修正してください。
+        </p>
+      </div>
 
       {generated && (
         <>
