@@ -1,4 +1,4 @@
-import React, { Suspense } from 'react'
+import React, { Suspense, useEffect } from 'react'
 
 // ==============================
 // エラーバウンダリ
@@ -48,6 +48,7 @@ import { PINGate } from '@/components/PINGate'
 import { LoadingSpinner } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
 import { ChatBot } from '@/components/ChatBot'
+import { loadDemoData } from '@/lib/demo'
 
 const Setup = React.lazy(() => import('@/pages/Setup'))
 const Dashboard = React.lazy(() => import('@/pages/Dashboard'))
@@ -110,6 +111,15 @@ const RequireSetup: React.FC<{ children: React.ReactNode }> = ({ children }) => 
 }
 
 function AppRoutes() {
+  // アプリ起動時にデモモードが残っていたら常にフレッシュなデモデータにリセット
+  // （前回のデモ利用者のデータが残らないようにする）
+  useEffect(() => {
+    const isDemo = useFacilityStore.getState().isDemo
+    if (isDemo) {
+      loadDemoData()
+    }
+  }, [])
+
   return (
     <Suspense fallback={<div className="px-4 py-10"><LoadingSpinner /></div>}>
       <Routes>
