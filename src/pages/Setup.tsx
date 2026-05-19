@@ -6,7 +6,7 @@ import {
 } from 'lucide-react'
 import { Button } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { createFacilityInSupabase, getFacilityByCode } from '@/lib/sync'
+import { createFacilityInSupabase, getFacilityByCode, initFacilityAuth } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { hashPIN, verifyPIN, markPINVerified } from '@/lib/pinAuth'
 import { loadDemoData } from '@/lib/demo'
@@ -25,9 +25,41 @@ type Mode = 'new' | 'join'
 
 export const Setup: React.FC = () => {
   const navigate = useNavigate()
-  const { facility, isDemo, setFacility, setTrialExpiresAt } = useFacilityStore()
+  const { facility, isDemo, setFacility, setTrialExpiresAt, setFacilityToken } = useFacilityStore()
+
+  // ==================== 全 hooks（早期 return より前に宣言） ====================
+  const { setShowWelcome } = useOnboardingStore()
+
+  const [mode, setMode] = useState<Mode>('new')
+  const [saving, setSaving] = useState(false)
+
+  // 招待コード: 'invite' = 入力, 'setup' = 施設情報入力
+  const [newStep, setNewStep] = useState<'invite' | 'setup'>('invite')
+  const [inviteCode, setInviteCode] = useState('')
+  const [pendingExpiresAt, setPendingExpiresAt] = useState<string | null>(null)
+
+  // 新規登録フォーム
+  const [name, setName]               = useState('')
+  const [directorName, setDirectorName] = useState('')
+  const [phone, setPhone]             = useState('')
+  const [newPin, setNewPin]           = useState('')
+  const [newPinConfirm, setNewPinConfirm] = useState('')
+  const [showNewPin, setShowNewPin]   = useState(false)
+
+  // コード参加フォーム
+  const [joinCode, setJoinCode]       = useState('')
+  const [joinStep, setJoinStep]       = useState<'code' | 'pin'>('code')
+  const [pendingFacility, setPendingFacility] = useState<{
+    id: string; code: string; name: string
+    director_name: string | null; phone: string | null; pin_hash: string | null
+  } | null>(null)
+  const [joinPin, setJoinPin]         = useState('')
+  const [joinPinError, setJoinPinError] = useState<string | null>(null)
+  const [showJoinPin, setShowJoinPin] = useState(false)
+  const joinPinRef = useRef<HTMLInputElement>(null)
 
   // 施設が登録済み（非デモ）の場合はダッシュボードへリダイレクト
+  // ※ hooks はすべて上で宣言済み（Rules of Hooks 準拠）
   if (facility !== null && isDemo === false) {
     return <Navigate to="/dashboard" replace />
   }
@@ -38,17 +70,6 @@ export const Setup: React.FC = () => {
     toast.success('デモモードで起動しました（さくら保育園）')
     navigate('/dashboard')
   }
-
-  const { setShowWelcome } = useOnboardingStore()
-
-  const [mode, setMode] = useState<Mode>('new')
-  const [saving, setSaving] = useState(false)
-
-  // ==================== 招待コード ====================
-  // 'invite' = 招待コード入力, 'setup' = 施設情報入力
-  const [newStep, setNewStep] = useState<'invite' | 'setup'>('invite')
-  const [inviteCode, setInviteCode] = useState('')
-  const [pendingExpiresAt, setPendingExpiresAt] = useState<string | null>(null)
 
   const handleValidateInviteCode = async () => {
     const code = inviteCode.trim().toUpperCase()
@@ -70,28 +91,6 @@ export const Setup: React.FC = () => {
       setSaving(false)
     }
   }
-
-  // 新規登録フォーム
-  const [name, setName]               = useState('')
-  const [directorName, setDirectorName] = useState('')
-  const [phone, setPhone]             = useState('')
-  const [newPin, setNewPin]           = useState('')
-  const [newPinConfirm, setNewPinConfirm] = useState('')
-  const [showNewPin, setShowNewPin]   = useState(false)
-
-  // コード参加フォーム
-  const [joinCode, setJoinCode]       = useState('')
-  // PIN検証ステップ（施設にPINが設定されている場合）
-  type JoinStep = 'code' | 'pin'
-  const [joinStep, setJoinStep]       = useState<JoinStep>('code')
-  const [pendingFacility, setPendingFacility] = useState<{
-    id: string; code: string; name: string
-    director_name: string | null; phone: string | null; pin_hash: string | null
-  } | null>(null)
-  const [joinPin, setJoinPin]         = useState('')
-  const [joinPinError, setJoinPinError] = useState<string | null>(null)
-  const [showJoinPin, setShowJoinPin] = useState(false)
-  const joinPinRef = useRef<HTMLInputElement>(null)
 
   // ==================== 新規登録 ====================
   const handleCreate = async () => {
@@ -143,6 +142,9 @@ export const Setup: React.FC = () => {
             await consumeInviteCode(inviteCode, facilityId)
             setTrialExpiresAt(pendingExpiresAt)
           }
+          // RLS 施設単位アクセス制御のために JWT を取得・保存
+          const token = await initFacilityAuth(result.code)
+          if (token) setFacilityToken(token)
           if (pinHash) markPINVerified(facilityId)
           setShowWelcome(true)
           toast.success(`施設コード「${result.code}」を発行しました。設定画面で確認できます`, { duration: 5000 })
@@ -200,7 +202,7 @@ export const Setup: React.FC = () => {
         setTimeout(() => joinPinRef.current?.focus(), 100)
       } else {
         // PINなし → そのまま参加
-        completeJoin(result, null)
+        await completeJoin(result, null)
       }
     } finally {
       setSaving(false)
@@ -224,13 +226,13 @@ export const Setup: React.FC = () => {
         setTimeout(() => joinPinRef.current?.focus(), 50)
         return
       }
-      completeJoin(pendingFacility, pendingFacility.pin_hash)
+      await completeJoin(pendingFacility, pendingFacility.pin_hash)
     } finally {
       setSaving(false)
     }
   }
 
-  const completeJoin = (
+  const completeJoin = async (
     result: { id: string; code: string; name: string; director_name: string | null; phone: string | null },
     pinHash: string | null
   ) => {
@@ -248,6 +250,9 @@ export const Setup: React.FC = () => {
       code: result.code,
       pinHash,
     })
+    // RLS 施設単位アクセス制御のために JWT を取得・保存
+    const token = await initFacilityAuth(result.code)
+    if (token) setFacilityToken(token)
     // PIN検証済みとしてマーク（参加時は認証済みとみなす）
     if (pinHash) markPINVerified(result.id)
     toast.success(`「${result.name}」に参加しました`)
