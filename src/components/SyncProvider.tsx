@@ -28,12 +28,25 @@ import {
   pullPhotoEvents,
   pullPhotoMeta,
   subscribeToNapChecks,
+  initFacilityAuth,
 } from '@/lib/sync'
+import { setFacilityAuth } from '@/lib/supabase'
 
 export const SyncProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { facility } = useFacilityStore()
+  const { facility, facilityToken } = useFacilityStore()
   const facilityId = facility?.supabaseId ?? null
   const lastSyncRef = useRef<number>(0)
+
+  // ページリロード後に保存済み JWT を Supabase セッションに復元する
+  useEffect(() => {
+    if (facilityToken) {
+      setFacilityAuth(facilityToken).catch(() => {})
+    } else if (facility?.code) {
+      // トークン未保存の場合は施設コードから再取得を試みる
+      initFacilityAuth(facility.code).catch(() => {})
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
 
   useEffect(() => {
     if (!facilityId) return

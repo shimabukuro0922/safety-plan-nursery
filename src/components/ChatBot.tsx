@@ -37,6 +37,7 @@ export const ChatBot: React.FC = () => {
   // パネルを開いたとき未読バッジを消す
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setHasNewMessage(false)
       setTimeout(() => inputRef.current?.focus(), 100)
     }

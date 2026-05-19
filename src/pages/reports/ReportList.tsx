@@ -64,7 +64,7 @@ export const ReportList: React.FC = () => {
                     <p className="text-xs text-gray-500 mt-0.5">{REPORT_TYPE_LABELS[r.report_type]}</p>
                     <p className="text-xs text-gray-400 mt-1">
                       更新: {format(new Date(r.updated_at), 'M月d日 HH:mm', { locale: ja })}
-                      　v{r.current_version}
+                      {' '}v{r.current_version}
                     </p>
                   </div>
                   <div className="flex items-center gap-1 shrink-0">

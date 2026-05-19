@@ -33,7 +33,7 @@ const SeasonCard: React.FC<{
   onAddItem: (seasonKey: string, label: string) => void
   onUpdateItem: (key: string, label: string) => void
   onDeleteItem: (key: string) => void
-}> = ({ meta, items, staffName, doneItems, onToggle, onAddItem, onUpdateItem, onDeleteItem }) => {
+}> = ({ meta, items, doneItems, onToggle, onAddItem, onUpdateItem, onDeleteItem }) => {
   const [editMode, setEditMode] = useState(false)
   const [editingKey, setEditingKey] = useState<string | null>(null)
   const [editLabel, setEditLabel] = useState('')
@@ -167,7 +167,7 @@ const SeasonCard: React.FC<{
                   </span>
                   {done && record && (
                     <p className="text-xs text-green-600 mt-0.5">
-                      {record.done_by}　{new Date(record.done_at).toLocaleDateString('ja-JP')}
+                      {record.done_by} {new Date(record.done_at).toLocaleDateString('ja-JP')}
                     </p>
                   )}
                 </div>
@@ -191,6 +191,7 @@ export const SeasonalChecklist: React.FC = () => {
 
   // 設定画面で施設長名が変更されたとき担当者名に反映する
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (facility?.director_name) setStaffName(facility.director_name)
   }, [facility?.director_name])
 

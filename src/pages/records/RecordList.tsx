@@ -28,7 +28,7 @@ export const RecordList: React.FC = () => {
       const done = doneItems[item.id]
       return {
         id: item.id, type: 'checklist' as Tab, title: item.title, date: done.done_at,
-        meta: `実施者: ${done.done_by ?? '不明'}　カテゴリ: ${item.categoryName}`,
+        meta: `実施者: ${done.done_by ?? '不明'} カテゴリ: ${item.categoryName}`,
         icon: <ClipboardCheck size={14} className="text-green-600" />, color: 'bg-green-50',
       }
     })

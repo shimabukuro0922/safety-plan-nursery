@@ -411,6 +411,7 @@ export const Settings: React.FC = () => {
 
   useEffect(() => {
     if (facility) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       setForm({
         name: facility.name ?? '',
         director_name: facility.director_name ?? '',

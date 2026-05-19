@@ -4,15 +4,13 @@ import {
   Camera, CheckCircle2, XCircle, Clock, ShieldAlert, X,
   ChevronLeft, ChevronRight, RotateCcw, Trash2, Tag, Check,
 } from 'lucide-react'
-import { Card, SectionHeader, Button, Modal } from '@/components/ui'
+import { Card, SectionHeader, Button } from '@/components/ui'
 import { usePhotoStore } from '@/stores/photoStore'
 import type { PhotoMeta, PhotoStatus } from '@/stores/photoStore'
 import { useChildrenStore } from '@/stores/childrenStore'
 import { loadPhotoURL, deletePhoto as deletePhotoFromDB } from '@/lib/photoDB'
 import { deletePhotoFromSupabase } from '@/lib/photoStorage'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { format } from 'date-fns'
-import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
 const STATUS_CONFIG: Record<PhotoStatus, { label: string; color: string; icon: React.ReactNode }> = {
@@ -49,6 +47,8 @@ const PhotoDetailModal: React.FC<{
       URL.revokeObjectURL(urlRef.current)
       urlRef.current = null
     }
+    // photo.id 変化時にフォーム状態をリセット
+    /* eslint-disable react-hooks/set-state-in-effect */
     setFullUrl(null)
     setTagOpen(false)
     setShowRejectInput(false)
@@ -56,6 +56,7 @@ const PhotoDetailModal: React.FC<{
     if (!photo) return
 
     setLoadingFull(true)
+    /* eslint-enable react-hooks/set-state-in-effect */
     loadPhotoURL(photo.id, photo.storageUrl).then((url) => {
       urlRef.current = url
       setFullUrl(url)
@@ -68,6 +69,7 @@ const PhotoDetailModal: React.FC<{
         urlRef.current = null
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [photo?.id])
 
   if (!photo) return null

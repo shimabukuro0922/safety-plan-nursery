@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react'
 import { Moon, CheckCircle2, Clock, Trash2, Users, Settings, X, Check } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
-import { useFacilityStore } from '@/stores/facilityStore'
+
 import { useNapCheckStore, useNapSettingsStore } from '@/stores/appStore'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
@@ -10,7 +10,7 @@ import toast from 'react-hot-toast'
 const INTERVAL_PRESETS = [3, 5, 10, 15]
 
 export const NapCheck: React.FC = () => {
-  const { facility } = useFacilityStore()
+
   const { records, addRecord, clearToday } = useNapCheckStore()
   const { intervalMinutes, setIntervalMinutes } = useNapSettingsStore()
 
@@ -34,7 +34,7 @@ export const NapCheck: React.FC = () => {
 
   const lastCheck = todayRecords[0]
   const minutesSinceLast = lastCheck
-    ? Math.floor((Date.now() - new Date(lastCheck.checked_at).getTime()) / 60000)
+    ? Math.floor((now.getTime() - new Date(lastCheck.checked_at).getTime()) / 60000)
     : null
 
   // 間隔に応じたアラート色（設定値の80%・100%・120%を閾値に）

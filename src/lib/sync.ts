@@ -2,8 +2,35 @@
  * Supabase sync helpers — push/pull for each entity.
  * All functions are safe no-ops when Supabase is not configured.
  */
-import { supabase, isSupabaseConfigured } from './supabase'
+import { supabase, isSupabaseConfigured, setFacilityAuth } from './supabase'
 import type { NearMiss } from '@/types'
+
+// ==========================================
+// Facility JWT (RLS セキュリティ強化)
+// ==========================================
+
+/**
+ * 施設コードを /api/facility-token に送り、返ってきた JWT を Supabase セッションに設定する。
+ * 成功すると以降の Supabase クエリに施設 ID クレームが付与され RLS が有効になる。
+ * API 未設定（SUPABASE_JWT_SECRET が Vercel に未登録）の場合は静かにスキップする。
+ */
+export async function initFacilityAuth(facilityCode: string): Promise<string | null> {
+  if (!isSupabaseConfigured) return null
+  try {
+    const res = await fetch('/api/facility-token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ code: facilityCode }),
+    })
+    if (!res.ok) return null  // 503 = JWT secret 未設定 → フォールバック許容
+    const data = await res.json() as { token?: string }
+    if (!data.token) return null
+    await setFacilityAuth(data.token)
+    return data.token
+  } catch {
+    return null  // ネットワークエラー等はサイレント無視
+  }
+}
 
 // Local interface mirrors (kept in sync with stores — avoids circular imports)
 export interface SyncNapCheckRecord {

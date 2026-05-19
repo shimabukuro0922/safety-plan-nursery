@@ -227,11 +227,15 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
   const [recheck, setRecheck] = useState(nm.recheck_date ?? '')
 
   React.useEffect(() => {
+    // nm.id が変わったとき（別のヒヤリハット選択時）にフォームをリセット
+    /* eslint-disable react-hooks/set-state-in-effect */
     setWhy(nm.why_it_happened ?? '')
     setWhat(nm.what_to_change ?? '')
     setShared(nm.shared_with ?? '')
     setRecheck(nm.recheck_date ?? '')
     setEditing(false)
+    /* eslint-enable react-hooks/set-state-in-effect */
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [nm.id])
 
   const handleSave = () => {

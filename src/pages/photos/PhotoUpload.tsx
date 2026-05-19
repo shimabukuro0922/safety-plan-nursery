@@ -139,6 +139,7 @@ export const PhotoUpload: React.FC = () => {
 
   // アンマウント時に未解放の object URL をすべて revoke する
   const previewsRef = useRef<PreviewItem[]>([])
+  // eslint-disable-next-line react-hooks/refs
   previewsRef.current = previews
   useEffect(() => {
     return () => { previewsRef.current.forEach((p) => URL.revokeObjectURL(p.objectUrl)) }

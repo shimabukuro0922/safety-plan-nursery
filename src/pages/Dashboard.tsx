@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import {
   ClipboardCheck, ChevronRight, CalendarDays,
   AlertCircle, Users, Bell, Building2, CheckCircle2, Circle,
-  Moon, GraduationCap, Siren, Camera, X, Sparkles, Plus,
+  Moon, Siren, Camera, X, Sparkles, Plus,
 } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import {
@@ -230,7 +230,7 @@ export const Dashboard: React.FC = () => {
   const todayNapRecords = napRecords.filter((r) => r.date === todayKey)
   const lastNapCheck = [...todayNapRecords].sort((a, b) => b.checked_at.localeCompare(a.checked_at))[0]
   const napMinutesSinceLast = lastNapCheck
-    ? Math.floor((Date.now() - new Date(lastNapCheck.checked_at).getTime()) / 60000)
+    ? Math.floor((now.getTime() - new Date(lastNapCheck.checked_at).getTime()) / 60000)
     : null
 
   return (

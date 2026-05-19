@@ -1,7 +1,7 @@
 import React, { useState } from 'react'
 import { Users, Plus, Pencil, Trash2, ShieldAlert, ShieldCheck, X, Check } from 'lucide-react'
 import { Card, SectionHeader, Button, Modal, EmptyState } from '@/components/ui'
-import { useChildrenStore, DEFAULT_CLASSES } from '@/stores/childrenStore'
+import { useChildrenStore } from '@/stores/childrenStore'
 import type { Child } from '@/stores/childrenStore'
 import { useFacilityStore } from '@/stores/facilityStore'
 import toast from 'react-hot-toast'

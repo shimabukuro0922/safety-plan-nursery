@@ -187,12 +187,15 @@ export const ReportEditPage: React.FC = () => {
 
   // 別デバイスからの同期でstoreが更新されたとき、ローカルstateに反映する
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (report) setStatus(report.status)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report?.status])
 
   useEffect(() => {
     // isDirty の場合（ユーザーが編集中）は同期で上書きしない
     if (report && !isDirtyRef.current) setContent(report.content)
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [report?.id, report?.updated_at])
 
   if (!report) return null

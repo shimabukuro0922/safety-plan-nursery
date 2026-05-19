@@ -358,7 +358,7 @@ export const MonthlyChecklist: React.FC = () => {
         >
           <ChevronLeft size={18} />
         </button>
-        <h2 className="text-sm font-bold text-gray-900 text-center">{year}年{month}月　月次チェック表</h2>
+        <h2 className="text-sm font-bold text-gray-900 text-center">{year}年{month}月 月次チェック表</h2>
         <button
           onClick={() => adjustMonth(+1)}
           className="p-2 rounded-xl border border-gray-200 bg-white min-w-[44px] min-h-[44px] flex items-center justify-center active:bg-gray-50"

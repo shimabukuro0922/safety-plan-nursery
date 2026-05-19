@@ -46,9 +46,9 @@ export const GuardianNotice: React.FC = () => {
     )
   }
 
-  const buildLocalTemplate = (catNames: string[], styleName: string): string => {
+  const buildLocalTemplate = (catNames: string[]): string => {
     const facilityName = facility?.name ?? '当園'
-    return `保護者の皆様へ\n\n${facilityName}より、安全管理に関するお知らせです。\n\n今月は以下の取り組みを実施しております。\n\n${catNames.map((c) => `■ ${c}\n　園では、${c}に関する取り組みを積極的に行っております。ご家庭でも引き続きご協力をお願いいたします。`).join('\n\n')}\n\n子どもたちの安全を最優先に、職員一同取り組んでまいります。\nご不明な点やご心配なことがございましたら、いつでもお声がけください。\n\n${new Date().getFullYear()}年${new Date().getMonth() + 1}月\n${facilityName}`
+    return `保護者の皆様へ\n\n${facilityName}より、安全管理に関するお知らせです。\n\n今月は以下の取り組みを実施しております。\n\n${catNames.map((c) => `■ ${c}\n  園では、${c}に関する取り組みを積極的に行っております。ご家庭でも引き続きご協力をお願いいたします。`).join('\n\n')}\n\n子どもたちの安全を最優先に、職員一同取り組んでまいります。\nご不明な点やご心配なことがございましたら、いつでもお声がけください。\n\n${new Date().getFullYear()}年${new Date().getMonth() + 1}月\n${facilityName}`
   }
 
   const handleGenerate = async () => {
@@ -85,7 +85,7 @@ export const GuardianNotice: React.FC = () => {
       toast.success('保護者周知文を作成しました')
     } catch {
       // API失敗時はローカルテンプレートを使用
-      const text = buildLocalTemplate(catNames, style)
+      const text = buildLocalTemplate(catNames)
       setGenerated(text)
       setEditedContent(text)
       setIsTemplate(true)

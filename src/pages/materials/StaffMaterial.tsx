@@ -202,18 +202,21 @@ export const StaffMaterial: React.FC = () => {
   const [manageOpen, setManageOpen] = useState(false)
   const contentRef = useRef<HTMLDivElement>(null)
 
-  const placeholder = useRef(
-    THEME_PLACEHOLDERS[Math.floor(Math.random() * THEME_PLACEHOLDERS.length)]
-  ).current
+  // ランダムプレースホルダーは初回マウント時のみ決定（lazy initializer で実行）
+  const [placeholder] = useState(
+    () => THEME_PLACEHOLDERS[Math.floor(Math.random() * THEME_PLACEHOLDERS.length)]
+  )
 
   const selectedType = types.find((t) => t.key === selected) ?? types[0]
 
   // 現在選択中の種別が削除されたとき、最初の種別にリセット
   React.useEffect(() => {
     if (types.length > 0 && !types.find((t) => t.key === selected)) {
+      /* eslint-disable react-hooks/set-state-in-effect */
       setSelected(types[0].key)
       setGenerated(null)
       setEditedContent('')
+      /* eslint-enable react-hooks/set-state-in-effect */
     }
   }, [types, selected])
 

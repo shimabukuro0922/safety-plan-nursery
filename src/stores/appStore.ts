@@ -139,7 +139,8 @@ export const useChecklistStore = create<ChecklistState>()(
       },
       markUndone: (itemId) => {
         set((state) => {
-          const { [itemId]: _, ...rest } = state.doneItems
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [itemId]: _removed, ...rest } = state.doneItems
           return { doneItems: rest }
         })
         const supabaseId = getSupabaseId()
@@ -185,7 +186,8 @@ export const useSeasonalChecklistStore = create<SeasonalChecklistState>()(
       },
       markUndone: (itemKey) => {
         set((state) => {
-          const { [itemKey]: _, ...rest } = state.doneItems
+          // eslint-disable-next-line @typescript-eslint/no-unused-vars
+          const { [itemKey]: _removed, ...rest } = state.doneItems
           return { doneItems: rest }
         })
         const supabaseId = getSupabaseId()
