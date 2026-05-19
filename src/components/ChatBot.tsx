@@ -155,8 +155,15 @@ export const ChatBot: React.FC = () => {
             </div>
           )}
 
+          {/* 個人情報注意 */}
+          <div className="px-3 pt-2 pb-0 bg-white shrink-0">
+            <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-2.5 py-1.5 leading-relaxed">
+              ⚠️ 園児名・職員名などの個人情報は入力しないでください（外部AIに送信されます）
+            </p>
+          </div>
+
           {/* 入力エリア */}
-          <div className="px-3 py-3 border-t border-gray-200 bg-white shrink-0 flex gap-2 items-end">
+          <div className="px-3 py-3 border-t-0 bg-white shrink-0 flex gap-2 items-end pt-2">
             <textarea
               ref={inputRef}
               value={input}
