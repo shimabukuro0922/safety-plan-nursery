@@ -1,17 +1,23 @@
 import React, { useState, useEffect } from 'react'
-import { Moon, CheckCircle2, Clock, Trash2, Users } from 'lucide-react'
+import { Moon, CheckCircle2, Clock, Trash2, Users, Settings, X, Check } from 'lucide-react'
 import { Card, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { useNapCheckStore } from '@/stores/appStore'
+import { useNapCheckStore, useNapSettingsStore } from '@/stores/appStore'
 import { format } from 'date-fns'
 import { ja } from 'date-fns/locale'
 import toast from 'react-hot-toast'
 
+const INTERVAL_PRESETS = [3, 5, 10, 15]
+
 export const NapCheck: React.FC = () => {
   const { facility } = useFacilityStore()
   const { records, addRecord, clearToday } = useNapCheckStore()
+  const { intervalMinutes, setIntervalMinutes } = useNapSettingsStore()
+
   const [checkerName, setCheckerName] = useState('')
   const [submitting, setSubmitting] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [customInput, setCustomInput] = useState(String(intervalMinutes))
 
   // 30秒ごとに再レンダリングして経過時間を最新に保つ
   const [, setTick] = useState(0)
@@ -30,6 +36,15 @@ export const NapCheck: React.FC = () => {
   const minutesSinceLast = lastCheck
     ? Math.floor((Date.now() - new Date(lastCheck.checked_at).getTime()) / 60000)
     : null
+
+  // 間隔に応じたアラート色（設定値の80%・100%・120%を閾値に）
+  const threshold1 = intervalMinutes * 0.8   // 良好
+  const threshold2 = intervalMinutes         // 注意
+  const alertColor =
+    minutesSinceLast === null ? 'bg-gray-100 text-gray-500' :
+    minutesSinceLast < threshold1 ? 'bg-green-100 text-green-700' :
+    minutesSinceLast < threshold2 ? 'bg-yellow-100 text-yellow-700' :
+    'bg-red-100 text-red-700'
 
   const handleCheck = () => {
     if (submitting) return
@@ -50,18 +65,91 @@ export const NapCheck: React.FC = () => {
     }
   }
 
-  const alertColor =
-    minutesSinceLast === null ? 'bg-gray-100 text-gray-500' :
-    minutesSinceLast < 5 ? 'bg-green-100 text-green-700' :
-    minutesSinceLast < 10 ? 'bg-yellow-100 text-yellow-700' :
-    'bg-red-100 text-red-700'
+  const handleSaveInterval = () => {
+    const v = parseInt(customInput, 10)
+    if (isNaN(v) || v < 1 || v > 60) {
+      toast.error('1〜60の数値を入力してください')
+      return
+    }
+    setIntervalMinutes(v)
+    setShowSettings(false)
+    toast.success(`確認間隔を${v}分に設定しました`)
+  }
 
   return (
     <div className="px-4 py-6 space-y-5">
       <SectionHeader
         title="午睡見守り記録"
-        subtitle="5分ごとに呼吸・体位を確認してボタンを押してください"
+        subtitle={`${intervalMinutes}分ごとに呼吸・体位を確認してボタンを押してください`}
+        action={
+          <button
+            onClick={() => { setShowSettings((v) => !v); setCustomInput(String(intervalMinutes)) }}
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white transition-colors"
+          >
+            <Settings size={13} />
+            間隔設定
+          </button>
+        }
       />
+
+      {/* 間隔設定パネル */}
+      {showSettings && (
+        <Card className="p-4 border-blue-200 bg-blue-50 space-y-3">
+          <div className="flex items-center justify-between">
+            <p className="text-sm font-bold text-gray-800">確認間隔を設定</p>
+            <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-gray-600 p-1">
+              <X size={16} />
+            </button>
+          </div>
+
+          {/* プリセット */}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">よく使う間隔</p>
+            <div className="flex gap-2 flex-wrap">
+              {INTERVAL_PRESETS.map((min) => (
+                <button
+                  key={min}
+                  onClick={() => { setIntervalMinutes(min); setCustomInput(String(min)); setShowSettings(false); toast.success(`確認間隔を${min}分に設定しました`) }}
+                  className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
+                    intervalMinutes === min
+                      ? 'bg-blue-600 text-white border-blue-600'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
+                  }`}
+                >
+                  {min}分
+                </button>
+              ))}
+            </div>
+          </div>
+
+          {/* カスタム入力 */}
+          <div>
+            <p className="text-xs text-gray-500 mb-2">その他（1〜60分で入力）</p>
+            <div className="flex gap-2">
+              <div className="flex items-center border border-gray-200 rounded-xl bg-white overflow-hidden flex-1">
+                <input
+                  type="number"
+                  min={1}
+                  max={60}
+                  value={customInput}
+                  onChange={(e) => setCustomInput(e.target.value)}
+                  onKeyDown={(e) => e.key === 'Enter' && handleSaveInterval()}
+                  className="flex-1 px-3 py-2 text-sm focus:outline-none"
+                />
+                <span className="text-sm text-gray-500 pr-3">分</span>
+              </div>
+              <button
+                onClick={handleSaveInterval}
+                className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+              >
+                <Check size={14} /> 設定
+              </button>
+            </div>
+          </div>
+
+          <p className="text-xs text-gray-400">現在の設定: <strong className="text-blue-700">{intervalMinutes}分ごと</strong></p>
+        </Card>
+      )}
 
       {/* 担当者 */}
       <div className="bg-white border border-gray-200 rounded-xl p-4">
@@ -84,9 +172,9 @@ export const NapCheck: React.FC = () => {
         <div>
           {minutesSinceLast === null ? (
             <p className="text-sm font-medium">まだ本日の記録がありません</p>
-          ) : minutesSinceLast < 5 ? (
+          ) : minutesSinceLast < threshold1 ? (
             <p className="text-sm font-medium">前回確認から <strong>{minutesSinceLast}</strong> 分経過（良好）</p>
-          ) : minutesSinceLast < 10 ? (
+          ) : minutesSinceLast < threshold2 ? (
             <p className="text-sm font-medium">前回確認から <strong>{minutesSinceLast}</strong> 分経過 — そろそろ確認を</p>
           ) : (
             <p className="text-sm font-bold">前回確認から <strong>{minutesSinceLast}</strong> 分経過 ⚠️ 確認してください</p>

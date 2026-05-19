@@ -760,3 +760,21 @@ export const useStaffManagementStore = create<StaffManagementState>()(
     { name: 'staff-management-store-v1' }
   )
 )
+
+// ==============================
+// 午睡設定ストア
+// ==============================
+interface NapSettingsState {
+  intervalMinutes: number          // 確認間隔（分）
+  setIntervalMinutes: (v: number) => void
+}
+
+export const useNapSettingsStore = create<NapSettingsState>()(
+  persist(
+    (set) => ({
+      intervalMinutes: 5,
+      setIntervalMinutes: (v) => set({ intervalMinutes: v }),
+    }),
+    { name: 'nap-settings-store-v1' }
+  )
+)
