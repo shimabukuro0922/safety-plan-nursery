@@ -34,6 +34,11 @@ export const GuardianNotice: React.FC = () => {
   // テーマ欄の開閉
   const [themeOpen, setThemeOpen] = useState(false)
 
+  // AI外部送信への同意チェック
+  const [aiConsented, setAiConsented] = useState(false)
+  // テンプレートフォールバック中フラグ
+  const [isTemplate, setIsTemplate] = useState(false)
+
   const toggleCat = (id: string) => {
     if (editMode) return
     setSelectedCats((prev) =>
@@ -76,13 +81,15 @@ export const GuardianNotice: React.FC = () => {
       if (!res.ok) throw new Error(data.error ?? '生成に失敗しました')
       setGenerated(data.text ?? '')
       setEditedContent(data.text ?? '')
+      setIsTemplate(false)
       toast.success('保護者周知文を作成しました')
     } catch {
       // API失敗時はローカルテンプレートを使用
       const text = buildLocalTemplate(catNames, style)
       setGenerated(text)
       setEditedContent(text)
-      toast('テンプレートを表示しています。内容を確認・編集してください', { icon: 'ℹ️' })
+      setIsTemplate(true)
+      toast('AI生成に失敗しました。テンプレートを表示しています', { icon: '⚠️' })
     } finally {
       setIsGenerating(false)
     }
@@ -260,24 +267,65 @@ export const GuardianNotice: React.FC = () => {
         </div>
       </div>
 
-      <Button variant="ai" fullWidth size="lg" loading={isGenerating} onClick={handleGenerate}>
-        <Sparkles size={18} /> 文章を自動で作る
-      </Button>
-      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3">
+      {/* AI外部送信への同意 */}
+      <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 space-y-2.5">
         <p className="text-xs text-amber-800 leading-relaxed">
           ⚠️ <strong>AI文書作成に関するご注意</strong><br />
           入力した内容は外部AIサービス（Anthropic Claude）に送信されます。<strong>園児名・職員名・事故の詳細など個人情報は入力しないでください。</strong><br />
           生成された文章はあくまで下書きです。配布・提出前に必ず職員が内容を確認・修正してください。
         </p>
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            checked={aiConsented}
+            onChange={(e) => setAiConsented(e.target.checked)}
+            className="mt-0.5 w-4 h-4 rounded accent-amber-600 shrink-0 cursor-pointer"
+          />
+          <span className="text-xs text-amber-900 font-medium leading-relaxed">
+            個人情報を入力しないことを確認し、外部AIサービスへの送信に同意する
+          </span>
+        </label>
       </div>
+
+      <Button
+        variant="ai"
+        fullWidth
+        size="lg"
+        loading={isGenerating}
+        disabled={!aiConsented}
+        onClick={handleGenerate}
+      >
+        <Sparkles size={18} /> 文章を自動で作る
+      </Button>
 
       {generated && (
         <>
+          {/* テンプレートフォールバック時のバナー */}
+          {isTemplate && (
+            <div className="bg-amber-50 border border-amber-300 rounded-xl px-4 py-3 flex items-start gap-3">
+              <span className="text-amber-500 text-lg shrink-0 mt-0.5">⚠️</span>
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-amber-800">AIによる生成ができませんでした</p>
+                <p className="text-xs text-amber-700 mt-0.5 leading-relaxed">
+                  ネットワークエラーまたはAPIの一時的な問題が発生したため、定型テンプレートを表示しています。内容を確認・編集してからご利用ください。
+                </p>
+              </div>
+              <button
+                onClick={handleGenerate}
+                className="shrink-0 flex items-center gap-1 text-xs text-amber-700 bg-amber-100 hover:bg-amber-200 border border-amber-300 rounded-lg px-2.5 py-1.5 transition-colors font-medium"
+              >
+                <RotateCcw size={12} /> 再試行
+              </button>
+            </div>
+          )}
+
           {/* 編集エリア（画面表示用） */}
           <Card className="p-4">
             <div className="flex items-center justify-between mb-3">
               <p className="text-sm font-bold text-gray-900">生成された周知文（下書き）</p>
-              <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">自動生成</span>
+              <span className={`text-xs px-2 py-0.5 rounded-full ${isTemplate ? 'bg-amber-100 text-amber-700' : 'bg-violet-100 text-violet-700'}`}>
+                {isTemplate ? 'テンプレート' : 'AI生成'}
+              </span>
             </div>
             <textarea
               value={editedContent}

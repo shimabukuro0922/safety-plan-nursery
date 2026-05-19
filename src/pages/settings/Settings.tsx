@@ -1,13 +1,34 @@
 import React, { useState, useRef, useEffect } from 'react'
-import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw, ChevronDown, Pencil } from 'lucide-react'
+import { Building2, Save, ChevronRight, Shield, Bell, Users, Download, Upload, AlertTriangle, Smartphone, Copy, Check, RefreshCw, Lock, Eye, EyeOff, X, Map, Plus, Trash2, RotateCcw, ChevronDown, Pencil, FileText, FlaskConical } from 'lucide-react'
 import { Card, Button, SectionHeader } from '@/components/ui'
 import { useFacilityStore } from '@/stores/facilityStore'
-import { useNearMissZoneStore, useStaffManagementStore, type StaffRole } from '@/stores/appStore'
-import { NEAR_MISS_LOCATION_GRID } from '@/types'
+import { useNearMissZoneStore, useStaffManagementStore, useNearMissStore, useNapCheckStore, useStaffTrainingStore, type StaffRole } from '@/stores/appStore'
+import { NEAR_MISS_LOCATION_GRID, type NearMissScene } from '@/types'
 import { createFacilityInSupabase, updateFacilityPIN } from '@/lib/sync'
 import { isSupabaseConfigured } from '@/lib/supabase'
 import { hashPIN, verifyPIN, markPINVerified, clearPINVerified } from '@/lib/pinAuth'
 import toast from 'react-hot-toast'
+
+// ==============================
+// CSV エクスポート
+// ==============================
+function toCSV(rows: string[][]): string {
+  return rows.map((row) =>
+    row.map((cell) => `"${String(cell ?? '').replace(/"/g, '""')}"`).join(',')
+  ).join('\n')
+}
+
+function downloadCSV(filename: string, content: string) {
+  // BOM 付き UTF-8 で出力（Excel での文字化け防止）
+  const bom = '﻿'
+  const blob = new Blob([bom + content], { type: 'text/csv;charset=utf-8;' })
+  const url = URL.createObjectURL(blob)
+  const a = document.createElement('a')
+  a.href = url
+  a.download = filename
+  a.click()
+  URL.revokeObjectURL(url)
+}
 
 // ==============================
 // バックアップ・復元ユーティリティ
@@ -112,6 +133,35 @@ const PINField: React.FC<{
       </button>
     </div>
     {error && <p className="text-xs text-red-600 mt-1">{error}</p>}
+  </div>
+)
+
+// ==============================
+// 施設情報フィールド（Settings 外で定義してインラインコンポーネント警告を回避）
+// ==============================
+type FacilityForm = {
+  name: string; director_name: string; address: string
+  phone: string; capacity: string; staff_count: string
+}
+const SettingsField: React.FC<{
+  label: string
+  name: keyof FacilityForm
+  type?: string
+  placeholder?: string
+  form: FacilityForm
+  setForm: React.Dispatch<React.SetStateAction<FacilityForm>>
+}> = ({ label, name, type = 'text', placeholder, form, setForm }) => (
+  <div>
+    <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
+    <input
+      type={type}
+      value={form[name]}
+      onChange={(e) => setForm((prev) => ({ ...prev, [name]: e.target.value }))}
+      placeholder={placeholder}
+      className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
+                 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                 min-h-[44px] break-anywhere"
+    />
   </div>
 )
 
@@ -260,14 +310,71 @@ const ZoneManager: React.FC = () => {
   )
 }
 
+// ==============================
+// デモデータ
+// ==============================
+function loadDemoData(
+  addNearMiss: (data: { scene: NearMissScene; location?: string | null; what_happened: string; created_by: string }) => void,
+  addNapRecord: (data: { date: string; checked_at: string; checked_by: string }) => void,
+  addTrainingRecord: (data: { staff_name: string; training_type: string; completed_date: string; expiry_date: string | null; notes: string | null }) => void,
+  addStaffMember: (name: string, role: StaffRole, note: string) => void,
+) {
+  const today = new Date()
+  const fmt = (d: Date) => d.toISOString().split('T')[0]
+  const daysAgo = (n: number) => { const d = new Date(today); d.setDate(d.getDate() - n); return d }
+
+  // 職員
+  addStaffMember('山田 花子', '園長', '安全管理責任者')
+  addStaffMember('田中 美咲', '主任', 'ヒヤリハット担当')
+  addStaffMember('佐藤 陽子', '保育士', '0〜2歳児クラス担当')
+  addStaffMember('伊藤 さくら', '保育士', '3〜5歳児クラス担当')
+  addStaffMember('中村 由美', '栄養士', 'アレルギー対応担当')
+
+  // ヒヤリハット
+  addNearMiss({ scene: 'facility', location: 'nap_room', what_happened: '積み木を踏んで転倒しそうになった。床に散乱した積み木に園児が気づかずに歩き、バランスを崩した。', created_by: '田中 美咲' })
+  addNearMiss({ scene: 'outdoor', location: 'garden', what_happened: '遊具のブランコで2名の園児が同時に接近し、軽く接触しそうになった。', created_by: '佐藤 陽子' })
+  addNearMiss({ scene: 'eating', location: 'dining', what_happened: 'アレルギー対応食の確認ミス発覚。提供直前に職員が確認し、事前に気づくことができた。', created_by: '中村 由美' })
+
+  // 午睡チェック記録
+  const napDate = fmt(daysAgo(1))
+  const checks = [
+    { minutes: 75, checker: '佐藤 陽子' },
+    { minutes: 70, checker: '田中 美咲' },
+    { minutes: 65, checker: '佐藤 陽子' },
+    { minutes: 60, checker: '田中 美咲' },
+  ]
+  checks.forEach(({ minutes, checker }) => {
+    const t = new Date(daysAgo(1))
+    t.setHours(13, 0, 0, 0)
+    t.setMinutes(t.getMinutes() + (75 - minutes))
+    addNapRecord({ date: napDate, checked_at: t.toISOString(), checked_by: checker })
+  })
+
+  // 職員研修記録
+  const expiry = (months: number) => {
+    const d = new Date(today)
+    d.setMonth(d.getMonth() + months)
+    return fmt(d)
+  }
+  addTrainingRecord({ staff_name: '山田 花子', training_type: '救命救急（AED）', completed_date: fmt(daysAgo(30)), expiry_date: expiry(24), notes: '日本赤十字社認定' })
+  addTrainingRecord({ staff_name: '田中 美咲', training_type: '食物アレルギー対応研修', completed_date: fmt(daysAgo(60)), expiry_date: expiry(12), notes: '園内研修実施' })
+  addTrainingRecord({ staff_name: '佐藤 陽子', training_type: '午睡安全管理研修', completed_date: fmt(daysAgo(14)), expiry_date: null, notes: '' })
+  addTrainingRecord({ staff_name: '伊藤 さくら', training_type: '不審者対応・防犯研修', completed_date: fmt(daysAgo(90)), expiry_date: expiry(18), notes: '警察署主催' })
+}
+
 export const Settings: React.FC = () => {
   const { facility, setFacility } = useFacilityStore()
   const { members, addMember, updateMember, deleteMember } = useStaffManagementStore()
+  const { nearMisses, addNearMiss } = useNearMissStore()
+  const { records: napRecords, addRecord: addNapRecord } = useNapCheckStore()
+  const { records: trainingRecords, addRecord: addTrainingRecord } = useStaffTrainingStore()
   const fileInputRef = useRef<HTMLInputElement>(null)
   const [restoreConfirm, setRestoreConfirm] = useState(false)
   const [pendingFile, setPendingFile] = useState<File | null>(null)
   const [codeCopied, setCodeCopied] = useState(false)
   const [publishingCode, setPublishingCode] = useState(false)
+  const [demoConfirm, setDemoConfirm] = useState(false)
+  const [demoLoaded, setDemoLoaded] = useState(false)
 
   // その他設定の開閉
   const [notifOpen, setNotifOpen] = useState(false)
@@ -293,7 +400,7 @@ export const Settings: React.FC = () => {
     setEditingStaffId(null)
     toast.success('職員情報を更新しました')
   }
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<FacilityForm>({
     name: facility?.name ?? '',
     director_name: facility?.director_name ?? '',
     address: facility?.address ?? '',
@@ -463,26 +570,6 @@ export const Settings: React.FC = () => {
     }
   }
 
-  const Field: React.FC<{
-    label: string
-    name: keyof typeof form
-    type?: string
-    placeholder?: string
-  }> = ({ label, name, type = 'text', placeholder }) => (
-    <div>
-      <label className="block text-xs font-medium text-gray-600 mb-1">{label}</label>
-      <input
-        type={type}
-        value={form[name]}
-        onChange={(e) => setForm((prev) => ({ ...prev, [name]: e.target.value }))}
-        placeholder={placeholder}
-        className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
-                   focus:ring-2 focus:ring-blue-500 focus:outline-none
-                   min-h-[44px] break-anywhere"
-      />
-    </div>
-  )
-
   return (
     <div className="px-4 py-6 space-y-6">
       {/* 施設情報 */}
@@ -496,13 +583,13 @@ export const Settings: React.FC = () => {
             <Building2 size={16} className="text-blue-500" />
             <p className="text-sm font-semibold text-gray-800">基本情報</p>
           </div>
-          <Field label="施設名 *" name="name" placeholder="さくら保育園" />
-          <Field label="施設長名" name="director_name" placeholder="山田 花子" />
-          <Field label="住所" name="address" placeholder="沖縄県南城市○○1-2-3" />
-          <Field label="電話番号" name="phone" type="tel" placeholder="098-000-0000" />
+          <SettingsField label="施設名 *" name="name" placeholder="さくら保育園" form={form} setForm={setForm} />
+          <SettingsField label="施設長名" name="director_name" placeholder="山田 花子" form={form} setForm={setForm} />
+          <SettingsField label="住所" name="address" placeholder="沖縄県南城市○○1-2-3" form={form} setForm={setForm} />
+          <SettingsField label="電話番号" name="phone" type="tel" placeholder="098-000-0000" form={form} setForm={setForm} />
           <div className="grid grid-cols-2 gap-3">
-            <Field label="定員（人）" name="capacity" type="number" placeholder="60" />
-            <Field label="職員数（人）" name="staff_count" type="number" placeholder="12" />
+            <SettingsField label="定員（人）" name="capacity" type="number" placeholder="60" form={form} setForm={setForm} />
+            <SettingsField label="職員数（人）" name="staff_count" type="number" placeholder="12" form={form} setForm={setForm} />
           </div>
           <Button variant="primary" fullWidth onClick={handleSave}>
             <Save size={16} />
@@ -666,8 +753,87 @@ export const Settings: React.FC = () => {
             </div>
           )}
 
+          <div className="bg-gray-50 rounded-xl p-3 space-y-1">
+            <p className="text-xs text-gray-500">
+              ※ PINはこの端末のみに保存され、タブを閉じると再度入力が必要です
+            </p>
+            <p className="text-xs text-gray-400 leading-relaxed">
+              ※ 本サービスのアクセス管理は施設コード方式です。PINは共有端末での誤操作防止を目的とした画面ロック機能であり、第三者からのネットワーク経由アクセスを防ぐセキュリティ機能ではありません。
+            </p>
+          </div>
+        </Card>
+      </div>
+
+      {/* データエクスポート（CSV） */}
+      <div>
+        <SectionHeader
+          title="記録データのエクスポート"
+          subtitle="ヒヤリハット・午睡記録・研修記録をCSVファイルで出力できます"
+        />
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <FileText size={16} className="text-blue-500" />
+            <p className="text-sm font-semibold text-gray-800">CSVダウンロード</p>
+          </div>
+
+          {/* ヒヤリハット */}
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => {
+              if (nearMisses.length === 0) { toast.error('エクスポートするヒヤリハット記録がありません'); return }
+              const header = ['記録ID', '発生日', '場所', '状況', '原因', '対応内容', '共有先', '再確認日', '進捗', '記録者', '登録日時']
+              const rows = nearMisses.map((r) => [
+                r.id, r.occurred_at, r.location ?? '', r.what_happened,
+                r.why_it_happened ?? '', r.what_to_change ?? '',
+                r.shared_with ?? '', r.recheck_date ?? '',
+                r.step, r.created_by, r.created_at,
+              ])
+              const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+              downloadCSV(`ヒヤリハット_${dateStr}.csv`, toCSV([header, ...rows]))
+              toast.success(`ヒヤリハット ${nearMisses.length}件をエクスポートしました`)
+            }}
+          >
+            <Download size={15} />
+            ヒヤリハット記録 ({nearMisses.length}件)
+          </Button>
+
+          {/* 午睡チェック */}
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => {
+              if (napRecords.length === 0) { toast.error('エクスポートする午睡記録がありません'); return }
+              const header = ['記録ID', '日付', '確認日時', '確認者']
+              const rows = napRecords.map((r) => [r.id, r.date, r.checked_at, r.checked_by])
+              const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+              downloadCSV(`午睡チェック_${dateStr}.csv`, toCSV([header, ...rows]))
+              toast.success(`午睡記録 ${napRecords.length}件をエクスポートしました`)
+            }}
+          >
+            <Download size={15} />
+            午睡チェック記録 ({napRecords.length}件)
+          </Button>
+
+          {/* 職員研修 */}
+          <Button
+            variant="secondary"
+            fullWidth
+            onClick={() => {
+              if (trainingRecords.length === 0) { toast.error('エクスポートする研修記録がありません'); return }
+              const header = ['記録ID', '職員名', '研修種別', '実施日', '有効期限', '備考']
+              const rows = trainingRecords.map((r) => [r.id, r.staff_name, r.training_type, r.completed_date, r.expiry_date ?? '', r.notes ?? ''])
+              const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '')
+              downloadCSV(`職員研修記録_${dateStr}.csv`, toCSV([header, ...rows]))
+              toast.success(`研修記録 ${trainingRecords.length}件をエクスポートしました`)
+            }}
+          >
+            <Download size={15} />
+            職員研修記録 ({trainingRecords.length}件)
+          </Button>
+
           <p className="text-xs text-gray-400">
-            ※ PINはこの端末のみに保存され、タブを閉じると再度入力が必要です
+            ※ CSV ファイルは Excel や Google スプレッドシートで開けます
           </p>
         </Card>
       </div>
@@ -926,6 +1092,51 @@ export const Settings: React.FC = () => {
           </Card>
 
         </div>
+      </div>
+
+      {/* サンプルデータ */}
+      <div>
+        <SectionHeader
+          title="サンプルデータ"
+          subtitle="機能を試したいときにサンプルデータを読み込めます"
+        />
+        <Card className="p-5 space-y-3">
+          <div className="flex items-center gap-2 mb-1">
+            <FlaskConical size={16} className="text-violet-500" />
+            <p className="text-sm font-semibold text-gray-800">デモ用データを読み込む</p>
+          </div>
+          <p className="text-xs text-gray-500 leading-relaxed">
+            職員5名・ヒヤリハット3件・午睡記録4件・研修記録4件のサンプルデータを追加します。既存のデータは削除されません。
+          </p>
+          {demoLoaded ? (
+            <div className="bg-green-50 border border-green-200 rounded-xl px-4 py-3 flex items-center gap-2">
+              <Check size={15} className="text-green-600 shrink-0" />
+              <p className="text-xs text-green-800 font-medium">サンプルデータを読み込みました</p>
+            </div>
+          ) : demoConfirm ? (
+            <div className="bg-violet-50 border border-violet-200 rounded-xl p-3 space-y-2">
+              <p className="text-xs text-violet-800">サンプルデータを追加しますか？</p>
+              <div className="flex gap-2">
+                <Button variant="primary" size="sm" fullWidth onClick={() => {
+                  loadDemoData(addNearMiss, addNapRecord, addTrainingRecord, addMember)
+                  setDemoConfirm(false)
+                  setDemoLoaded(true)
+                  toast.success('サンプルデータを読み込みました')
+                }}>
+                  追加する
+                </Button>
+                <Button variant="secondary" size="sm" onClick={() => setDemoConfirm(false)}>
+                  キャンセル
+                </Button>
+              </div>
+            </div>
+          ) : (
+            <Button variant="secondary" fullWidth onClick={() => setDemoConfirm(true)}>
+              <FlaskConical size={15} />
+              サンプルデータを読み込む
+            </Button>
+          )}
+        </Card>
       </div>
 
       {/* アプリ情報 */}
