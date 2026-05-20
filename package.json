@@ -8,7 +8,9 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "deploy:lp": "cd lp && npx vercel --prod"
+    "deploy": "npx vercel --prod",
+    "deploy:lp": "cd lp && npx vercel --prod",
+    "deploy:all": "npx vercel --prod && cd lp && npx vercel --prod"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.39.0",
