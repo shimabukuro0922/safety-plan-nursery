@@ -8,7 +8,7 @@ import { STATUS_CONFIG, CHECKLIST_STATUS_CONFIG } from '@/types'
 export const StatusBadge: React.FC<{ status: ReportStatus }> = ({ status }) => {
   const { label, color } = STATUS_CONFIG[status]
   return (
-    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${color}`}>
+    <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold tracking-wide ${color}`}>
       {label}
     </span>
   )
@@ -17,7 +17,7 @@ export const StatusBadge: React.FC<{ status: ReportStatus }> = ({ status }) => {
 export const CheckStatusBadge: React.FC<{ status: ChecklistItemStatus }> = ({ status }) => {
   const { label, color } = CHECKLIST_STATUS_CONFIG[status]
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium ${color}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-full text-xs font-semibold ${color}`}>
       {label}
     </span>
   )
@@ -32,7 +32,9 @@ export const Card: React.FC<{
   onClick?: () => void
 }> = ({ children, className = '', onClick }) => (
   <div
-    className={`bg-white border border-gray-200 rounded-xl ${onClick ? 'cursor-pointer active:bg-gray-50' : ''} ${className}`}
+    className={`bg-white border border-[#e2ece6] rounded-2xl shadow-sm
+      ${onClick ? 'cursor-pointer hover:shadow-md hover:border-emerald-200 active:scale-[0.99] transition-all duration-150' : ''}
+      ${className}`}
     onClick={onClick}
   >
     {children}
@@ -51,16 +53,16 @@ interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElement> {
 }
 
 const VARIANT_CLASSES: Record<BtnVariant, string> = {
-  primary: 'bg-blue-600 text-white hover:bg-blue-700 active:bg-blue-800',
-  secondary: 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 active:bg-gray-100',
-  danger: 'bg-red-100 text-red-700 hover:bg-red-200 active:bg-red-300',
-  ghost: 'text-gray-600 hover:bg-gray-100 active:bg-gray-200',
-  ai: 'bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800',
+  primary:   'bg-emerald-600 text-white hover:bg-emerald-700 active:bg-emerald-800 shadow-sm',
+  secondary: 'bg-white border border-[#c8d9ce] text-[#1f2d27] hover:bg-emerald-50 hover:border-emerald-300 active:bg-emerald-100 shadow-sm',
+  danger:    'bg-red-50 border border-red-200 text-red-700 hover:bg-red-100 active:bg-red-200',
+  ghost:     'text-[#6b7e74] hover:bg-emerald-50 hover:text-emerald-700 active:bg-emerald-100',
+  ai:        'bg-violet-600 text-white hover:bg-violet-700 active:bg-violet-800 shadow-sm',
 }
 const SIZE_CLASSES = {
-  sm: 'px-3 py-1.5 text-xs min-h-[36px]',
-  md: 'px-4 py-2.5 text-sm min-h-[44px]',
-  lg: 'px-5 py-3 text-base min-h-[52px]',
+  sm: 'px-3.5 py-1.5 text-xs min-h-[36px] rounded-xl',
+  md: 'px-5 py-2.5 text-sm min-h-[44px] rounded-2xl',
+  lg: 'px-6 py-3.5 text-base min-h-[54px] rounded-2xl',
 }
 
 export const Button: React.FC<ButtonProps> = ({
@@ -77,8 +79,9 @@ export const Button: React.FC<ButtonProps> = ({
     {...props}
     disabled={disabled || loading}
     className={`
-      inline-flex items-center justify-center gap-2 font-medium rounded-xl
-      transition-colors duration-150 focus:outline-none focus:ring-2 focus:ring-blue-500
+      inline-flex items-center justify-center gap-2 font-semibold
+      transition-all duration-150
+      focus-visible:outline-2 focus-visible:outline-emerald-500 focus-visible:outline-offset-2
       disabled:opacity-50 disabled:cursor-not-allowed
       ${VARIANT_CLASSES[variant]}
       ${SIZE_CLASSES[size]}
@@ -104,11 +107,15 @@ export const EmptyState: React.FC<{
   description?: string
   action?: { label: string; onClick: () => void }
 }> = ({ icon, title, description, action }) => (
-  <div className="flex flex-col items-center justify-center py-16 px-6 text-center">
-    {icon && <div className="text-gray-300 mb-4">{icon}</div>}
-    <p className="text-base font-medium text-gray-700 mb-1">{title}</p>
+  <div className="flex flex-col items-center justify-center py-14 px-6 text-center">
+    {icon && (
+      <div className="w-16 h-16 rounded-full bg-emerald-50 flex items-center justify-center mb-4 text-emerald-400">
+        {icon}
+      </div>
+    )}
+    <p className="text-base font-semibold text-[#1f2d27] mb-1">{title}</p>
     {description && (
-      <p className="text-sm text-gray-500 mb-6 max-w-xs break-anywhere">{description}</p>
+      <p className="text-sm text-[#6b7e74] mb-6 max-w-xs break-anywhere leading-relaxed">{description}</p>
     )}
     {action && (
       <Button variant="primary" onClick={action.onClick}>
@@ -129,14 +136,14 @@ export const ProgressBar: React.FC<{
   const pct = total > 0 ? Math.round((done / total) * 100) : 0
   return (
     <div className={className}>
-      <div className="flex justify-between text-xs text-gray-500 mb-1">
+      <div className="flex justify-between text-xs text-[#6b7e74] mb-1.5">
         <span>{done} / {total} 件完了</span>
-        <span>{pct}%</span>
+        <span className="font-semibold">{pct}%</span>
       </div>
-      <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-2.5 bg-emerald-100 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all duration-500 ${
-            pct === 100 ? 'bg-green-500' : pct >= 50 ? 'bg-blue-500' : 'bg-orange-400'
+            pct === 100 ? 'bg-emerald-500' : pct >= 50 ? 'bg-emerald-400' : 'bg-amber-400'
           }`}
           style={{ width: `${pct}%` }}
         />
@@ -158,16 +165,18 @@ export const SummaryCard: React.FC<{
   className?: string
 }> = ({ icon, label, value, unit, urgent, onClick, className = '' }) => (
   <Card
-    className={`p-4 ${urgent ? 'border-red-300 bg-red-50' : ''} ${className}`}
+    className={`p-4 ${urgent ? 'border-amber-300 bg-amber-50' : ''} ${className}`}
     onClick={onClick}
   >
-    <div className="flex items-start gap-2">
-      <div className="shrink-0 mt-0.5">{icon}</div>
+    <div className="flex items-start gap-3">
+      <div className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${urgent ? 'bg-amber-100' : 'bg-emerald-50'}`}>
+        {icon}
+      </div>
       <div className="min-w-0">
-        <p className="text-xs text-gray-500 break-anywhere">{label}</p>
-        <p className={`text-2xl font-bold mt-0.5 ${urgent ? 'text-red-600' : 'text-gray-900'}`}>
+        <p className="text-xs text-[#6b7e74] break-anywhere">{label}</p>
+        <p className={`text-2xl font-bold mt-0.5 leading-tight ${urgent ? 'text-amber-700' : 'text-[#1f2d27]'}`}>
           {value}
-          {unit && <span className="text-sm font-normal text-gray-500 ml-1">{unit}</span>}
+          {unit && <span className="text-sm font-normal text-[#6b7e74] ml-1">{unit}</span>}
         </p>
       </div>
     </div>
@@ -186,13 +195,14 @@ export const Modal: React.FC<{
   if (!open) return null
   return (
     <div className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4">
-      <div className="absolute inset-0 bg-black/50" onClick={onClose} />
-      <div className="relative w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-2xl shadow-2xl max-h-[90vh] overflow-y-auto">
-        <div className="sticky top-0 bg-white border-b border-gray-100 px-5 py-4 flex items-center justify-between">
-          <h3 className="font-bold text-gray-900">{title}</h3>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative w-full sm:max-w-lg bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl max-h-[92vh] overflow-y-auto">
+        <div className="sticky top-0 bg-white border-b border-[#e2ece6] px-5 py-4 flex items-center justify-between rounded-t-3xl">
+          <h3 className="font-bold text-[#1f2d27] text-base">{title}</h3>
           <button
             onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 p-1 min-w-[36px] min-h-[36px] flex items-center justify-center"
+            className="w-8 h-8 rounded-full bg-gray-100 hover:bg-gray-200 text-gray-500 flex items-center justify-center transition-colors"
+            aria-label="閉じる"
           >
             ✕
           </button>
@@ -208,8 +218,8 @@ export const Modal: React.FC<{
 // ==============================
 export const LoadingSpinner: React.FC<{ text?: string }> = ({ text = '読み込み中...' }) => (
   <div className="flex flex-col items-center justify-center py-16 gap-3">
-    <div className="w-8 h-8 border-4 border-blue-500 border-t-transparent rounded-full animate-spin" />
-    <p className="text-sm text-gray-500">{text}</p>
+    <div className="w-9 h-9 border-4 border-emerald-500 border-t-transparent rounded-full animate-spin" />
+    <p className="text-sm text-[#6b7e74]">{text}</p>
   </div>
 )
 
@@ -223,8 +233,8 @@ export const SectionHeader: React.FC<{
 }> = ({ title, subtitle, action }) => (
   <div className="flex items-start justify-between gap-3 mb-4">
     <div className="min-w-0">
-      <h2 className="text-base font-bold text-gray-900 break-anywhere">{title}</h2>
-      {subtitle && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{subtitle}</p>}
+      <h2 className="text-base font-bold text-[#1f2d27] break-anywhere">{title}</h2>
+      {subtitle && <p className="text-xs text-[#6b7e74] mt-0.5 break-anywhere">{subtitle}</p>}
     </div>
     {action && <div className="shrink-0">{action}</div>}
   </div>

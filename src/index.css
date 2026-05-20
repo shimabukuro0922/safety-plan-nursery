@@ -3,6 +3,18 @@
 :root {
   --safe-top: env(safe-area-inset-top, 0px);
   --safe-bottom: env(safe-area-inset-bottom, 0px);
+
+  /* デザイントークン — やさしいグリーン系パレット */
+  --color-primary:        #059669; /* emerald-600 */
+  --color-primary-dark:   #047857; /* emerald-700 */
+  --color-primary-light:  #d1fae5; /* emerald-100 */
+  --color-primary-bg:     #f0fdf4; /* emerald-50  */
+  --color-surface:        #ffffff;
+  --color-bg:             #f6faf7; /* やわらかいクリーム寄りオフホワイト */
+  --color-text:           #1f2d27; /* 深みのある緑がかりネイビー */
+  --color-text-muted:     #6b7e74;
+  --color-border:         #e2ece6;
+  --radius-card:          1rem;    /* 16px */
 }
 
 *, *::before, *::after {
@@ -24,7 +36,9 @@ body {
   font-family: 'Hiragino Sans', 'Hiragino Kaku Gothic ProN',
     'Noto Sans JP', 'Meiryo', 'Yu Gothic', sans-serif;
   -webkit-font-smoothing: antialiased;
-  background-color: #f9fafb;
+  background-color: var(--color-bg);
+  color: var(--color-text);
+  line-height: 1.65;
 }
 
 /* safe area ユーティリティ */
@@ -33,7 +47,7 @@ body {
 
 /* メインコンテンツ余白: ボトムナビ64px + safe area */
 .main-content {
-  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 64px);
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 72px);
   min-height: 100dvh;
 }
 
@@ -55,3 +69,14 @@ body {
   min-height: 100vh;
   min-height: 100dvh;
 }
+
+/* フォーカスリング（アクセシビリティ） */
+:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+/* スクロールバー（PC） */
+::-webkit-scrollbar { width: 6px; height: 6px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: #c8d9ce; border-radius: 3px; }
