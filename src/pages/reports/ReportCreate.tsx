@@ -47,12 +47,12 @@ export const ReportCreate: React.FC = () => {
         {[1, 2, 3].map((s) => (
           <React.Fragment key={s}>
             <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold shrink-0 ${
-              s <= step ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-500'
+              s <= step ? 'bg-emerald-600 text-white' : 'bg-gray-200 text-gray-500'
             }`}>
               {s}
             </div>
             {s < 3 && (
-              <div className={`flex-1 h-0.5 ${s < step ? 'bg-blue-600' : 'bg-gray-200'}`} />
+              <div className={`flex-1 h-0.5 ${s < step ? 'bg-emerald-600' : 'bg-gray-200'}`} />
             )}
           </React.Fragment>
         ))}
@@ -72,7 +72,7 @@ export const ReportCreate: React.FC = () => {
               <Card
                 key={type}
                 className={`p-4 cursor-pointer border-2 transition-colors ${
-                  selectedType === type ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  selectedType === type ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedType(type)}
               >
@@ -109,7 +109,7 @@ export const ReportCreate: React.FC = () => {
               <Card
                 key={style}
                 className={`p-4 cursor-pointer border-2 transition-colors ${
-                  selectedStyle === style ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                  selectedStyle === style ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedStyle(style)}
               >
@@ -150,12 +150,12 @@ export const ReportCreate: React.FC = () => {
             </div>
           </Card>
 
-          <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+          <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
             <div className="flex items-start gap-2">
-              <Sparkles size={16} className="text-blue-600 mt-0.5 shrink-0" />
+              <Sparkles size={16} className="text-emerald-600 mt-0.5 shrink-0" />
               <div>
-                <p className="text-sm font-semibold text-blue-800">報告書の下書きを作成します</p>
-                <p className="text-xs text-blue-600 mt-1 leading-relaxed break-anywhere">
+                <p className="text-sm font-semibold text-emerald-800">報告書の下書きを作成します</p>
+                <p className="text-xs text-emerald-600 mt-1 leading-relaxed break-anywhere">
                   空白のセクションが用意されます。内容を自由に入力・編集してください。
                 </p>
               </div>

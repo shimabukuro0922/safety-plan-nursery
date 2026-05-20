@@ -15,7 +15,7 @@ import { useOnboardingStore } from '@/stores/appStore'
 import toast from 'react-hot-toast'
 
 const FEATURE_PREVIEWS = [
-  { icon: <ClipboardCheck size={16} className="text-blue-500" />,  label: '月次安全チェック表' },
+  { icon: <ClipboardCheck size={16} className="text-emerald-500" />,  label: '月次安全チェック表' },
   { icon: <Siren size={16} className="text-red-500" />,            label: '緊急対応カード' },
   { icon: <Camera size={16} className="text-green-500" />,         label: '写真管理・NG保護' },
   { icon: <Users size={16} className="text-purple-500" />,         label: '職員研修・資格管理' },
@@ -265,7 +265,7 @@ export const Setup: React.FC = () => {
 
         {/* ロゴ・タイトル */}
         <div className="text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <ShieldCheck size={32} className="text-white" />
           </div>
           <h1 className="text-2xl font-bold text-gray-900">まもりすと</h1>
@@ -294,7 +294,7 @@ export const Setup: React.FC = () => {
                 onClick={() => setMode('new')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-colors
                   ${mode === 'new'
-                    ? 'bg-blue-50 text-blue-700 border-b-2 border-blue-500'
+                    ? 'bg-emerald-50 text-emerald-700 border-b-2 border-blue-500'
                     : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
@@ -319,8 +319,8 @@ export const Setup: React.FC = () => {
           {mode === 'new' && newStep === 'invite' && (
             <div className="p-6 space-y-5">
               <div className="text-center">
-                <div className="w-12 h-12 bg-blue-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
-                  <KeyRound size={24} className="text-blue-500" />
+                <div className="w-12 h-12 bg-emerald-50 rounded-2xl flex items-center justify-center mx-auto mb-3">
+                  <KeyRound size={24} className="text-emerald-500" />
                 </div>
                 <h2 className="text-base font-bold text-gray-900 mb-1">招待コードを入力してください</h2>
                 <p className="text-xs text-gray-500 leading-relaxed">
@@ -339,7 +339,7 @@ export const Setup: React.FC = () => {
                   onChange={(e) => setInviteCode(e.target.value.replace(/[^a-zA-Z0-9]/g, ''))}
                   onKeyDown={(e) => e.key === 'Enter' && handleValidateInviteCode()}
                   placeholder="例：ABC12345"
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-center tracking-widest font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm text-center tracking-widest font-mono text-lg uppercase focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   autoFocus
                 />
               </div>
@@ -349,8 +349,8 @@ export const Setup: React.FC = () => {
                 <ChevronRight size={18} />
               </Button>
 
-              <div className="bg-blue-50 rounded-xl p-3">
-                <p className="text-xs text-blue-800 leading-relaxed">
+              <div className="bg-emerald-50 rounded-xl p-3">
+                <p className="text-xs text-emerald-800 leading-relaxed">
                   📩 招待コードはお申し込みいただいた方にメールでお送りしています。<br />
                   お持ちでない方は<a href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform" target="_blank" rel="noopener noreferrer" className="underline font-semibold">こちらからお申し込みください</a>。
                 </p>
@@ -378,7 +378,7 @@ export const Setup: React.FC = () => {
                   onChange={(e) => setName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   placeholder="例：さくら保育園"
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                   autoFocus
                 />
               </div>
@@ -393,7 +393,7 @@ export const Setup: React.FC = () => {
                   onChange={(e) => setDirectorName(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   placeholder="例：山田 太郎"
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
 
@@ -407,7 +407,7 @@ export const Setup: React.FC = () => {
                   onChange={(e) => setPhone(e.target.value)}
                   onKeyDown={(e) => e.key === 'Enter' && handleCreate()}
                   placeholder="例：098-000-0000"
-                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 />
               </div>
 
@@ -428,7 +428,7 @@ export const Setup: React.FC = () => {
                       onChange={(e) => setNewPin(e.target.value.replace(/\D/g, '').slice(0, 8))}
                       placeholder="例：1234"
                       maxLength={8}
-                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm pr-10 focus:outline-none focus:ring-2 focus:ring-emerald-400"
                     />
                     <button
                       type="button"
@@ -452,7 +452,7 @@ export const Setup: React.FC = () => {
                       onChange={(e) => setNewPinConfirm(e.target.value.replace(/\D/g, '').slice(0, 8))}
                       placeholder="もう一度入力"
                       maxLength={8}
-                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 ${
+                      className={`w-full border rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 ${
                         newPinConfirm && newPin !== newPinConfirm ? 'border-red-400' : 'border-gray-300'
                       }`}
                     />

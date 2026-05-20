@@ -120,7 +120,7 @@ const PINField: React.FC<{
         maxLength={8}
         autoFocus={autoFocus}
         className={`w-full border rounded-xl px-3 py-2.5 text-sm text-center tracking-widest font-mono pr-10
-          focus:outline-none focus:ring-2 focus:ring-blue-400
+          focus:outline-none focus:ring-2 focus:ring-emerald-400
           ${error ? 'border-red-400 bg-red-50' : 'border-gray-300'}`}
       />
       <button
@@ -159,7 +159,7 @@ const SettingsField: React.FC<{
       onChange={(e) => setForm((prev) => ({ ...prev, [name]: e.target.value }))}
       placeholder={placeholder}
       className="w-full border border-gray-300 rounded-xl px-4 py-2.5 text-sm
-                 focus:ring-2 focus:ring-blue-500 focus:outline-none
+                 focus:ring-2 focus:ring-emerald-500 focus:outline-none
                  min-h-[44px] break-anywhere"
     />
   </div>
@@ -207,7 +207,7 @@ const ZoneManager: React.FC = () => {
                 className={`flex items-center gap-1.5 px-2 py-2 rounded-xl text-xs border transition-colors text-left ${
                   hidden
                     ? 'bg-gray-100 border-gray-200 text-gray-400 line-through'
-                    : 'bg-white border-gray-200 text-gray-700 hover:border-blue-300'
+                    : 'bg-white border-gray-200 text-gray-700 hover:border-emerald-300'
                 }`}
               >
                 <span className="text-base shrink-0">{zone.emoji}</span>
@@ -228,7 +228,7 @@ const ZoneManager: React.FC = () => {
           <p className="text-xs font-semibold text-gray-700 mb-2">カスタムゾーン</p>
           <div className="space-y-1.5">
             {customZones.map((zone) => (
-              <div key={zone.key} className="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+              <div key={zone.key} className="flex items-center gap-2 px-3 py-2 bg-emerald-50 border border-emerald-200 rounded-xl">
                 <span className="text-base shrink-0">{zone.emoji}</span>
                 <span className="flex-1 text-sm text-gray-800 break-anywhere">{zone.label}</span>
                 <button
@@ -245,7 +245,7 @@ const ZoneManager: React.FC = () => {
 
       {/* ゾーン追加フォーム */}
       {showForm ? (
-        <div className="border border-blue-200 rounded-xl p-4 space-y-3 bg-blue-50">
+        <div className="border border-emerald-200 rounded-xl p-4 space-y-3 bg-emerald-50">
           <p className="text-xs font-semibold text-gray-700">新しいゾーンを追加</p>
           <div className="flex gap-2">
             <div className="w-16 shrink-0">
@@ -255,7 +255,7 @@ const ZoneManager: React.FC = () => {
                 value={emoji}
                 onChange={(e) => setEmoji(e.target.value.slice(0, 2))}
                 placeholder="🏊"
-                className="w-full border border-gray-300 rounded-xl px-2 py-2 text-center text-lg focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-xl px-2 py-2 text-center text-lg focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
             <div className="flex-1">
@@ -268,7 +268,7 @@ const ZoneManager: React.FC = () => {
                 placeholder="例：プール室"
                 maxLength={20}
                 autoFocus
-                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
               />
             </div>
           </div>
@@ -581,7 +581,7 @@ export const Settings: React.FC = () => {
         />
         <Card className="p-5 space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <Building2 size={16} className="text-blue-500" />
+            <Building2 size={16} className="text-emerald-500" />
             <p className="text-sm font-semibold text-gray-800">基本情報</p>
           </div>
           <SettingsField label="施設名 *" name="name" placeholder="さくら保育園" form={form} setForm={setForm} />
@@ -607,16 +607,16 @@ export const Settings: React.FC = () => {
         />
         <Card className="p-5 space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <Smartphone size={16} className="text-blue-500" />
+            <Smartphone size={16} className="text-emerald-500" />
             <p className="text-sm font-semibold text-gray-800">施設コード</p>
           </div>
 
           {facility?.code ? (
             <>
               {/* コード表示 */}
-              <div className="bg-blue-50 rounded-xl p-4 text-center space-y-2">
-                <p className="text-xs text-blue-600 font-medium">この端末の施設コード</p>
-                <p className="text-4xl font-bold tracking-widest text-blue-700 font-mono">
+              <div className="bg-emerald-50 rounded-xl p-4 text-center space-y-2">
+                <p className="text-xs text-emerald-600 font-medium">この端末の施設コード</p>
+                <p className="text-4xl font-bold tracking-widest text-emerald-700 font-mono">
                   {facility.code}
                 </p>
                 <div className="flex justify-center">
@@ -677,7 +677,7 @@ export const Settings: React.FC = () => {
         />
         <Card className="p-5 space-y-4">
           <div className="flex items-center gap-2 mb-1">
-            <Lock size={16} className="text-blue-500" />
+            <Lock size={16} className="text-emerald-500" />
             <p className="text-sm font-semibold text-gray-800">PINコード</p>
             <span className={`ml-auto text-xs px-2 py-0.5 rounded-full font-medium ${
               facility?.pinHash ? 'bg-green-100 text-green-700' : 'bg-gray-100 text-gray-500'
@@ -773,7 +773,7 @@ export const Settings: React.FC = () => {
         />
         <Card className="p-5 space-y-3">
           <div className="flex items-center gap-2 mb-1">
-            <FileText size={16} className="text-blue-500" />
+            <FileText size={16} className="text-emerald-500" />
             <p className="text-sm font-semibold text-gray-800">CSVダウンロード</p>
           </div>
 
@@ -927,7 +927,7 @@ export const Settings: React.FC = () => {
         />
         <Card className="p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Map size={16} className="text-blue-500" />
+            <Map size={16} className="text-emerald-500" />
             <p className="text-sm font-semibold text-gray-800">ゾーン設定</p>
           </div>
           <ZoneManager />
@@ -955,12 +955,12 @@ export const Settings: React.FC = () => {
               {notifOpen ? <ChevronDown size={16} className="text-gray-400 shrink-0" /> : <ChevronRight size={16} className="text-gray-400 shrink-0" />}
             </button>
             {notifOpen && (
-              <div className="px-4 pb-4 border-t border-gray-100 pt-4 bg-blue-50">
+              <div className="px-4 pb-4 border-t border-gray-100 pt-4 bg-emerald-50">
                 <div className="flex items-start gap-3">
                   <span className="text-2xl">🔔</span>
                   <div>
-                    <p className="text-sm font-semibold text-blue-800 mb-1">通知機能（開発中）</p>
-                    <p className="text-xs text-blue-700 leading-relaxed">
+                    <p className="text-sm font-semibold text-emerald-800 mb-1">通知機能（開発中）</p>
+                    <p className="text-xs text-emerald-700 leading-relaxed">
                       月次チェックの未実施アラート・ヒヤリハット再確認日のリマインド・
                       研修資格の期限アラートなど、通知機能を現在開発中です。<br /><br />
                       リリース次第、このアプリ上でお知らせします。
@@ -1025,12 +1025,12 @@ export const Settings: React.FC = () => {
                         <div className="flex-1 min-w-0">
                           <div className="flex items-center gap-2">
                             <span className="text-sm font-medium text-gray-900">{m.name}</span>
-                            <span className="text-xs bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full">{m.role}</span>
+                            <span className="text-xs bg-emerald-100 text-emerald-700 px-2 py-0.5 rounded-full">{m.role}</span>
                           </div>
                           {m.note && <p className="text-xs text-gray-400 mt-0.5">{m.note}</p>}
                         </div>
                         <button onClick={() => { setEditingStaffId(m.id); setEditStaffForm({ name: m.name, role: m.role, note: m.note }) }}
-                                className="p-1.5 text-gray-400 hover:text-blue-500 transition-colors">
+                                className="p-1.5 text-gray-400 hover:text-emerald-500 transition-colors">
                           <Pencil size={14} />
                         </button>
                         <button onClick={() => { if (window.confirm(`「${m.name}」を削除しますか？`)) deleteMember(m.id) }}

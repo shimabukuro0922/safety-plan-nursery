@@ -77,24 +77,24 @@ const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
           )}
           {items.map((item) =>
             editingId === item.id ? (
-              <div key={item.id} className="border border-blue-300 rounded-xl p-3 space-y-2 bg-blue-50">
+              <div key={item.id} className="border border-emerald-300 rounded-xl p-3 space-y-2 bg-emerald-50">
                 <input
                   value={editCategory}
                   onChange={(e) => setEditCategory(e.target.value)}
                   placeholder="カテゴリ名（例：午睡）"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <input
                   value={editTitle}
                   onChange={(e) => setEditTitle(e.target.value)}
                   placeholder="項目名（必須）"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <input
                   value={editDescription}
                   onChange={(e) => setEditDescription(e.target.value)}
                   placeholder="説明・備考（任意）"
-                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  className="w-full border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
                 />
                 <div className="flex gap-2">
                   <Button size="sm" variant="primary" fullWidth onClick={saveEdit}>保存する</Button>
@@ -104,12 +104,12 @@ const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
             ) : (
               <div key={item.id} className="flex items-start gap-2 p-3 bg-gray-50 rounded-xl">
                 <div className="flex-1 min-w-0">
-                  <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full border border-blue-100">{item.categoryName}</span>
+                  <span className="text-xs text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-100">{item.categoryName}</span>
                   <p className="text-sm text-gray-800 mt-1.5 break-anywhere font-medium">{item.title}</p>
                   {item.description && <p className="text-xs text-gray-500 mt-0.5 break-anywhere">{item.description}</p>}
                 </div>
                 <div className="flex gap-1 shrink-0 mt-0.5">
-                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-emerald-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
                     <Pencil size={14} />
                   </button>
                   <button onClick={() => handleDelete(item.id, item.title)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
@@ -128,19 +128,19 @@ const ItemManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
             value={newCategory}
             onChange={(e) => setNewCategory(e.target.value)}
             placeholder="カテゴリ名（例：午睡、AED・救急）"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <input
             value={newTitle}
             onChange={(e) => setNewTitle(e.target.value)}
             placeholder="項目名（必須）"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <input
             value={newDescription}
             onChange={(e) => setNewDescription(e.target.value)}
             placeholder="説明・備考（任意）"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500"
           />
           <Button variant="primary" fullWidth onClick={handleAdd}>
             <Plus size={14} /> 追加する
@@ -178,7 +178,7 @@ const ChecklistCard: React.FC<{
   const [notes, setNotes] = useState('')
   return (
     <Card className={`p-4 ${isDone ? 'opacity-70' : ''}`}>
-      <span className="text-xs font-medium text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+      <span className="text-xs font-medium text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full">
         {categoryName}
       </span>
       <p className={`mt-2 text-sm font-medium break-anywhere leading-relaxed ${isDone ? 'line-through text-gray-400' : 'text-gray-900'}`}>
@@ -194,7 +194,7 @@ const ChecklistCard: React.FC<{
             onChange={(e) => setNotes(e.target.value)}
             placeholder="実施内容・気づいた点を記録（任意）"
             rows={2}
-            className="mt-3 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none leading-relaxed"
+            className="mt-3 w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none leading-relaxed"
           />
           <button
             onClick={() => onDone(itemId, notes)}
@@ -235,9 +235,9 @@ const TableRow: React.FC<{
 }> = ({ item, done, onDone, onUndone }) => {
   const [notes, setNotes] = useState('')
   return (
-    <tr className={done ? 'bg-gray-50' : 'hover:bg-blue-50/30'}>
+    <tr className={done ? 'bg-gray-50' : 'hover:bg-emerald-50/30'}>
       <td className="px-4 py-3">
-        <span className="text-xs text-blue-600 font-medium bg-blue-50 px-2 py-0.5 rounded-full whitespace-nowrap">
+        <span className="text-xs text-emerald-600 font-medium bg-emerald-50 px-2 py-0.5 rounded-full whitespace-nowrap">
           {item.categoryName}
         </span>
       </td>
@@ -252,7 +252,7 @@ const TableRow: React.FC<{
             onChange={(e) => setNotes(e.target.value)}
             placeholder="実施内容・気づきを記録（任意）"
             rows={2}
-            className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none min-w-[160px]"
+            className="w-full border border-gray-200 rounded-lg px-2 py-1.5 text-xs focus:outline-none focus:ring-2 focus:ring-emerald-500 resize-none min-w-[160px]"
           />
         ) : (
           <p className="text-xs text-gray-600 break-anywhere">
@@ -442,7 +442,7 @@ export const MonthlyChecklist: React.FC = () => {
           </Button>
           <button
             onClick={() => setManageOpen(true)}
-            className="w-full py-2.5 border border-dashed border-blue-300 rounded-xl text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors"
+            className="w-full py-2.5 border border-dashed border-emerald-300 rounded-xl text-sm text-emerald-600 font-medium hover:bg-emerald-50 transition-colors"
           >
             <Plus size={14} className="inline mr-1" />
             自分で項目を追加する
@@ -463,9 +463,9 @@ export const MonthlyChecklist: React.FC = () => {
 
           {/* 過去月・未来月を表示中は注記を表示 */}
           {!isCurrentMonth && (
-            <div className="bg-blue-50 border border-blue-200 rounded-xl px-4 py-3 flex items-start gap-2">
-              <AlertTriangle size={16} className="text-blue-500 shrink-0 mt-0.5" />
-              <p className="text-xs text-blue-700">
+            <div className="bg-emerald-50 border border-emerald-200 rounded-xl px-4 py-3 flex items-start gap-2">
+              <AlertTriangle size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+              <p className="text-xs text-emerald-700">
                 過去・未来の月を表示中です。実施記録は今月分のみ保存されます。
               </p>
             </div>

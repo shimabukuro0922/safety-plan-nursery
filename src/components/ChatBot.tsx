@@ -95,16 +95,16 @@ export const ChatBot: React.FC = () => {
              style={{ maxHeight: 'calc(100vh - 120px)' }}>
 
           {/* ヘッダー */}
-          <div className="bg-blue-700 px-4 py-3 flex items-center justify-between shrink-0">
+          <div className="bg-emerald-700 px-4 py-3 flex items-center justify-between shrink-0">
             <div className="flex items-center gap-2">
               <span className="text-xl">🛡️</span>
               <div>
                 <div className="text-white font-bold text-sm leading-tight">まもりすとサポートBot</div>
-                <div className="text-blue-200 text-xs">使い方はなんでも聞いてください</div>
+                <div className="text-emerald-200 text-xs">使い方はなんでも聞いてください</div>
               </div>
             </div>
             <button onClick={() => setOpen(false)}
-                    className="text-blue-200 hover:text-white transition-colors p-1 rounded">
+                    className="text-emerald-200 hover:text-white transition-colors p-1 rounded">
               <X size={18} />
             </button>
           </div>
@@ -118,7 +118,7 @@ export const ChatBot: React.FC = () => {
                 )}
                 <div className={`max-w-[80%] px-3 py-2 rounded-2xl text-sm leading-relaxed whitespace-pre-wrap ${
                   msg.role === 'user'
-                    ? 'bg-blue-600 text-white rounded-br-sm'
+                    ? 'bg-emerald-600 text-white rounded-br-sm'
                     : 'bg-white text-gray-800 shadow-sm border border-gray-100 rounded-bl-sm'
                 }`}>
                   {msg.content}
@@ -131,7 +131,7 @@ export const ChatBot: React.FC = () => {
               <div className="flex justify-start">
                 <span className="text-lg mr-2 mt-0.5">🛡️</span>
                 <div className="bg-white border border-gray-100 shadow-sm px-3 py-2 rounded-2xl rounded-bl-sm flex items-center gap-1">
-                  <Loader2 size={14} className="animate-spin text-blue-500" />
+                  <Loader2 size={14} className="animate-spin text-emerald-500" />
                   <span className="text-gray-400 text-sm">考え中...</span>
                 </div>
               </div>
@@ -147,7 +147,7 @@ export const ChatBot: React.FC = () => {
                 {QUICK_QUESTIONS.map((q) => (
                   <button key={q}
                           onClick={() => sendMessage(q)}
-                          className="text-xs bg-blue-50 hover:bg-blue-100 text-blue-700 border border-blue-200 rounded-full px-3 py-1 transition-colors">
+                          className="text-xs bg-emerald-50 hover:bg-emerald-100 text-emerald-700 border border-emerald-200 rounded-full px-3 py-1 transition-colors">
                     {q}
                   </button>
                 ))}
@@ -171,14 +171,14 @@ export const ChatBot: React.FC = () => {
               onKeyDown={handleKeyDown}
               placeholder="質問を入力（Enterで送信）"
               rows={1}
-              className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 leading-relaxed"
+              className="flex-1 resize-none rounded-xl border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400 leading-relaxed"
               style={{ maxHeight: '80px' }}
             />
             <button
               onClick={() => sendMessage(input)}
               disabled={!input.trim() || loading}
               aria-label="送信"
-              className="bg-blue-600 hover:bg-blue-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl p-2 transition-colors shrink-0">
+              className="bg-emerald-600 hover:bg-emerald-700 disabled:opacity-40 disabled:cursor-not-allowed text-white rounded-xl p-2 transition-colors shrink-0">
               <Send size={16} />
             </button>
           </div>
@@ -188,7 +188,7 @@ export const ChatBot: React.FC = () => {
       {/* フローティングボタン */}
       <button
         onClick={() => setOpen((v) => !v)}
-        className="fixed bottom-[88px] right-4 z-[55] bg-blue-600 hover:bg-blue-700 active:scale-95 text-white rounded-full shadow-2xl transition-all flex items-center gap-2 px-4 py-3"
+        className="fixed bottom-[88px] right-4 z-[55] bg-emerald-600 hover:bg-emerald-700 active:scale-95 text-white rounded-full shadow-2xl transition-all flex items-center gap-2 px-4 py-3"
         aria-label="サポートチャットを開く"
       >
         {open ? (

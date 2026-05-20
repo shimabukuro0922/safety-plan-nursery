@@ -18,7 +18,7 @@ const SEASON_META: SeasonMeta[] = [
   { key: 'spring', label: '春季（3〜4月）', icon: <Flower2 size={20} className="text-pink-500" />,   color: 'bg-pink-50 border-pink-200',   headerBg: 'bg-pink-50' },
   { key: 'summer', label: '夏季（6〜7月）', icon: <Sun size={20} className="text-yellow-500" />,      color: 'bg-yellow-50 border-yellow-200', headerBg: 'bg-yellow-50' },
   { key: 'autumn', label: '秋季（9〜10月）', icon: <Wind size={20} className="text-orange-500" />,    color: 'bg-orange-50 border-orange-200', headerBg: 'bg-orange-50' },
-  { key: 'winter', label: '冬季（12〜1月）', icon: <Snowflake size={20} className="text-blue-500" />, color: 'bg-blue-50 border-blue-200',     headerBg: 'bg-blue-50' },
+  { key: 'winter', label: '冬季（12〜1月）', icon: <Snowflake size={20} className="text-emerald-500" />, color: 'bg-emerald-50 border-emerald-200',     headerBg: 'bg-emerald-50' },
 ]
 
 // ==============================
@@ -97,7 +97,7 @@ const SeasonCard: React.FC<{
                     value={editLabel}
                     onChange={(e) => setEditLabel(e.target.value)}
                     autoFocus
-                    className="flex-1 border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+                    className="flex-1 border border-emerald-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white"
                   />
                   <button onClick={saveEdit} className="p-2 text-green-600 hover:bg-green-50 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center">
                     <Check size={16} />
@@ -109,7 +109,7 @@ const SeasonCard: React.FC<{
               ) : (
                 <div key={item.key} className="flex items-center gap-2 bg-white rounded-xl px-3 py-2.5 border border-gray-200">
                   <span className="flex-1 text-sm text-gray-700 break-anywhere">{item.label}</span>
-                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                  <button onClick={() => startEdit(item)} className="p-1.5 text-gray-400 hover:text-emerald-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
                     <Pencil size={13} />
                   </button>
                   <button
@@ -134,12 +134,12 @@ const SeasonCard: React.FC<{
                 onChange={(e) => setNewLabel(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 placeholder="新しい項目を追加（Enter でも追加）"
-                className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+                className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white"
               />
               <button
                 onClick={handleAdd}
                 disabled={!newLabel.trim()}
-                className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
+                className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center disabled:opacity-40 disabled:cursor-not-allowed"
               >
                 <Plus size={16} />
               </button>
@@ -228,7 +228,7 @@ export const SeasonalChecklist: React.FC = () => {
           value={staffName}
           onChange={(e) => setStaffName(e.target.value)}
           placeholder="例：山田 花子"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
         />
         <p className="text-xs text-gray-400 mt-1">チェック時に実施者名として記録されます</p>
       </div>

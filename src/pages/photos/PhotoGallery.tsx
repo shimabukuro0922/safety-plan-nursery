@@ -183,7 +183,7 @@ const PhotoDetailModal: React.FC<{
         <div>
           <div className="flex items-center justify-between mb-1.5">
             <p className="text-xs font-semibold text-gray-600">写っている子ども</p>
-            <button onClick={() => setTagOpen((v) => !v)} className="text-xs text-blue-600 flex items-center gap-1">
+            <button onClick={() => setTagOpen((v) => !v)} className="text-xs text-emerald-600 flex items-center gap-1">
               <Tag size={11} /> 編集
             </button>
           </div>
@@ -194,7 +194,7 @@ const PhotoDetailModal: React.FC<{
               {taggedChildren.map((child) => (
                 <span
                   key={child.id}
-                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${child.isPhotoNG ? 'bg-red-100 text-red-700' : 'bg-blue-100 text-blue-700'}`}
+                  className={`text-xs px-2 py-0.5 rounded-full font-medium ${child.isPhotoNG ? 'bg-red-100 text-red-700' : 'bg-emerald-100 text-emerald-700'}`}
                 >
                   {child.isPhotoNG && '⚠️ '}{child.name}
                 </span>
@@ -330,7 +330,7 @@ export const PhotoGallery: React.FC = () => {
             className={`text-xs px-3 py-1.5 rounded-full border whitespace-nowrap transition-colors shrink-0 font-medium
               ${filterStatus === tab.key
                 ? tab.key === 'ng' ? 'bg-red-600 text-white border-red-600'
-                  : 'bg-blue-600 text-white border-blue-600'
+                  : 'bg-emerald-600 text-white border-emerald-600'
                 : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
           >
             {tab.label}
@@ -343,7 +343,7 @@ export const PhotoGallery: React.FC = () => {
         <select
           value={filterEventId}
           onChange={(e) => setFilterEventId(e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
         >
           <option value="">全イベント</option>
           {events.map((ev) => (

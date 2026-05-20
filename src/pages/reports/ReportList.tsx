@@ -51,8 +51,8 @@ export const ReportList: React.FC = () => {
                 onClick={() => navigate(`/reports/${r.id}`)}
               >
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
-                    <FileText size={16} className="text-blue-600" />
+                  <div className="w-9 h-9 bg-emerald-50 rounded-lg flex items-center justify-center shrink-0 mt-0.5">
+                    <FileText size={16} className="text-emerald-600" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start gap-2 justify-between">

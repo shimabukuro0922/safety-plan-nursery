@@ -39,7 +39,7 @@ const ChildForm: React.FC<{
           value={name}
           onChange={(e) => setName(e.target.value)}
           placeholder="例：山田 太郎"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
         />
       </div>
 
@@ -48,7 +48,7 @@ const ChildForm: React.FC<{
         <select
           value={className}
           onChange={(e) => setClassName(e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
         >
           {classes.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
@@ -100,7 +100,7 @@ const ChildCard: React.FC<{
   <Card className="p-4">
     <div className="flex items-center gap-3">
       <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 text-base font-bold
-        ${child.isPhotoNG ? 'bg-red-100 text-red-600' : 'bg-blue-100 text-blue-600'}`}>
+        ${child.isPhotoNG ? 'bg-red-100 text-red-600' : 'bg-emerald-100 text-emerald-600'}`}>
         {child.name.charAt(0)}
       </div>
       <div className="flex-1 min-w-0">
@@ -120,7 +120,7 @@ const ChildCard: React.FC<{
       <div className="flex items-center gap-1 shrink-0">
         <button
           onClick={onEdit}
-          className="p-2 text-gray-400 hover:text-blue-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
+          className="p-2 text-gray-400 hover:text-emerald-500 transition-colors min-w-[36px] min-h-[36px] flex items-center justify-center"
         >
           <Pencil size={14} />
         </button>
@@ -161,7 +161,7 @@ export const ChildrenManager: React.FC = () => {
       {/* 統計 */}
       <div className="grid grid-cols-2 gap-3">
         <Card className="p-4 text-center">
-          <Users size={20} className="text-blue-500 mx-auto mb-1" />
+          <Users size={20} className="text-emerald-500 mx-auto mb-1" />
           <p className="text-2xl font-bold text-gray-900">{children.length}</p>
           <p className="text-xs text-gray-500">登録園児数</p>
         </Card>
@@ -182,7 +182,7 @@ export const ChildrenManager: React.FC = () => {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilterClass('')}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterClass ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterClass ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
           >
             全クラス
           </button>
@@ -190,7 +190,7 @@ export const ChildrenManager: React.FC = () => {
             <button
               key={c}
               onClick={() => setFilterClass(c)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterClass === c ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterClass === c ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
             >
               {c}
             </button>
@@ -240,10 +240,10 @@ export const ChildrenManager: React.FC = () => {
         </div>
       )}
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
         <div className="flex items-start gap-2">
-          <ShieldCheck size={16} className="text-blue-500 shrink-0 mt-0.5" />
-          <p className="text-xs text-blue-700 leading-relaxed">
+          <ShieldCheck size={16} className="text-emerald-500 shrink-0 mt-0.5" />
+          <p className="text-xs text-emerald-700 leading-relaxed">
             {isSynced
               ? '園児情報は施設コードで参加した端末間で自動的に同期されます。'
               : '施設コードを発行すると、複数端末で園児情報を共有できます。'}

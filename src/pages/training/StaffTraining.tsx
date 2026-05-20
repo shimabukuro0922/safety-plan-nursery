@@ -52,25 +52,25 @@ const AddForm: React.FC<{ onAdd: (r: Omit<TrainingRecord, 'id'>) => void; onCanc
   }
 
   return (
-    <Card className="p-4 border-blue-200 bg-blue-50 space-y-3">
+    <Card className="p-4 border-emerald-200 bg-emerald-50 space-y-3">
       <p className="text-sm font-bold text-gray-900">研修記録を追加</p>
 
       <div>
         <label className="text-xs font-medium text-gray-600 block mb-1">職員名 *</label>
         <input value={staffName} onChange={(e) => setStaffName(e.target.value)} placeholder="例：山田 花子"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
       </div>
 
       <div>
         <label className="text-xs font-medium text-gray-600 block mb-1">研修・資格の種類 *</label>
         <select value={trainingType} onChange={(e) => setTrainingType(e.target.value)}
-          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white">
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white">
           {TRAINING_TYPES.map((t) => <option key={t} value={t}>{t}</option>)}
           <option value="custom">その他（直接入力）</option>
         </select>
         {trainingType === 'custom' && (
           <input value={customType} onChange={(e) => setCustomType(e.target.value)} placeholder="研修名を入力"
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white mt-1.5" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white mt-1.5" />
         )}
       </div>
 
@@ -78,19 +78,19 @@ const AddForm: React.FC<{ onAdd: (r: Omit<TrainingRecord, 'id'>) => void; onCanc
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">受講日 *</label>
           <input type="date" value={completedDate} onChange={(e) => setCompletedDate(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
         </div>
         <div>
           <label className="text-xs font-medium text-gray-600 block mb-1">有効期限（任意）</label>
           <input type="date" value={expiryDate} onChange={(e) => setExpiryDate(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+            className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
         </div>
       </div>
 
       <div>
         <label className="text-xs font-medium text-gray-600 block mb-1">メモ（任意）</label>
         <input value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="実施機関・修了証番号など"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white" />
+          className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white" />
       </div>
 
       <div className="flex gap-2">
@@ -164,7 +164,7 @@ export const StaffTraining: React.FC = () => {
       ) : (
         <button
           onClick={() => setShowForm(true)}
-          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-blue-300 rounded-xl text-sm text-blue-600 font-medium hover:bg-blue-50 transition-colors min-h-[52px]"
+          className="w-full flex items-center justify-center gap-2 py-3 border-2 border-dashed border-emerald-300 rounded-xl text-sm text-emerald-600 font-medium hover:bg-emerald-50 transition-colors min-h-[52px]"
         >
           <Plus size={16} /> 研修記録を追加する
         </button>
@@ -175,13 +175,13 @@ export const StaffTraining: React.FC = () => {
         <div className="flex gap-2 flex-wrap">
           <button
             onClick={() => setFilterStaff('')}
-            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterStaff ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+            className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${!filterStaff ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
           >
             全員
           </button>
           {staffNames.map((name) => (
             <button key={name} onClick={() => setFilterStaff(name)}
-              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterStaff === name ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
+              className={`text-xs px-3 py-1.5 rounded-full border transition-colors ${filterStaff === name ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50'}`}
             >
               {name}
             </button>
@@ -195,7 +195,7 @@ export const StaffTraining: React.FC = () => {
           <GraduationCap size={32} className="mx-auto mb-2 text-gray-300" />
           <p className="text-sm text-gray-500">研修記録がありません</p>
           <p className="text-xs text-gray-400 mt-1">「研修記録を追加する」から登録してください</p>
-          <p className="text-xs text-blue-600 mt-3">有効期限を設定すると、期限が近づいたときにアラートで知らせます</p>
+          <p className="text-xs text-emerald-600 mt-3">有効期限を設定すると、期限が近づいたときにアラートで知らせます</p>
         </Card>
       ) : (
         <div className="space-y-2">
@@ -204,8 +204,8 @@ export const StaffTraining: React.FC = () => {
             return (
               <Card key={r.id} className="p-4">
                 <div className="flex items-start gap-3">
-                  <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                    <GraduationCap size={18} className="text-blue-500" />
+                  <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                    <GraduationCap size={18} className="text-emerald-500" />
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-start justify-between gap-2">

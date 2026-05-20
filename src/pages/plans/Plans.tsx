@@ -56,27 +56,27 @@ const MonthCard: React.FC<{
   }
 
   return (
-    <Card className={`overflow-hidden ${isCurrentMonth ? 'border-2 border-blue-400' : ''}`}>
+    <Card className={`overflow-hidden ${isCurrentMonth ? 'border-2 border-emerald-400' : ''}`}>
       {/* ヘッダー行 */}
       <button
         className="w-full flex items-center gap-3 px-4 py-3 text-left"
         onClick={onToggle}
       >
         <div className={`w-10 h-10 rounded-xl flex flex-col items-center justify-center shrink-0 text-xs font-bold
-          ${isCurrentMonth ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
+          ${isCurrentMonth ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600'}`}>
           {month}月
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
             {themes.length > 0 ? (
-              <p className={`text-sm font-semibold break-anywhere ${isCurrentMonth ? 'text-blue-800' : 'text-gray-800'}`}>
+              <p className={`text-sm font-semibold break-anywhere ${isCurrentMonth ? 'text-emerald-800' : 'text-gray-800'}`}>
                 {themes[0]}
               </p>
             ) : (
               <p className="text-sm text-gray-400 italic">テーマ未設定</p>
             )}
             {isCurrentMonth && (
-              <span className="text-xs bg-blue-600 text-white px-2 py-0.5 rounded-full font-medium shrink-0">今月</span>
+              <span className="text-xs bg-emerald-600 text-white px-2 py-0.5 rounded-full font-medium shrink-0">今月</span>
             )}
           </div>
         </div>
@@ -105,7 +105,7 @@ const MonthCard: React.FC<{
                           next[i] = e.target.value
                           setEditThemes(next)
                         }}
-                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]"
+                        className="flex-1 border border-gray-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                       />
                       <button
                         onClick={() => setEditThemes((prev) => prev.filter((_, j) => j !== i))}
@@ -122,11 +122,11 @@ const MonthCard: React.FC<{
                     onChange={(e) => setNewTheme(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addTheme()}
                     placeholder="テーマを追加（例：避難訓練実施）"
-                    className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]"
+                    className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                   />
                   <button
                     onClick={addTheme}
-                    className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
+                    className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center"
                   >
                     <Plus size={16} />
                   </button>
@@ -158,7 +158,7 @@ const MonthCard: React.FC<{
                     onChange={(e) => setNewRisk(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && addRisk()}
                     placeholder="追加（例：水遊び・プール）"
-                    className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]"
+                    className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]"
                   />
                   <button
                     onClick={addRisk}
@@ -187,7 +187,7 @@ const MonthCard: React.FC<{
                   <div className="space-y-1">
                     {themes.map((theme) => (
                       <div key={theme} className="flex items-start gap-2">
-                        <span className="text-blue-500 mt-0.5 shrink-0">•</span>
+                        <span className="text-emerald-500 mt-0.5 shrink-0">•</span>
                         <p className="text-sm text-gray-700 break-anywhere">{theme}</p>
                       </div>
                     ))}
@@ -212,7 +212,7 @@ const MonthCard: React.FC<{
 
               <button
                 onClick={openEdit}
-                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 transition-colors py-1 px-2 rounded-lg hover:bg-blue-50 min-h-[36px]"
+                className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-emerald-600 transition-colors py-1 px-2 rounded-lg hover:bg-emerald-50 min-h-[36px]"
               >
                 <Pencil size={13} />
                 この月の内容を編集する
@@ -251,8 +251,8 @@ export const Plans: React.FC = () => {
         subtitle="4月〜3月の安全活動スケジュール"
       />
 
-      <Card className="p-4 bg-blue-50 border-blue-200">
-        <p className="text-xs text-blue-700 break-anywhere">
+      <Card className="p-4 bg-emerald-50 border-emerald-200">
+        <p className="text-xs text-emerald-700 break-anywhere">
           各月をタップすると内容を確認・編集できます。
           今月（{format(now, 'M月', { locale: ja })}）は青で強調表示されています。
         </p>

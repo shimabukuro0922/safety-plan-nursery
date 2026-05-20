@@ -7,11 +7,11 @@ import { useOnboardingStore } from '@/stores/appStore'
 
 const QUICK_STARTS = [
   {
-    icon: <ClipboardCheck size={18} className="text-blue-500" />,
+    icon: <ClipboardCheck size={18} className="text-emerald-500" />,
     label: '月次チェック表を確認する',
     desc: '毎月確認するチェック項目をさっと見てみましょう',
     path: '/checklists/monthly',
-    bg: 'bg-blue-50 border-blue-200 hover:bg-blue-100',
+    bg: 'bg-emerald-50 border-emerald-200 hover:bg-emerald-100',
   },
   {
     icon: <Siren size={18} className="text-red-500" />,

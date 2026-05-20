@@ -105,8 +105,8 @@ const EMERGENCY_CARDS: EmergencyCard[] = [
     id: 'sids',
     title: 'SIDS・午睡中の異変',
     subtitle: '午睡中に呼吸・反応がない',
-    color: 'border-blue-300 bg-blue-50',
-    headerColor: 'bg-blue-600 text-white',
+    color: 'border-emerald-300 bg-emerald-50',
+    headerColor: 'bg-emerald-600 text-white',
     steps: [
       { text: '①名前を呼ぶ・肩を軽くたたく → 反応確認' },
       { text: '②呼吸・胸の動き・顔色を確認', emphasis: true },
@@ -209,8 +209,8 @@ export const EmergencyGuide: React.FC = () => {
         })}
       </div>
 
-      <div className="bg-blue-50 border border-blue-200 rounded-xl p-4">
-        <p className="text-xs text-blue-700 leading-relaxed">
+      <div className="bg-emerald-50 border border-emerald-200 rounded-xl p-4">
+        <p className="text-xs text-emerald-700 leading-relaxed">
           このカードは保育施設での緊急対応の目安です。日頃から救命講習を受講し、手順を確認しておきましょう。
         </p>
       </div>

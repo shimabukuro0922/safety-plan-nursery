@@ -54,7 +54,7 @@ export const RecordList: React.FC = () => {
               ${tab === t.key ? 'bg-white text-gray-900 shadow-sm' : 'text-gray-500 hover:text-gray-700'}`}>
             {t.icon}
             {t.label}
-            <span className={`px-1.5 py-0.5 rounded-full text-xs ${tab === t.key ? 'bg-blue-100 text-blue-700' : 'bg-gray-200 text-gray-500'}`}>
+            <span className={`px-1.5 py-0.5 rounded-full text-xs ${tab === t.key ? 'bg-emerald-100 text-emerald-700' : 'bg-gray-200 text-gray-500'}`}>
               {t.key === 'all' ? allRecords.length : allRecords.filter((r) => r.type === t.key).length}
             </span>
           </button>

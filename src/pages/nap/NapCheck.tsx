@@ -84,7 +84,7 @@ export const NapCheck: React.FC = () => {
         action={
           <button
             onClick={() => { setShowSettings((v) => !v); setCustomInput(String(intervalMinutes)) }}
-            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-blue-600 border border-gray-200 rounded-lg px-2.5 py-1.5 bg-white transition-colors"
+            className="flex items-center gap-1.5 text-xs text-gray-500 hover:text-emerald-600 border border-[#e2ece6] rounded-lg px-2.5 py-1.5 bg-white transition-colors"
           >
             <Settings size={13} />
             間隔設定
@@ -94,7 +94,7 @@ export const NapCheck: React.FC = () => {
 
       {/* 間隔設定パネル */}
       {showSettings && (
-        <Card className="p-4 border-blue-200 bg-blue-50 space-y-3">
+        <Card className="p-4 border-emerald-200 bg-emerald-50 space-y-3">
           <div className="flex items-center justify-between">
             <p className="text-sm font-bold text-gray-800">確認間隔を設定</p>
             <button onClick={() => setShowSettings(false)} className="text-gray-400 hover:text-gray-600 p-1">
@@ -112,8 +112,8 @@ export const NapCheck: React.FC = () => {
                   onClick={() => { setIntervalMinutes(min); setCustomInput(String(min)); setShowSettings(false); toast.success(`確認間隔を${min}分に設定しました`) }}
                   className={`px-4 py-2 rounded-xl text-sm font-semibold border transition-colors ${
                     intervalMinutes === min
-                      ? 'bg-blue-600 text-white border-blue-600'
-                      : 'bg-white text-gray-700 border-gray-200 hover:border-blue-400'
+                      ? 'bg-emerald-600 text-white border-emerald-600'
+                      : 'bg-white text-gray-700 border-gray-200 hover:border-emerald-400'
                   }`}
                 >
                   {min}分
@@ -140,14 +140,14 @@ export const NapCheck: React.FC = () => {
               </div>
               <button
                 onClick={handleSaveInterval}
-                className="flex items-center gap-1 px-4 py-2 bg-blue-600 text-white rounded-xl text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-1 px-4 py-2 bg-emerald-600 text-white rounded-xl text-sm font-semibold hover:bg-emerald-700 transition-colors"
               >
                 <Check size={14} /> 設定
               </button>
             </div>
           </div>
 
-          <p className="text-xs text-gray-400">現在の設定: <strong className="text-blue-700">{intervalMinutes}分ごと</strong></p>
+          <p className="text-xs text-gray-400">現在の設定: <strong className="text-emerald-700">{intervalMinutes}分ごと</strong></p>
         </Card>
       )}
 
@@ -162,7 +162,7 @@ export const NapCheck: React.FC = () => {
           value={checkerName}
           onChange={(e) => setCheckerName(e.target.value)}
           placeholder="例：山田 花子"
-          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+          className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
         />
       </div>
 
@@ -191,7 +191,7 @@ export const NapCheck: React.FC = () => {
       <button
         onClick={handleCheck}
         disabled={submitting}
-        className="w-full flex flex-col items-center justify-center gap-1 py-8 bg-blue-600 text-white rounded-2xl shadow-md active:bg-blue-700 transition-colors min-h-[120px] disabled:opacity-70 disabled:cursor-not-allowed"
+        className="w-full flex flex-col items-center justify-center gap-1 py-8 bg-emerald-600 text-white rounded-2xl shadow-md active:bg-emerald-700 hover:bg-emerald-700 transition-colors min-h-[120px] disabled:opacity-70 disabled:cursor-not-allowed"
       >
         <Moon size={32} />
         <span className="text-lg font-bold mt-1">午睡確認しました</span>

@@ -80,7 +80,7 @@ const PhotoPreviewCard: React.FC<{
           <div className="mt-1.5">
             <button
               onClick={() => setExpanded((v) => !v)}
-              className="flex items-center gap-1 text-[10px] text-blue-600 font-medium"
+              className="flex items-center gap-1 text-[10px] text-emerald-600 font-medium"
             >
               {item.taggedChildIds.length > 0
                 ? `${item.taggedChildIds.length}名タグ付き`
@@ -258,13 +258,13 @@ export const PhotoUpload: React.FC = () => {
           <div className="flex gap-2">
             <button
               onClick={() => setUseExistingEvent(true)}
-              className={`flex-1 py-2 text-xs font-medium rounded-xl border transition-colors ${useExistingEvent ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'}`}
+              className={`flex-1 py-2 text-xs font-medium rounded-xl border transition-colors ${useExistingEvent ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200'}`}
             >
               既存イベントに追加
             </button>
             <button
               onClick={() => setUseExistingEvent(false)}
-              className={`flex-1 py-2 text-xs font-medium rounded-xl border transition-colors ${!useExistingEvent ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-600 border-gray-200'}`}
+              className={`flex-1 py-2 text-xs font-medium rounded-xl border transition-colors ${!useExistingEvent ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-600 border-gray-200'}`}
             >
               新しいイベントを作成
             </button>
@@ -275,7 +275,7 @@ export const PhotoUpload: React.FC = () => {
           <select
             value={selectedEventId}
             onChange={(e) => setSelectedEventId(e.target.value)}
-            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+            className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
           >
             {events.map((ev) => (
               <option key={ev.id} value={ev.id}>
@@ -289,7 +289,7 @@ export const PhotoUpload: React.FC = () => {
               value={newEventName}
               onChange={(e) => setNewEventName(e.target.value)}
               placeholder="イベント名（例：運動会、春の遠足）"
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
             <div className="grid grid-cols-2 gap-2">
               <div>
@@ -298,7 +298,7 @@ export const PhotoUpload: React.FC = () => {
                   type="date"
                   value={newEventDate}
                   onChange={(e) => setNewEventDate(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
                 />
               </div>
               <div>
@@ -306,7 +306,7 @@ export const PhotoUpload: React.FC = () => {
                 <select
                   value={newEventClass}
                   onChange={(e) => setNewEventClass(e.target.value)}
-                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none bg-white"
+                  className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none bg-white"
                 >
                   <option value="">全クラス</option>
                   {classes.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -317,7 +317,7 @@ export const PhotoUpload: React.FC = () => {
               value={newEventNotes}
               onChange={(e) => setNewEventNotes(e.target.value)}
               placeholder="メモ（任意）"
-              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
           </div>
         )}
@@ -332,10 +332,10 @@ export const PhotoUpload: React.FC = () => {
           onDrop={uploading ? undefined : handleDrop}
           onClick={() => { if (!uploading) inputRef.current?.click() }}
           className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 py-10 transition-colors
-            ${uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' : 'cursor-pointer ' + (dragging ? 'border-blue-500 bg-blue-50' : 'border-blue-300 hover:bg-blue-50')}`}
+            ${uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' : 'cursor-pointer ' + (dragging ? 'border-blue-500 bg-emerald-50' : 'border-emerald-300 hover:bg-emerald-50')}`}
         >
           <Upload size={32} className="text-blue-400" />
-          <p className="text-sm font-medium text-blue-600">タップまたはドラッグ＆ドロップで写真を追加</p>
+          <p className="text-sm font-medium text-emerald-600">タップまたはドラッグ＆ドロップで写真を追加</p>
           <p className="text-xs text-gray-400">JPG・PNG対応 · 複数選択可</p>
           <input
             ref={inputRef}
@@ -393,7 +393,7 @@ export const PhotoUpload: React.FC = () => {
             <button
               disabled={uploading}
               onClick={() => { if (!uploading) inputRef.current?.click() }}
-              className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-blue-300 hover:text-blue-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+              className="aspect-square border-2 border-dashed border-gray-300 rounded-xl flex flex-col items-center justify-center gap-1 text-gray-400 hover:border-emerald-300 hover:text-emerald-500 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
             >
               <Plus size={20} />
               <span className="text-xs">追加</span>

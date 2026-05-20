@@ -26,8 +26,8 @@ export const PhotoHub: React.FC = () => {
     {
       label: '写真をアップロード',
       sub: 'イベント・クラスごとに整理',
-      icon: <Upload size={24} className="text-blue-500" />,
-      color: 'border-blue-200 bg-blue-50',
+      icon: <Upload size={24} className="text-emerald-500" />,
+      color: 'border-emerald-200 bg-emerald-50',
       path: '/photos/upload',
     },
     {
@@ -125,7 +125,7 @@ export const PhotoHub: React.FC = () => {
           <SectionHeader
             title={`確認待ち (${pending}枚)`}
             action={
-              <button onClick={() => navigate('/photos/gallery?filter=pending')} className="text-xs text-blue-600 flex items-center gap-1">
+              <button onClick={() => navigate('/photos/gallery?filter=pending')} className="text-xs text-emerald-600 flex items-center gap-1">
                 すべて見る <ChevronRight size={14} />
               </button>
             }
@@ -164,8 +164,8 @@ export const PhotoHub: React.FC = () => {
               return (
                 <Card key={ev.id} className="p-4" onClick={() => navigate(`/photos/gallery?eventId=${ev.id}`)}>
                   <div className="flex items-center gap-3">
-                    <div className="w-9 h-9 bg-blue-50 rounded-xl flex items-center justify-center shrink-0">
-                      <Images size={16} className="text-blue-500" />
+                    <div className="w-9 h-9 bg-emerald-50 rounded-xl flex items-center justify-center shrink-0">
+                      <Images size={16} className="text-emerald-500" />
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-semibold text-gray-900 break-anywhere">{ev.name}</p>
@@ -196,7 +196,7 @@ export const PhotoHub: React.FC = () => {
           <p className="text-xs text-gray-400 mt-1 mb-4">「写真をアップロード」から始めましょう</p>
           <button
             onClick={() => navigate('/photos/upload')}
-            className="text-sm text-blue-600 font-medium underline"
+            className="text-sm text-emerald-600 font-medium underline"
           >
             写真をアップロードする →
           </button>

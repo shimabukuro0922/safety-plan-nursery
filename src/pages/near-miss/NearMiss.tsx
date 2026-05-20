@@ -28,13 +28,13 @@ const StepFlow: React.FC<{ current: NearMissStep }> = ({ current }) => {
         return (
           <React.Fragment key={step}>
             <div className={`flex items-center gap-1 shrink-0 px-2 py-1 rounded-lg text-xs font-medium ${
-              i === currentIdx ? cfg.color : done ? 'bg-green-50 text-green-600' : 'bg-gray-100 text-gray-400'
+              i === currentIdx ? cfg.color : done ? 'bg-emerald-50 text-emerald-600' : 'bg-gray-100 text-gray-400'
             }`}>
               {done && i < currentIdx && <CheckCircle2 size={12} />}
               {cfg.label}
             </div>
             {i < STEP_FLOW.length - 1 && (
-              <ArrowRight size={12} className={`shrink-0 ${i < currentIdx ? 'text-green-400' : 'text-gray-300'}`} />
+              <ArrowRight size={12} className={`shrink-0 ${i < currentIdx ? 'text-emerald-400' : 'text-gray-300'}`} />
             )}
           </React.Fragment>
         )
@@ -303,7 +303,7 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
         <span className="text-xs text-gray-500">{format(new Date(nm.occurred_at), 'yyyy年M月d日', { locale: ja })} 発生</span>
         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{NEAR_MISS_SCENE_LABELS[nm.scene]}</span>
         {locationZone && (
-          <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded-full">
+          <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded-full">
             {locationZone.emoji} {locationZone.label}
           </span>
         )}
@@ -322,25 +322,25 @@ const NearMissDetail: React.FC<{ nm: NearMissRecord; onClose: () => void }> = ({
             <div>
               <label className="text-xs font-semibold text-gray-700 block mb-1">なぜ起きたか</label>
               <textarea value={why} onChange={(e) => setWhy(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 rows={3} placeholder="原因を記入してください" />
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-700 block mb-1">明日から何を変えるか</label>
               <textarea value={what} onChange={(e) => setWhat(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 rows={3} placeholder="具体的な対策を記入してください" />
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-700 block mb-1">誰に共有したか</label>
               <input type="text" value={shared} onChange={(e) => setShared(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400"
                 placeholder="例：全職員（朝礼にて）" />
             </div>
             <div>
               <label className="text-xs font-semibold text-gray-700 block mb-1">再確認日</label>
               <input type="date" value={recheck} onChange={(e) => setRecheck(e.target.value)}
-                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400" />
+                className="w-full border border-gray-300 rounded-xl px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-400" />
             </div>
             <div className="flex gap-2">
               {nextStep ? (
@@ -450,7 +450,7 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
           {SCENES.map(([key, label]) => (
             <button key={key} onClick={() => setScene(key)}
               className={`text-xs px-3 py-1.5 rounded-full font-medium transition-colors ${
-                scene === key ? 'bg-blue-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-gray-200'
+                scene === key ? 'bg-emerald-600 text-white' : 'bg-gray-100 text-gray-600 hover:bg-emerald-50 hover:text-emerald-700'
               }`}>
               {label}
             </button>
@@ -471,8 +471,8 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
               onClick={() => setLocation(location === zone.key ? null : zone.key)}
               className={`flex items-center gap-1.5 px-2 py-2 rounded-xl text-xs font-medium border transition-colors text-left ${
                 location === zone.key
-                  ? 'bg-blue-600 text-white border-blue-600'
-                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-blue-300 hover:bg-blue-50'
+                  ? 'bg-emerald-600 text-white border-emerald-600'
+                  : 'bg-gray-50 text-gray-700 border-gray-200 hover:border-emerald-300 hover:bg-emerald-50'
               }`}
             >
               <span className="text-base leading-none shrink-0">{zone.emoji}</span>
@@ -489,12 +489,12 @@ const NewNearMissForm: React.FC<{ onClose: () => void }> = ({ onClose }) => {
         </label>
         <textarea value={what} onChange={(e) => setWhat(e.target.value)}
           placeholder="例：3歳児が砂場の縁につまずき、転倒しそうになった。近くの保育士がすぐ支えたため怪我はなかった。"
-          className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-400"
+          className="w-full border border-gray-300 rounded-xl px-3 py-2.5 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-emerald-400"
           rows={4} />
       </div>
 
-      <div className="bg-blue-50 rounded-xl p-3">
-        <p className="text-xs text-blue-700 break-anywhere">
+      <div className="bg-emerald-50 rounded-xl p-3 border border-emerald-100">
+        <p className="text-xs text-emerald-700 break-anywhere">
           まず「何が起きかけたか」だけ記録すれば大丈夫です。
           「なぜ起きたか」「対策」は後から追記できます。
         </p>
@@ -609,13 +609,13 @@ export const NearMiss: React.FC = () => {
                         <span className="text-xs text-gray-400">{format(new Date(nm.occurred_at), 'M月d日', { locale: ja })}</span>
                         <span className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-full">{NEAR_MISS_SCENE_LABELS[nm.scene]}</span>
                         {locationZone && (
-                          <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">
+                          <span className="text-xs bg-emerald-50 text-emerald-600 px-2 py-0.5 rounded-full">
                             {locationZone.emoji} {locationZone.label}
                           </span>
                         )}
                       </div>
                       <StepFlow current={nm.step} />
-                      <div className="flex items-center gap-1 mt-2 text-blue-600">
+                      <div className="flex items-center gap-1 mt-2 text-emerald-600">
                         <span className="text-xs">タップして改善を進める</span>
                         <ChevronRight size={12} />
                       </div>

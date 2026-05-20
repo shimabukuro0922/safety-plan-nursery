@@ -36,7 +36,7 @@ const SectionEditor: React.FC<{
         placeholder="ここに内容を入力してください"
         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm
                    resize-none min-h-[120px] leading-relaxed break-anywhere
-                   focus:ring-2 focus:ring-blue-500 focus:outline-none
+                   focus:ring-2 focus:ring-emerald-500 focus:outline-none
                    text-gray-800 placeholder:text-gray-400"
       />
     </Card>
@@ -121,13 +121,13 @@ const AIPanel: React.FC<{
         <div className="p-4 space-y-4">
           {suggestions.length > 0 ? (
             <div>
-              <p className="text-xs font-semibold text-blue-700 flex items-center gap-1 mb-2">
+              <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1 mb-2">
                 <Lightbulb size={12} />
                 アドバイス
               </p>
               <ul className="space-y-1">
                 {suggestions.map((s, i) => (
-                  <li key={i} className="text-xs text-blue-600 break-anywhere leading-relaxed pl-3 border-l-2 border-blue-300">
+                  <li key={i} className="text-xs text-emerald-600 break-anywhere leading-relaxed pl-3 border-l-2 border-emerald-300">
                     {s}
                   </li>
                 ))}
@@ -135,7 +135,7 @@ const AIPanel: React.FC<{
             </div>
           ) : (
             <div>
-              <p className="text-xs font-semibold text-blue-700 flex items-center gap-1 mb-2">
+              <p className="text-xs font-semibold text-emerald-700 flex items-center gap-1 mb-2">
                 <Lightbulb size={12} />
                 記入のヒント
               </p>
@@ -146,7 +146,7 @@ const AIPanel: React.FC<{
                   '「未実施項目」には理由と次回対応予定を明記しましょう',
                   '「次月の取り組み」には重点的に行う安全活動を書きます',
                 ].map((hint, i) => (
-                  <li key={i} className="text-xs text-blue-600 break-anywhere leading-relaxed pl-3 border-l-2 border-blue-300">
+                  <li key={i} className="text-xs text-emerald-600 break-anywhere leading-relaxed pl-3 border-l-2 border-emerald-300">
                     {hint}
                   </li>
                 ))}

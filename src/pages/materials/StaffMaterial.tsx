@@ -8,7 +8,7 @@ import { exportToPDF } from '@/lib/exportPDF'
 import toast from 'react-hot-toast'
 
 const DEFAULT_ICONS: Record<string, React.ReactNode> = {
-  morning:  <BookOpen size={18} className="text-blue-500" />,
+  morning:  <BookOpen size={18} className="text-emerald-500" />,
   training: <Users size={18} className="text-green-500" />,
   newcomer: <UserPlus size={18} className="text-purple-500" />,
 }
@@ -133,11 +133,11 @@ const TypeManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
         <div className="p-4 space-y-2">
           {types.map((t) =>
             editingKey === t.key ? (
-              <div key={t.key} className="border border-blue-200 rounded-xl p-3 space-y-2 bg-blue-50">
+              <div key={t.key} className="border border-emerald-200 rounded-xl p-3 space-y-2 bg-emerald-50">
                 <input value={editLabel} onChange={(e) => setEditLabel(e.target.value)} placeholder="種別名" autoFocus
-                  className="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white" />
+                  className="w-full border border-emerald-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white" />
                 <input value={editDesc} onChange={(e) => setEditDesc(e.target.value)} placeholder="説明文（任意）"
-                  className="w-full border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white" />
+                  className="w-full border border-emerald-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white" />
                 <div className="flex gap-2">
                   <button onClick={saveEdit} className="flex items-center gap-1 text-xs bg-green-600 text-white px-3 py-2 rounded-lg min-h-[36px]"><Check size={13} /> 保存</button>
                   <button onClick={() => setEditingKey(null)} className="flex items-center gap-1 text-xs bg-gray-100 text-gray-600 px-3 py-2 rounded-lg min-h-[36px]"><X size={13} /> キャンセル</button>
@@ -149,7 +149,7 @@ const TypeManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
                   <p className="text-sm font-medium text-gray-800 break-anywhere">{t.label}</p>
                   {t.description && <p className="text-xs text-gray-500 break-anywhere mt-0.5">{t.description}</p>}
                 </div>
-                <button onClick={() => startEdit(t)} className="p-1.5 text-gray-400 hover:text-blue-600 shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center">
+                <button onClick={() => startEdit(t)} className="p-1.5 text-gray-400 hover:text-emerald-600 shrink-0 min-w-[32px] min-h-[32px] flex items-center justify-center">
                   <Pencil size={13} />
                 </button>
                 {!t.isDefault && (
@@ -167,13 +167,13 @@ const TypeManageModal: React.FC<{ open: boolean; onClose: () => void }> = ({ ope
             <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)}
               onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
               placeholder="種別名（例：保護者向け説明用）"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]" />
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]" />
             <input value={newDesc} onChange={(e) => setNewDesc(e.target.value)}
               placeholder="説明文（任意）"
-              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px]" />
+              className="w-full border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px]" />
             <button onClick={handleAdd}
               disabled={!newLabel.trim()}
-              className="flex items-center gap-1.5 text-xs bg-blue-600 text-white px-4 py-2 rounded-lg min-h-[36px] hover:bg-blue-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
+              className="flex items-center gap-1.5 text-xs bg-emerald-600 text-white px-4 py-2 rounded-lg min-h-[36px] hover:bg-emerald-700 transition-colors disabled:opacity-40 disabled:cursor-not-allowed">
               <Plus size={14} /> 追加する
             </button>
           </div>
@@ -281,7 +281,7 @@ export const StaffMaterial: React.FC = () => {
             <Card
               key={t.key}
               className={`p-4 cursor-pointer border-2 transition-colors ${
-                selected === t.key ? 'border-blue-500 bg-blue-50' : 'border-gray-200'
+                selected === t.key ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
               }`}
               onClick={() => handleSelectType(t.key)}
             >
@@ -316,12 +316,12 @@ export const StaffMaterial: React.FC = () => {
           onChange={(e) => setTheme(e.target.value)}
           placeholder={placeholder}
           maxLength={100}
-          className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-blue-500 focus:outline-none min-h-[48px] break-anywhere"
+          className="w-full border border-gray-300 rounded-xl px-4 py-3 text-sm bg-white focus:ring-2 focus:ring-emerald-500 focus:outline-none min-h-[48px] break-anywhere"
         />
         <div className="flex flex-wrap gap-1.5 pt-0.5">
           {THEME_EXAMPLES.map((ex) => (
             <button key={ex} type="button" onClick={() => setTheme(ex)}
-              className="text-xs px-2.5 py-1 bg-white border border-gray-300 rounded-full text-gray-600 hover:bg-blue-50 hover:border-blue-300 hover:text-blue-700 transition-colors min-h-[28px]">
+              className="text-xs px-2.5 py-1 bg-white border border-gray-300 rounded-full text-gray-600 hover:bg-emerald-50 hover:border-emerald-300 hover:text-emerald-700 transition-colors min-h-[28px]">
               {ex}
             </button>
           ))}
@@ -349,14 +349,14 @@ export const StaffMaterial: React.FC = () => {
                 <span className="text-xs bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full shrink-0">AI生成</span>
               </div>
               {theme.trim() && (
-                <p className="text-xs text-blue-600 bg-blue-50 border border-blue-100 rounded-lg px-3 py-2 mb-3 break-anywhere">
+                <p className="text-xs text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg px-3 py-2 mb-3 break-anywhere">
                   テーマ：{theme.trim()}
                 </p>
               )}
               <textarea
                 value={editedContent}
                 onChange={(e) => setEditedContent(e.target.value)}
-                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-y min-h-[200px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
+                className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-y min-h-[200px] leading-relaxed break-anywhere focus:ring-2 focus:ring-emerald-500 focus:outline-none"
               />
               <p className="text-xs text-gray-400 mt-1">※ 内容を自由に書き直せます</p>
             </Card>

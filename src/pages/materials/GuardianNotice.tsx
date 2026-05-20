@@ -151,7 +151,7 @@ export const GuardianNotice: React.FC = () => {
                     value={editName}
                     onChange={(e) => setEditName(e.target.value)}
                     autoFocus
-                    className="flex-1 border border-blue-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+                    className="flex-1 border border-emerald-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white"
                   />
                   <button onClick={saveEdit} className="p-2 text-green-600 hover:bg-green-50 rounded-lg min-w-[36px] min-h-[36px] flex items-center justify-center">
                     <Check size={15} />
@@ -163,7 +163,7 @@ export const GuardianNotice: React.FC = () => {
               ) : (
                 <div key={cat.id} className="flex items-center gap-2 bg-white rounded-xl px-3 py-2.5 border border-gray-200">
                   <span className="flex-1 text-sm text-gray-700 break-anywhere">{cat.name}</span>
-                  <button onClick={() => startEdit(cat.id, cat.name)} className="p-1.5 text-gray-400 hover:text-blue-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
+                  <button onClick={() => startEdit(cat.id, cat.name)} className="p-1.5 text-gray-400 hover:text-emerald-600 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
                     <Pencil size={13} />
                   </button>
                   <button onClick={() => handleDelete(cat.id, cat.name)} className="p-1.5 text-gray-400 hover:text-red-500 transition-colors min-w-[32px] min-h-[32px] flex items-center justify-center">
@@ -179,9 +179,9 @@ export const GuardianNotice: React.FC = () => {
                 onChange={(e) => setNewName(e.target.value)}
                 onKeyDown={(e) => e.key === 'Enter' && handleAdd()}
                 placeholder="新しいカテゴリを追加（例：熱中症対策）"
-                className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-500 min-h-[40px] bg-white"
+                className="flex-1 border border-dashed border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-emerald-500 min-h-[40px] bg-white"
               />
-              <button onClick={handleAdd} className="p-2 bg-blue-50 text-blue-600 rounded-lg hover:bg-blue-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center">
+              <button onClick={handleAdd} className="p-2 bg-emerald-50 text-emerald-600 rounded-lg hover:bg-emerald-100 transition-colors shrink-0 min-w-[40px] min-h-[40px] flex items-center justify-center">
                 <Plus size={16} />
               </button>
             </div>
@@ -197,7 +197,7 @@ export const GuardianNotice: React.FC = () => {
                 key={cat.id}
                 onClick={() => toggleCat(cat.id)}
                 className={`text-left px-3 py-2.5 rounded-xl border text-xs font-medium transition-colors min-h-[44px] break-anywhere
-                  ${selectedCats.includes(cat.id) ? 'bg-blue-600 text-white border-blue-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
+                  ${selectedCats.includes(cat.id) ? 'bg-emerald-600 text-white border-emerald-600' : 'bg-white text-gray-700 border-gray-200 hover:bg-gray-50'}`}
               >
                 {cat.name}
               </button>
@@ -228,7 +228,7 @@ export const GuardianNotice: React.FC = () => {
                 .filter((c) => selectedCats.includes(c.id))
                 .map((cat) => (
                   <div key={cat.id}>
-                    <label className="text-xs font-medium text-blue-700 block mb-1">
+                    <label className="text-xs font-medium text-emerald-700 block mb-1">
                       {cat.name} のテーマ・伝えたいこと
                     </label>
                     <textarea
@@ -236,7 +236,7 @@ export const GuardianNotice: React.FC = () => {
                       onChange={(e) => setCatThemes((prev) => ({ ...prev, [cat.id]: e.target.value }))}
                       placeholder={`例：今月はプール開きがあります。水の事故防止のため、ご家庭でも水の危険性について話し合ってください。`}
                       rows={2}
-                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-blue-400 focus:outline-none leading-relaxed"
+                      className="w-full border border-gray-200 rounded-xl px-3 py-2 text-sm resize-none focus:ring-2 focus:ring-emerald-400 focus:outline-none leading-relaxed"
                     />
                   </div>
                 ))}
@@ -252,7 +252,7 @@ export const GuardianNotice: React.FC = () => {
           {STYLES.map((s) => (
             <Card
               key={s.value}
-              className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-blue-500 bg-blue-50' : 'border-gray-200'}`}
+              className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'}`}
               onClick={() => setStyle(s.value)}
             >
               <div className="flex items-center gap-2">
@@ -330,7 +330,7 @@ export const GuardianNotice: React.FC = () => {
             <textarea
               value={editedContent}
               onChange={(e) => setEditedContent(e.target.value)}
-              className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[280px] leading-relaxed break-anywhere focus:ring-2 focus:ring-blue-500 focus:outline-none"
+              className="w-full border border-gray-200 rounded-xl px-3 py-3 text-sm resize-none min-h-[280px] leading-relaxed break-anywhere focus:ring-2 focus:ring-emerald-500 focus:outline-none"
             />
             <p className="text-xs text-gray-400 mt-1">※ 上の文章は自由に編集できます。配布前に必ず確認してください。</p>
           </Card>

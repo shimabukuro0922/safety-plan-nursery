@@ -76,7 +76,7 @@ const PINEntryScreen: React.FC<{
 
         {/* ヘッダー */}
         <div className="text-center">
-          <div className="w-16 h-16 bg-blue-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
+          <div className="w-16 h-16 bg-emerald-600 rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
             <ShieldCheck size={32} className="text-white" />
           </div>
           <h1 className="text-xl font-bold text-gray-900">{facilityName}</h1>
@@ -100,7 +100,7 @@ const PINEntryScreen: React.FC<{
               placeholder="4〜8桁の数字"
               maxLength={8}
               className={`w-full border rounded-xl px-4 py-3 text-center text-2xl tracking-widest font-mono
-                focus:outline-none focus:ring-2 focus:ring-blue-400 pr-12
+                focus:outline-none focus:ring-2 focus:ring-emerald-400 pr-12
                 ${error ? 'border-red-400 bg-red-50' : 'border-gray-300 bg-white'}`}
             />
             <button
@@ -121,8 +121,8 @@ const PINEntryScreen: React.FC<{
         <button
           onClick={handleSubmit}
           disabled={checking || pin.length < 4}
-          className="w-full py-3 bg-blue-600 text-white rounded-xl text-sm font-semibold
-            hover:bg-blue-700 active:bg-blue-800
+          className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold
+            hover:bg-emerald-700 active:bg-blue-800
             disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {checking ? '確認中...' : '入力する'}
