@@ -260,7 +260,7 @@ export const Setup: React.FC = () => {
   }
 
   return (
-    <div className="min-h-dvh bg-gradient-to-b from-blue-50 to-white flex flex-col items-center justify-center px-5 py-12">
+    <div className="min-h-dvh bg-gradient-to-b from-emerald-50 to-white flex flex-col items-center justify-center px-5 py-12">
       <div className="w-full max-w-md space-y-6">
 
         {/* ロゴ・タイトル */}
