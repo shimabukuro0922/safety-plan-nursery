@@ -1,0 +1,22 @@
+name: LP を Vercel に自動デプロイ
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'lp/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Deploy LP to Vercel
+        run: npx vercel --prod --token ${{ secrets.VERCEL_TOKEN }}
+        working-directory: lp
+        env:
+          VERCEL_ORG_ID: team_Oy25OGHC4XY7m0mNk5FNYAtU
+          VERCEL_PROJECT_ID: prj_i2OphtfafGBaBgIKL3mFwZ1LysFj
