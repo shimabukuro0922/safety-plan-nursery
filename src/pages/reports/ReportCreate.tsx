@@ -72,13 +72,13 @@ export const ReportCreate: React.FC = () => {
               <Card
                 key={type}
                 className={`p-4 cursor-pointer border-2 transition-colors ${
-                  selectedType === type ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
+                  selectedType === type ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedType(type)}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${
-                    selectedType === type ? 'border-blue-500 bg-blue-500' : 'border-gray-400'
+                    selectedType === type ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400'
                   }`} />
                   <p className="text-sm font-medium text-gray-900 break-anywhere">
                     {REPORT_TYPE_LABELS[type]}
@@ -109,13 +109,13 @@ export const ReportCreate: React.FC = () => {
               <Card
                 key={style}
                 className={`p-4 cursor-pointer border-2 transition-colors ${
-                  selectedStyle === style ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
+                  selectedStyle === style ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
                 }`}
                 onClick={() => setSelectedStyle(style)}
               >
                 <div className="flex items-center gap-3">
                   <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${
-                    selectedStyle === style ? 'border-blue-500 bg-blue-500' : 'border-gray-400'
+                    selectedStyle === style ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400'
                   }`} />
                   <p className="text-sm font-medium text-gray-900">{REPORT_STYLE_LABELS[style]}</p>
                 </div>

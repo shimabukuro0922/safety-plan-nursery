@@ -252,11 +252,11 @@ export const GuardianNotice: React.FC = () => {
           {STYLES.map((s) => (
             <Card
               key={s.value}
-              className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'}`}
+              className={`p-3 cursor-pointer border-2 ${style === s.value ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'}`}
               onClick={() => setStyle(s.value)}
             >
               <div className="flex items-center gap-2">
-                <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${style === s.value ? 'border-blue-500 bg-blue-500' : 'border-gray-400'}`} />
+                <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${style === s.value ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400'}`} />
                 <div>
                   <p className="text-sm font-medium text-gray-900">{s.label}</p>
                   <p className="text-xs text-gray-500">{s.sub}</p>

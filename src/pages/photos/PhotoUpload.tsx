@@ -95,7 +95,7 @@ const PhotoPreviewCard: React.FC<{
                       type="checkbox"
                       checked={item.taggedChildIds.includes(child.id)}
                       onChange={() => handleToggleChild(child.id)}
-                      className="w-3 h-3 accent-blue-500"
+                      className="w-3 h-3 accent-emerald-500"
                     />
                     <span className="text-[10px] text-gray-700 break-anywhere flex-1">{child.name}</span>
                     {child.isPhotoNG && (
@@ -332,9 +332,9 @@ export const PhotoUpload: React.FC = () => {
           onDrop={uploading ? undefined : handleDrop}
           onClick={() => { if (!uploading) inputRef.current?.click() }}
           className={`border-2 border-dashed rounded-2xl flex flex-col items-center justify-center gap-2 py-10 transition-colors
-            ${uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' : 'cursor-pointer ' + (dragging ? 'border-blue-500 bg-emerald-50' : 'border-emerald-300 hover:bg-emerald-50')}`}
+            ${uploading ? 'border-gray-200 bg-gray-50 cursor-not-allowed opacity-60' : 'cursor-pointer ' + (dragging ? 'border-emerald-500 bg-emerald-50' : 'border-emerald-300 hover:bg-emerald-50')}`}
         >
-          <Upload size={32} className="text-blue-400" />
+          <Upload size={32} className="text-emerald-400" />
           <p className="text-sm font-medium text-emerald-600">タップまたはドラッグ＆ドロップで写真を追加</p>
           <p className="text-xs text-gray-400">JPG・PNG対応 · 複数選択可</p>
           <input

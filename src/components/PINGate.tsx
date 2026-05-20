@@ -122,7 +122,7 @@ const PINEntryScreen: React.FC<{
           onClick={handleSubmit}
           disabled={checking || pin.length < 4}
           className="w-full py-3 bg-emerald-600 text-white rounded-xl text-sm font-semibold
-            hover:bg-emerald-700 active:bg-blue-800
+            hover:bg-emerald-700 active:bg-emerald-800
             disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
           {checking ? '確認中...' : '入力する'}

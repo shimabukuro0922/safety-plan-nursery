@@ -214,7 +214,7 @@ const PhotoDetailModal: React.FC<{
                       type="checkbox"
                       checked={photo.taggedChildIds.includes(child.id)}
                       onChange={() => handleTagToggle(child.id)}
-                      className="w-4 h-4 accent-blue-500"
+                      className="w-4 h-4 accent-emerald-500"
                     />
                     <span className="text-sm text-gray-800 flex-1 break-anywhere">{child.name}</span>
                     <span className="text-xs text-gray-400">{child.className}</span>

@@ -440,12 +440,12 @@ export const Dashboard: React.FC = () => {
           </button>
           <button
             onClick={() => navigate('/nap')}
-            className="flex flex-col items-center gap-2.5 p-4 bg-blue-50 border border-blue-100 rounded-2xl hover:bg-blue-100 active:scale-95 transition-all shadow-sm"
+            className="flex flex-col items-center gap-2.5 p-4 bg-emerald-50 border border-emerald-100 rounded-2xl hover:bg-emerald-100 active:scale-95 transition-all shadow-sm"
           >
-            <div className="w-10 h-10 rounded-xl bg-blue-100 flex items-center justify-center">
-              <Moon size={22} className="text-blue-500" />
+            <div className="w-10 h-10 rounded-xl bg-emerald-100 flex items-center justify-center">
+              <Moon size={22} className="text-emerald-600" />
             </div>
-            <span className="text-xs font-bold text-blue-700 text-center leading-tight">午睡<br />見守り記録</span>
+            <span className="text-xs font-bold text-emerald-700 text-center leading-tight">午睡<br />見守り記録</span>
           </button>
           <button
             onClick={() => navigate('/photos')}

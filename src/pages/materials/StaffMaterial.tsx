@@ -281,12 +281,12 @@ export const StaffMaterial: React.FC = () => {
             <Card
               key={t.key}
               className={`p-4 cursor-pointer border-2 transition-colors ${
-                selected === t.key ? 'border-blue-500 bg-emerald-50' : 'border-gray-200'
+                selected === t.key ? 'border-emerald-500 bg-emerald-50' : 'border-gray-200'
               }`}
               onClick={() => handleSelectType(t.key)}
             >
               <div className="flex items-center gap-3">
-                <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${selected === t.key ? 'border-blue-500 bg-blue-500' : 'border-gray-400'}`} />
+                <div className={`w-4 h-4 rounded-full border-2 shrink-0 ${selected === t.key ? 'border-emerald-500 bg-emerald-500' : 'border-gray-400'}`} />
                 <div className="flex items-center gap-2">
                   {DEFAULT_ICONS[t.key] ?? <BookOpen size={18} className="text-gray-400" />}
                   <div>

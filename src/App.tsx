@@ -29,7 +29,7 @@ class ErrorBoundary extends React.Component<
           </p>
           <button
             onClick={() => location.reload()}
-            className="px-6 py-3 bg-blue-600 text-white rounded-xl text-sm font-medium hover:bg-blue-700 transition-colors"
+            className="px-6 py-3 bg-emerald-600 text-white rounded-xl text-sm font-medium hover:bg-emerald-700 transition-colors"
           >
             再読み込み
           </button>
@@ -90,7 +90,7 @@ const TrialExpiredScreen: React.FC = () => (
       href="https://docs.google.com/forms/d/e/1FAIpQLSdTO95TmeXWXtNbk7EqbyqJpJAJbYM27cVjZTHTxY_Rn-9Xkw/viewform"
       target="_blank"
       rel="noopener noreferrer"
-      className="bg-blue-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-blue-700 transition-colors"
+      className="bg-emerald-600 text-white px-6 py-3 rounded-xl font-semibold text-sm hover:bg-emerald-700 transition-colors"
     >
       継続利用を申し込む
     </a>

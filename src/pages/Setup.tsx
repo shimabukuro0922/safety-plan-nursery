@@ -294,7 +294,7 @@ export const Setup: React.FC = () => {
                 onClick={() => setMode('new')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-colors
                   ${mode === 'new'
-                    ? 'bg-emerald-50 text-emerald-700 border-b-2 border-blue-500'
+                    ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-500'
                     : 'text-gray-500 hover:text-gray-700'
                   }`}
               >
@@ -305,7 +305,7 @@ export const Setup: React.FC = () => {
                 onClick={() => setMode('join')}
                 className={`flex-1 flex items-center justify-center gap-1.5 py-3 text-sm font-semibold transition-colors
                   ${mode === 'join'
-                    ? 'bg-green-50 text-green-700 border-b-2 border-green-500'
+                    ? 'bg-emerald-50 text-emerald-700 border-b-2 border-emerald-500'
                     : 'text-gray-500 hover:text-gray-700'
                   }`}
               >

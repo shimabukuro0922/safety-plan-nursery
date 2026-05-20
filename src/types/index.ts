@@ -262,7 +262,7 @@ export const NEAR_MISS_STEP_CONFIG: Record<NearMissStep, { label: string; color:
   occurred:  { label: '発生記録',   color: 'bg-red-100 text-red-700',    order: 1 },
   cause:     { label: '原因分析',   color: 'bg-orange-100 text-orange-700', order: 2 },
   action:    { label: '対策決定',   color: 'bg-yellow-100 text-yellow-700', order: 3 },
-  shared:    { label: '職員共有済', color: 'bg-blue-100 text-blue-700',   order: 4 },
+  shared:    { label: '職員共有済', color: 'bg-teal-100 text-teal-700',   order: 4 },
   recheck:   { label: '再確認済',   color: 'bg-green-100 text-green-700', order: 5 },
 }
 
@@ -309,5 +309,5 @@ export const CHECKLIST_STATUS_CONFIG: Record<
   pending: { label: '未実施', color: 'bg-orange-100 text-orange-700' },
   done: { label: '実施済み', color: 'bg-green-100 text-green-700' },
   excluded: { label: '除外', color: 'bg-gray-100 text-gray-500' },
-  deferred: { label: '延期', color: 'bg-blue-100 text-blue-700' },
+  deferred: { label: '延期', color: 'bg-sky-100 text-sky-700' },
 }

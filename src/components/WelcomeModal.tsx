@@ -51,7 +51,7 @@ export const WelcomeModal: React.FC = () => {
       <div className="relative w-full sm:max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
 
         {/* グラデーションヘッダー */}
-        <div className="bg-gradient-to-br from-blue-600 to-indigo-600 px-6 pt-8 pb-6 text-center">
+        <div className="bg-gradient-to-br from-emerald-600 to-teal-700 px-6 pt-8 pb-6 text-center">
           <div className="w-14 h-14 bg-white/20 rounded-2xl flex items-center justify-center mx-auto mb-3">
             <ShieldCheck size={28} className="text-white" />
           </div>
